@@ -32,7 +32,6 @@
                 @endforeach
             </select>
             @auth <a class="btn btn-quiet" href="{{ route('dashboard') }}">Dashboard</a> @else <a class="btn btn-quiet" href="{{ route('login') }}">Sign in</a><a class="btn btn-primary" href="{{ route('register') }}">Join</a> @endauth
-            @auth <a class="btn btn-quiet" href="{{ route('dashboard') }}">Dashboard</a> @else <a class="btn btn-quiet" href="{{ route('login') }}">Sign in</a><a class="btn btn-primary" href="{{ route('register') }}">Join</a> @endauth
             <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span class="theme-icon">◐</span><span class="theme-label">{{ \App\Helpers\Common_helper::label('dark', $locale) }}</span></button>
         </div>
     </div>
