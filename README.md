@@ -67,3 +67,34 @@ Checked: PHP syntax, JSON manifests, expected installer routing and lock behavio
 ## Development roadmap
 
 Database-backed courses, users, authentication, authorization, instructor tools, enrollment, quizzes, certificate issuance and verification, audit trails, accessibility QA, migrations and deployment acceptance remain future milestones.
+
+## Edumia database schema (October 30, 2026)
+
+`database/migrations/` contains original Laravel 13 schema definitions reauthored
+from the supplied migration *table names*, not copied third-party PHP code.
+Every migration has the October 30, 2026 date prefix. Dependencies are
+ordered so foreign-key targets exist before referencing tables.
+
+The supplied archive contained 126 PHP files but included 31 duplicate table
+creations, plus a custom `migrations` tracking-table creation. Laravel manages
+that tracking table automatically; Edumia does not create it separately.
+Legacy table spellings were normalized:
+
+- `addtocarts` is replaced by `cart_items`.
+- `watche_durations` and `watche_histories` are replaced by `watch_durations` and `watch_histories`.
+- `knowledge_base_topicks` is replaced by `knowledge_base_topics`.
+- New Laravel runtime tables `cache`, `cache_locks`, `jobs`, `job_batches`, and `sessions` support optional file/database service configuration.
+
+**Important:** These are fresh-install migrations only. Never rename already
+executed migrations in a deployed installation. Existing databases require
+separate additive migrations and verified data transformations. No live database
+was modified as part of this source update.
+
+For installation on an empty MySQL database with the existing root installer,
+confirm `vendor/autoload.php` is installed and the application `storage/` and
+`bootstrap/cache/` are writable. Then run `php artisan migrate --force` from
+the application root as part of the installation acceptance test.
+
+The database definitions establish data structures; complete LMS business
+logic, admin workflows, authentication and user management require their own
+implementation and testing before deployment.
