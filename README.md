@@ -24,7 +24,10 @@ An original responsive homepage, preview course catalogue, searchable courses, d
 Catalogue: /courses; localized: /{locale}/courses; course: /courses/{slug}. English is unprefixed.
 
 ## Framework
-PHP 8.2+, Laravel 11, Blade, HTML5, one CSS file (resources/css/app.css), one JavaScript file (resources/js/app.js), Vite, Composer.
+
+Target the supported Laravel 13 release. The first local functional checks used the Laravel 11 dependencies in the uploaded archive; run a fresh Composer install and acceptance tests with Laravel 13 before production deployment.
+
+PHP 8.3+, Laravel 13, Blade, HTML5, one CSS file (resources/css/app.css), one JavaScript file (resources/js/app.js), Vite, Composer.
 
 Install PHP dependencies with composer install, install Node dependencies with npm install, and compile assets with npm run build. Supply a secure APP_KEY and environment settings outside version control; set the site document root to public/. Create writable storage/framework/{cache,sessions,views} and storage/logs at deployment. Do not publish secrets, legacy templates, vendors, media uploads or macOS metadata.
 
