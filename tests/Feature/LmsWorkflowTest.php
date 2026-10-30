@@ -26,6 +26,13 @@ class LmsWorkflowTest extends TestCase {
   $this->get('/dashboard')->assertOk()->assertSee('My learning');
   $this->put('/admin/users/'.$student->id,['role'=>'admin','status'=>'active'])->assertForbidden();
  }
+ public function test_administrator_and_instructor_dashboards_render(): void {
+  $admin=$this->member('admin');
+  $this->actingAs($admin)->get('/dashboard')->assertOk()->assertSee('Course approval queue');
+
+  $instructor=$this->member('instructor');
+  $this->actingAs($instructor)->get('/dashboard')->assertOk()->assertSee('Your courses');
+ }
  public function test_instructor_can_create_course_but_cannot_publish(): void {
   $teacher=$this->member('instructor');$this->actingAs($teacher);
   $this->post('/instructor/courses',['title'=>'Edumia Fundamentals','level'=>'beginner','language_code'=>'en'])->assertRedirect();
