@@ -1,18 +1,25 @@
 {
   "name": "tonsamith/edumia",
   "type": "project",
-  "description": "Edumia multilingual Laravel LMS by Ton Samith",
+  "description": "Edumia multilingual learning management system for PHP 8.3+ and Laravel 13.",
+  "keywords": [
+    "edumia",
+    "lms",
+    "education",
+    "laravel"
+  ],
   "license": "proprietary",
   "require": {
     "php": "^8.3",
-    "laravel/framework": "^13.0"
+    "laravel/framework": "^13.39",
+    "laravel/tinker": "^3.0"
   },
   "require-dev": {
     "fakerphp/faker": "^1.23",
-    "laravel/pint": "^1.13",
+    "laravel/pint": "^1.27",
     "mockery/mockery": "^1.6",
-    "nunomaduro/collision": "^8.1",
-    "phpunit/phpunit": "^11.0"
+    "nunomaduro/collision": "^8.6",
+    "phpunit/phpunit": "^12.5.12"
   },
   "autoload": {
     "psr-4": {
@@ -30,6 +37,13 @@
     "post-autoload-dump": [
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
       "@php artisan package:discover --ansi"
+    ],
+    "test": [
+      "@php artisan config:clear --ansi",
+      "@php artisan test"
+    ],
+    "post-update-cmd": [
+      "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
     ]
   },
   "config": {
