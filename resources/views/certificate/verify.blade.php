@@ -1,0 +1,4 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Edumia certificate verification</title><link rel="stylesheet" href="{{ asset('build/assets/app.css') }}"></head>
+<body><main class="auth-wrap"><a class="brand" href="{{ route('home') }}"><span class="brand-mark">e</span> edumia.</a><div class="auth-card">
+<h1>Certificate verification</h1>@if($certificate->revoked_at)<p class="flash error">This certificate has been revoked.</p>@else<p class="flash">Valid certificate.</p>@endif
+<dl><dt>Certificate</dt><dd>{{ $certificate->certificate_number }}</dd><dt>Student</dt><dd>{{ $certificate->user->name }}</dd><dt>Course</dt><dd>{{ $certificate->course->title }}</dd><dt>Issued</dt><dd>{{ $certificate->issued_at?->format('F j, Y') }}</dd></dl></div></main></body></html>

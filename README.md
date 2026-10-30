@@ -98,12 +98,3 @@ the application root as part of the installation acceptance test.
 The database definitions establish data structures; complete LMS business
 logic, admin workflows, authentication and user management require their own
 implementation and testing before deployment.
-
-**Installer safety check:** The standalone installer requires a completely empty
-MySQL database before executing the fresh-install migrations. It refuses a
-database containing any pre-existing table, rather than checking only Laravel's
-`migrations` ledger.
-
-The legacy Google-auth alter-table migration is folded into the fresh `users`
-schema as an optional, uniquely indexed `google_id`. OAuth client secrets are
-**not** seeded into migration files; configure them securely at runtime.

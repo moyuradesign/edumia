@@ -147,6 +147,13 @@ function install(array $values): void
         if ($result !== 0) {
             throw new RuntimeException('Laravel migrations failed; inspect the application logs.');
         }
+        // Admin is created only after a successful migration and before locking setup.
+        $hash = password_hash($values['admin_password'], PASSWORD_BCRYPT, ['cost' => 12]);
+        if (!is_string($hash)) {
+            throw new RuntimeException('Unable to hash the administrator password.');
+        }
+        $admin = $pdo->prepare("INSERT INTO users (name,email,password,role,status,locale,created_at,updated_at) VALUES (?,?,?,'admin','active','en',NOW(),NOW())");
+        $admin->execute([$values['admin_name'], $values['admin_email'], $hash]);
         if (file_put_contents(EDUMIA_LOCK, 'installed_at='.gmdate('c')."\n", LOCK_EX) === false) {
             throw new RuntimeException('Could not write the installation lock.');
         }
@@ -181,7 +188,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         if (!is_string($key) || !hash_equals($storedKey, $key)) {
             $errors[] = 'Invalid deployment authorization token.';
         } else {
-            $required = ['app_name', 'app_url', 'timezone', 'db_host', 'db_port', 'db_database', 'db_username', 'db_password'];
+            $required = ['app_name', 'app_url', 'timezone', 'db_host', 'db_port', 'db_database', 'db_username', 'db_password', 'admin_name', 'admin_email', 'admin_password', 'admin_password_confirmation'];
             $values = [];
             foreach ($required as $field) {
                 $input = $_POST[$field] ?? '';
@@ -189,7 +196,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     $errors[] = 'Invalid configuration value: '.$field;
                     break;
                 }
-                $values[$field] = trim($input);
+                $values[$field] = in_array($field, ['db_password','admin_password','admin_password_confirmation'],true) ? $input : trim($input);
             }
             if (!$errors) {
                 $parts = parse_url($values['app_url']);
@@ -215,6 +222,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         $errors[] = 'Invalid database field: '.$field;
                     }
                 }
+                if (strlen($values['admin_name']) < 2 || strlen($values['admin_name']) > 150) {
+                    $errors[] = 'Administrator name must be 2–150 characters.';
+                }
+                if (!filter_var($values['admin_email'], FILTER_VALIDATE_EMAIL) || strlen($values['admin_email']) > 190) {
+                    $errors[] = 'Administrator email address is invalid.';
+                }
+                if (strlen($values['admin_password']) < 12 || strlen($values['admin_password']) > 200
+                    || !preg_match('/[a-z]/', $values['admin_password']) || !preg_match('/[A-Z]/', $values['admin_password'])
+                    || !preg_match('/[0-9]/', $values['admin_password']) || !preg_match('/[^a-zA-Z0-9]/', $values['admin_password'])
+                    || $values['admin_password'] !== $values['admin_password_confirmation']) {
+                    $errors[] = 'Administrator password needs 12+ characters, uppercase and lowercase letters, a number, a symbol and confirmation.';
+                }
                 if (!$errors) {
                     try {
                         install($values);
@@ -232,7 +251,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 }
 
 if ($success) {
-    echo '<!doctype html><html lang="en"><meta charset="utf-8"><title>Edumia installed</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px system-ui;background:#f8fafc;color:#14213d;display:grid;place-items:center;min-height:100vh}.card{background:white;padding:40px;border-radius:18px;max-width:560px;box-shadow:0 20px 80px #14213d18}a{color:#1d4ed8}</style><main class="card"><h1>Edumia installed</h1><p>Configuration saved and Laravel migrations completed. The installer is now locked.</p><p><strong>Delete the entire root-level <code>installer/</code> directory using your hosting file manager.</strong></p><p><a href="/">Open Edumia</a></p></main></html>';
+    echo '<!doctype html><html lang="en"><meta charset="utf-8"><title>Edumia installed</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px system-ui;background:#f8fafc;color:#14213d;display:grid;place-items:center;min-height:100vh}.card{background:white;padding:40px;border-radius:18px;max-width:560px;box-shadow:0 20px 80px #14213d18}a{color:#1d4ed8}</style><main class="card"><h1>Edumia installed</h1><p>Configuration saved, database migrated, and first administrator created. The installer is now locked.</p><p><strong>Delete the entire root-level <code>installer/</code> directory using your hosting file manager.</strong></p><p><a href="/">Open Edumia</a></p></main></html>';
     exit;
 }
 
@@ -269,7 +288,9 @@ h2{font-size:19px;margin:0 0 15px}ul{margin:0;padding:0;list-style:none;display:
 <div class="grid"><?php field('app_name','Application name','text','Edumia');field('app_url','HTTPS application URL','url','https://edumia.tonsamith.com');field('timezone','Timezone','text','Asia/Phnom_Penh'); ?></div>
 <h2 style="margin-top:25px">3. Database connection</h2>
 <div class="grid"><?php field('db_host','Database host','text','127.0.0.1');field('db_port','Database port','number','3306');field('db_database','Database name');field('db_username','Database username');field('db_password','Database password','password','',false); ?></div>
-<h2 style="margin-top:25px">4. Deployment authorization</h2>
+<h2 style="margin-top:25px">4. Administrator account</h2>
+<div class="grid"><?php field('admin_name','Administrator full name');field('admin_email','Administrator email','email');field('admin_password','Strong administrator password','password');field('admin_password_confirmation','Confirm administrator password','password'); ?></div>
+<h2 style="margin-top:25px">5. Deployment authorization</h2>
 <div class="grid"><?php field('authorization','Token from installer/authorize.txt','password'); ?></div>
 <div class="buttons"><label style="display:flex;align-items:start;gap:10px;font-weight:500"><input type="checkbox" name="accept" value="yes" required style="width:auto;margin-top:5px">I am authorized to install Edumia in a new database. I understand this creates configuration and executes Laravel migrations.</label><button class="button" type="submit" <?=$ready?'':'disabled'?>>Install Edumia</button></div>
 </form><p class="foot">© <?=date('Y')?> <a href="https://tonsamith.com" rel="noopener noreferrer">Ton Samith</a>. Remove this installer folder after installation.</p>
