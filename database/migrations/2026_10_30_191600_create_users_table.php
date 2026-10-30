@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 150);
             $table->string('email', 190);
+            $table->string('google_id', 190)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 255);
             $table->string('role', 24)->default('student');
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->string('remember_token', 100)->nullable();
             $table->timestamps();
             $table->unique('email', 'ed_users_email_unique');
+            $table->unique('google_id', 'ed_users_google_id_unique');
             $table->index('status', 'ed_users_status_index');
             $table->index('role', 'ed_users_role_index');
             $table->softDeletes();
