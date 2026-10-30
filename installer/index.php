@@ -218,7 +218,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     $errors[] = 'Invalid database port.';
                 }
                 foreach (['db_host', 'db_database', 'db_username'] as $field) {
-                    if ($values[$field] === '' || preg_match('/[\x00-\x20\x7f;\\]/', $values[$field])) {
+                    if ($values[$field] === '' || preg_match('/[\x00-\x20\x7f;\\\\]/', $values[$field])) {
                         $errors[] = 'Invalid database field: '.$field;
                     }
                 }
