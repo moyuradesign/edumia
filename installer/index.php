@@ -92,10 +92,11 @@ function install(array $values): void
             PDO::ATTR_EMULATE_PREPARES => false,
         ]);
         $pdo->query('SELECT 1')->fetch();
-        // Avoid accidentally migrating an existing unrelated application database.
-        $existing = $pdo->query("SHOW TABLES LIKE 'migrations'")->fetch();
+        // Edumia migrations are a fresh-install baseline. Reject *any* existing
+        // tables, not only an existing Laravel migration ledger.
+        $existing = $pdo->query('SHOW TABLES')->fetch(PDO::FETCH_NUM);
         if ($existing !== false) {
-            throw new RuntimeException('Select a fresh database with no existing migrations table.');
+            throw new RuntimeException('Select a completely empty database; existing tables were detected.');
         }
     } catch (PDOException) {
         throw new RuntimeException('Database connection failed. Check database name, host, port and credentials.');
