@@ -29,9 +29,15 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            // PHP 8.5 deprecates PDO::MYSQL_ATTR_SSL_CA; the PDO subclass
+            // constant is available on newer PHP while PHP 8.3 is supported.
+            'options' => extension_loaded('pdo_mysql') && (string) env('MYSQL_ATTR_SSL_CA', '') !== ''
+                ? [
+                    (defined('Pdo\Mysql::ATTR_SSL_CA')
+                        ? constant('Pdo\Mysql::ATTR_SSL_CA')
+                        : constant('PDO::MYSQL_ATTR_SSL_CA')) => env('MYSQL_ATTR_SSL_CA'),
+                ]
+                : [],
         ],
     ],
     'migrations' => [
