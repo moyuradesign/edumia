@@ -1,15 +1,33 @@
 # Edumia — Learning Management System
 
 **Version:** v0.0.1  
-**Author:** Ton Samith — https://tonsamith.com  
-**Product:** https://edumia.tonsamith.com  
-**Language:** PHP/Laravel, Blade, CSS3, JavaScript, Vite  
-**License:** Proprietary commercial source, © 2026 Ton Samith. Third-party licenses remain with their respective authors.
+**Author:** Ton Samith · https://tonsamith.com  
+**Product website:** https://edumia.tonsamith.com  
+**License:** Proprietary commercial source — © 2026 Ton Samith. All rights reserved. Third-party packages retain their separate licenses.
 
-Edumia is a multilingual learning management system for educational institutions, instructors and learners. The initial stage covers an original public interface, course preview catalogue, light/dark mode and eight language URL structures.
+Edumia is a multilingual Laravel learning management system for institutions, instructors and students. Its roadmap includes courses, lessons, enrollments, quizzes, progress tracking, certificates and administration.
 
-English `/` (default); Chinese `/zh`; French `/fr`; German `/de`; Japanese `/ja`; Khmer `/km`; Korean `/ko`; Vietnamese `/vi`.
+## Implemented v0.0.1 foundation
+An original responsive homepage, preview course catalogue, searchable courses, detail pages, light/dark themes, and eight localized public URL structures. English is default at /; /en redirects to /.
 
-**Development status:** v0.0.1 scaffold. Full enrollment, payments, assessments, certificates, admin workflows and deployment are not yet implemented.
+| Language | URL |
+|---|---|
+| English | / |
+| Chinese | /zh |
+| French | /fr |
+| German | /de |
+| Japanese | /ja |
+| Khmer | /km |
+| Korean | /ko |
+| Vietnamese | /vi |
 
-Only existing source paths from the uploaded Edumia directory structure will be populated. Legacy scripts, unknown-rights assets, vendor dependencies, secrets and generated files are not to be copied into the codebase.
+Catalogue: /courses; localized: /{locale}/courses; course: /courses/{slug}. English is unprefixed.
+
+## Framework
+PHP 8.2+, Laravel 11, Blade, HTML5, one CSS file (resources/css/app.css), one JavaScript file (resources/js/app.js), Vite, Composer.
+
+Install PHP dependencies with composer install, install Node dependencies with npm install, and compile assets with npm run build. Supply a secure APP_KEY and environment settings outside version control; set the site document root to public/. Create writable storage/framework/{cache,sessions,views} and storage/logs at deployment. Do not publish secrets, legacy templates, vendors, media uploads or macOS metadata.
+
+**Scope limitation:** The course catalogue is sample preview data, not a persistent LMS database. Authentication, actual lessons, enrollments, instructors, payments, assessments, certificates, installer, and production deployment have not yet been implemented. A new set of database migrations, authorization policies and tests will be required before release. Do not market this milestone as a full, production-ready LMS.
+
+No legacy branded source code or unverified media assets are included. All code in this repository is original Edumia foundation code using filenames already present in the uploaded directory structure.
