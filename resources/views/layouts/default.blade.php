@@ -25,6 +25,7 @@
             <a href="{{ \App\Helpers\Localization::url($locale, 'courses') }}" class="{{ str_starts_with($currentPath, 'courses') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_courses', $locale) }}</a>
             <a href="{{ route('ebooks.index') }}" class="{{ $currentPath === 'ebooks' ? 'active' : '' }}">Ebooks</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'blog') }}" class="{{ str_starts_with($currentPath, 'blog') ? 'active' : '' }}">Blog</a>
+            <a href="{{ route('help.index') }}" class="{{ str_starts_with($currentPath, 'help') ? 'active' : '' }}">Help</a>
             <a href="{{ route('contact.create') }}" class="{{ $currentPath === 'contact' ? 'active' : '' }}">Contact</a>
         </nav>
         <div class="header-actions">

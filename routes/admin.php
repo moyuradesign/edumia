@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Courses\CategoryController;
 use App\Http\Controllers\Admin\Courses\ReviewModerationController;
 use App\Http\Controllers\Admin\Content\MediaController;
 use App\Http\Controllers\Admin\Content\BlogController;
+use App\Http\Controllers\Admin\Content\KnowledgeBaseController;
 use App\Http\Controllers\Admin\Content\EbookPublicationController;
 use App\Http\Controllers\Admin\Support\ContactController;
 use App\Http\Controllers\Admin\Support\TicketController;
@@ -46,6 +47,16 @@ Route::middleware(['auth', 'active', 'role:admin'])
 
         Route::get('/ebooks', [EbookPublicationController::class, 'index'])->name('ebooks.index');
         Route::patch('/ebooks/{ebook}/publication', [EbookPublicationController::class, 'update'])->name('ebooks.publication');
+
+        Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base.index');
+        Route::get('/knowledge-base/create', [KnowledgeBaseController::class, 'create'])->name('knowledge-base.create');
+        Route::post('/knowledge-base', [KnowledgeBaseController::class, 'store'])->name('knowledge-base.store');
+        Route::get('/knowledge-base/{knowledgeBase}/edit', [KnowledgeBaseController::class, 'edit'])->name('knowledge-base.edit');
+        Route::put('/knowledge-base/{knowledgeBase}', [KnowledgeBaseController::class, 'update'])->name('knowledge-base.update');
+        Route::delete('/knowledge-base/{knowledgeBase}', [KnowledgeBaseController::class, 'destroy'])->name('knowledge-base.destroy');
+        Route::post('/knowledge-base/{knowledgeBase}/topics', [KnowledgeBaseController::class, 'storeTopic'])->name('knowledge-base.topics.store');
+        Route::put('/knowledge-base/{knowledgeBase}/topics/{topic}', [KnowledgeBaseController::class, 'updateTopic'])->name('knowledge-base.topics.update');
+        Route::delete('/knowledge-base/{knowledgeBase}/topics/{topic}', [KnowledgeBaseController::class, 'destroyTopic'])->name('knowledge-base.topics.destroy');
 
         Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
         Route::get('/blogs/create', [BlogController::class, 'create'])->name('blogs.create');
