@@ -9,6 +9,7 @@ use App\Http\Controllers\Student\InstructorApplicationController;
 use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\CourseWishlistController;
 use App\Http\Controllers\Student\CourseReviewController;
+use App\Http\Controllers\Student\EbookLibraryController;
 use App\Http\Controllers\Student\LearningController;
 use App\Http\Controllers\Student\QuizAttemptController;
 use App\Http\Controllers\Student\Support\TicketController;
@@ -26,6 +27,10 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     // All roles share this entrypoint; DashboardController chooses the workspace.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/my-ebooks', [EbookLibraryController::class, 'index'])->name('ebooks.library');
+    Route::post('/my-ebooks/{ebook}', [EbookLibraryController::class, 'claim'])->middleware('throttle:10,1')->name('ebooks.claim');
+    Route::get('/my-ebooks/{ebook}/download', [EbookLibraryController::class, 'download'])->name('ebooks.download');
 
     Route::get('/saved-courses', [CourseWishlistController::class, 'index'])->name('saved-courses.index');
     Route::post('/saved-courses/{course}', [CourseWishlistController::class, 'store'])->name('saved-courses.store');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Instructor\CourseManagementController;
 use App\Http\Controllers\Instructor\AssignmentController;
+use App\Http\Controllers\Instructor\EbookController;
 use App\Http\Controllers\Instructor\LessonManagementController;
 use App\Http\Controllers\Instructor\QuizManagementController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +13,12 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
     ->prefix('instructor')
     ->name('instructor.')
     ->group(function (): void {
+        Route::get('/ebooks', [EbookController::class, 'index'])->name('ebooks.index');
+        Route::get('/ebooks/create', [EbookController::class, 'create'])->name('ebooks.create');
+        Route::post('/ebooks', [EbookController::class, 'store'])->name('ebooks.store');
+        Route::get('/ebooks/{ebook}/edit', [EbookController::class, 'edit'])->name('ebooks.edit');
+        Route::put('/ebooks/{ebook}', [EbookController::class, 'update'])->name('ebooks.update');
+
         Route::get('/courses/create', [CourseManagementController::class, 'create'])->name('courses.create');
         Route::post('/courses', [CourseManagementController::class, 'store'])->name('courses.store');
         Route::get('/courses/{course}/edit', [CourseManagementController::class, 'edit'])->name('courses.edit');

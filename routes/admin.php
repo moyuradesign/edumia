@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Courses\CategoryController;
 use App\Http\Controllers\Admin\Courses\ReviewModerationController;
 use App\Http\Controllers\Admin\Content\MediaController;
 use App\Http\Controllers\Admin\Content\BlogController;
+use App\Http\Controllers\Admin\Content\EbookPublicationController;
 use App\Http\Controllers\Admin\Support\ContactController;
 use App\Http\Controllers\Admin\Support\TicketController;
 use App\Http\Controllers\Admin\System\GeneralSettingsController;
@@ -42,6 +43,9 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
         Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('contacts.show');
         Route::patch('/contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update');
+
+        Route::get('/ebooks', [EbookPublicationController::class, 'index'])->name('ebooks.index');
+        Route::patch('/ebooks/{ebook}/publication', [EbookPublicationController::class, 'update'])->name('ebooks.publication');
 
         Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
         Route::get('/blogs/create', [BlogController::class, 'create'])->name('blogs.create');
