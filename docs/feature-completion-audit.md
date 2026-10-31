@@ -1,6 +1,6 @@
 # Edumia LMS — Feature completion audit
 
-Source baseline: `main` as of 2026-10-31. This is a code-based implementation status, **not** a claim that the production site has been updated or that CodeCanyon requirements have been met.
+Source baseline: `main` as of 2026-10-31, after the help-center, newsletter, forum, permissions, bootcamp and reporting development pass. This is a code-based implementation status, **not** a claim that the production site has been updated or that CodeCanyon requirements have been met.
 
 ## Acceptance vocabulary
 
@@ -27,6 +27,12 @@ Source baseline: `main` as of 2026-10-31. This is a code-based implementation st
 | Contact inbox | Public contact form, private admin inbox, status, audit log | SMTP replies and spam protection beyond throttling |
 | Support tickets | Student ticket creation, private threaded replies, admin review and close/reopen | SLA/escalation, staff assignment, email notices, attachment handling |
 | Media library | Admin private upload/download/delete with MIME and size limits | Image processing, responsive variants, reusable selectors and permissions |
+| Help center | Administrator-managed published/draft guides and nested articles, public topic pages and search, scoped editor permissions | Rich media, language translations, search relevance, editorial workflow |
+| Newsletter subscriptions | Explicit consent, signed confirmation within 48 hours, unsubscribe and re-confirmation tests | Production SMTP/queue and campaign authoring, recipient segmentation, delivery tracking |
+| Course forums | Private enrolled-course discussions, replies, admin hide/close/reopen moderation with audit events | Messaging between individuals, abuse reports, notifications, attachments |
+| Delegated staff roles | Custom role management and permission grants, validated safe permission keys, staff Help Center delegation | Generalized all-module permission matrix, organization/team membership, comprehensive role audit |
+| Bootcamps (free cohorts) | Instructor cohort dates/capacity, modules/resources, private session links, admin publish, free enrollment and private classroom | Multi-cohort series, attendance, completion, instructor insights and paid enrollment |
+| Learning reports | Administrator enrollment/completion/quiz totals, instructor-scoped course summaries | Advanced cohorts, retention, exports, verified financial metrics and revenue |
 | General settings | Restricted validated settings including registration toggle | Complete appearance builder, payment/email/integration settings |
 | Internal CI and diagnostics | Pinned dependency locks, two centralized CSS bundles, nested JS, PHPUnit CI on PHP 8.3/8.5, private installer lock, health command | Isolated MySQL upgrade tests, QA browser/accessibility/security checks, distribution QA |
 
@@ -34,24 +40,24 @@ Source baseline: `main` as of 2026-10-31. This is a code-based implementation st
 
 | Workstream | Status | Concrete remaining build work |
 |---|---|---|
-| Granular roles/permissions | Partial | Persistent permission definitions, role editing, per-resource policies and tests |
+| Granular roles/permissions | Partial | Custom roles and Help Center delegation are now implemented; every other module still needs a permission matrix, policies and tests |
 | Full instructor management | Partial | Credentials verification, instructor profile editing, dashboards, moderation and earnings |
 | Payments/checkout | **Blocked / not implemented** | Gateway contracts, server-side verification, idempotent webhooks, invoice ledger, reconciliation, refunds and settlement |
 | Paid course and ebook orders | **Blocked / not implemented** | Cart/checkout, payment evidence, entitlements, pricing, taxes and currency conversion |
 | Payouts/instructor earnings | Not implemented | Earnings ledger, commissions, scheduled disbursement, reversals and payout reconciliation |
 | Coupons and discounts | Not implemented | Validity, usage limits, checkout enforcement and redemption ledger |
-| Bootcamps | Not implemented | Admin/instructor bootcamp authoring, modules, resources, sessions, enrollment and completion |
+| Bootcamps | Partial (free cohorts) | Free cohorts/modules/URLs/registration are implemented; attendance, completion, cohorts series and paid enrollment remain |
 | Tutors and bookings | Not implemented | Tutor profiles, subjects, timezone availability, conflict-free booking, cancellation and payment |
 | Team training | Not implemented | Business packages, members, seat billing and reporting |
 | Full live-class provider integration | Partial | Zoom/Meet/Teams API provisioning and token security, attendance and notifications |
 | Ebook paid sales and enhanced formats | Partial | Payment-dependent access, EPUB, covers, reader and publishing/license checks |
-| Knowledge base | Not implemented | Topic/article CRUD, public search and moderation |
-| Discussion forums and messaging | Not implemented | Member threads, messages, moderation, report and notifications |
-| Newsletter/email campaigns | Not implemented | Consent confirmation, unsubscribe, queued sending, deliverability and templates |
+| Knowledge base | Functional core | Nested topics, draft/publish and public search implemented; full-text relevance, media, editorial roles and translations remain |
+| Discussion forums and messaging | Partial | Enrolled-course discussions and moderation implemented; direct messages, report handling and notifications remain |
+| Newsletter/email campaigns | Partial | Double opt-in/unsubscribe implemented; campaign composer, verified SMTP, queued fanout and delivery evidence remain |
 | Notifications and mail | Partial | Verified outbound SMTP/queue, user preferences, delivery retries, event notifications |
 | Language management | Partial | Admin language/phrase editor, full translations, locale persistence and fallback tests; 8 locale routes alone are not complete translation |
 | Frontend appearance and CMS | Partial | Page builder, header/footer configuration, SEO, menus, reusable media and drafts/publish |
-| Advanced learning analytics | Partial | Progress reporting, instructor gradebooks, cohort analytics, export and completion statistics |
+| Advanced learning analytics | Partial | Admin/instructor enrollment and completion views implemented; exports, cohort analytics, verified finance and advanced gradebooks remain |
 | Security/operations | Partial | Redis/queue infrastructure, backups/restore, structured logs, upgrade compatibility, full OWASP tests |
 | Shared-hosting customer release | **Blocked** | Repeatable installer for customer hosts, removal/lock test, upgrade and rollback, Composer/npm distribution, licensing/purchase-code integration, Envato docs and complete rights review |
 | Real-browser acceptance | Not yet completed | Responsive CSS/JS, authenticated multi-role journeys, cross-browser, a11y and performance tests |
@@ -59,7 +65,7 @@ Source baseline: `main` as of 2026-10-31. This is a code-based implementation st
 
 ## Implementation priorities for continued development
 
-1. Payment-neutral LMS infrastructure: granular permissions, learning analytics, verified email/queue, lesson and quiz editing.
+1. Payment-neutral LMS infrastructure: extend granular permissions to all areas, verified email/queue, tutor calendars and lesson/quiz editing.
 2. Bootcamps, tutors, calendars and booked sessions with secure entitlement checks.
 3. Payment provider adapters only with a verified signed webhook and test credentials; never grant paid entitlements from a browser redirect or unverified payment claim.
 4. CMS and language management, reports and notifications, support operations.
