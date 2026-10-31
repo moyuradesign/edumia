@@ -204,6 +204,13 @@ async function browse(scenario) {
     verify(await page.locator('.premium-mega-menu a[href$="/bootcamps"]').count() >= 1,
       'Mega menu is missing learning links');
     await menuProfile.locator('summary').click();
+    const detailsState = await page.evaluate(() => ({
+      categories: document.querySelector('[data-header-details="categories"]')?.open,
+      profile: document.querySelector('[data-header-details="profile"]')?.open,
+      mobileNavOpen: document.querySelector('#primary-navigation')?.classList.contains('is-open'),
+      width: window.innerWidth
+    }));
+    console.log('EDUMIA_HEADER_MENU_STATE=' + JSON.stringify(detailsState));
     await page.waitForFunction(() =>
       document.querySelector('details[data-header-details="profile"]')?.open === true, null,
       { timeout: 5000 });

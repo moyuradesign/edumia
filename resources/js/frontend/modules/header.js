@@ -39,7 +39,6 @@ export function initPremiumHeader() {
       close(active, true);
     }
   });
-  window.addEventListener('resize', () => {
-    menus.forEach(menu => close(menu));
-  });
+  // Mobile viewport height may change while menus expand or the browser UI moves.
+  // Do not close dropdowns on those resize events: native <details> handles layout.
 }
