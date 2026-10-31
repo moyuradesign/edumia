@@ -34,7 +34,7 @@ jobs:
 
       - name: Check PHP syntax
         run: |
-          find app bootstrap config routes tests scripts database/migrations -type f -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+          find app bootstrap config routes tests scripts installer database/migrations -type f -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
       - name: Validate Composer manifest
         run: composer validate --no-check-publish
