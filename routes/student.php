@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Student\EnrollmentController;
+use App\Http\Controllers\Student\InstructorApplicationController;
 use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\CourseWishlistController;
 use App\Http\Controllers\Student\CourseReviewController;
@@ -19,6 +20,9 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/support/tickets', [TicketController::class, 'store'])->middleware('throttle:6,1')->name('support.tickets.store');
     Route::get('/support/tickets/{ticket}', [TicketController::class, 'show'])->name('support.tickets.show');
     Route::post('/support/tickets/{ticket}/reply', [TicketController::class, 'reply'])->middleware('throttle:12,1')->name('support.tickets.reply');
+
+    Route::get('/instructor-application', [InstructorApplicationController::class, 'index'])->name('instructor-application.index');
+    Route::post('/instructor-application', [InstructorApplicationController::class, 'store'])->middleware('throttle:3,1')->name('instructor-application.store');
 
     // All roles share this entrypoint; DashboardController chooses the workspace.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

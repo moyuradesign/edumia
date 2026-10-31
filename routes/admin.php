@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\Users\MemberController;
+use App\Http\Controllers\Admin\Users\InstructorApplicationController;
 use App\Http\Controllers\Admin\Courses\CategoryController;
 use App\Http\Controllers\Admin\Courses\ReviewModerationController;
 use App\Http\Controllers\Admin\Content\MediaController;
@@ -19,6 +20,8 @@ Route::middleware(['auth', 'active', 'role:admin'])
     ->name('admin.')
     ->group(function (): void {
         Route::put('/users/{user}', MemberController::class)->name('users.update');
+        Route::get('/instructor-applications', [InstructorApplicationController::class, 'index'])->name('instructor-applications.index');
+        Route::patch('/instructor-applications/{application}', [InstructorApplicationController::class, 'review'])->name('instructor-applications.review');
         Route::get('/reviews', [ReviewModerationController::class, 'index'])->name('reviews.index');
         Route::patch('/reviews/{review}', [ReviewModerationController::class, 'update'])->name('reviews.update');
 
