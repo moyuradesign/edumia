@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Course;
+use App\Models\Ebook;
+use App\Models\Bootcamp;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 final class VerifiedPaymentWorkflowTest extends TestCase
@@ -183,4 +186,71 @@ final class VerifiedPaymentWorkflowTest extends TestCase
         $this->actingAs($other)->post('/checkout/orders/'.$order->id.'/pay')->assertNotFound();
         $this->assertSame('pending', $order->fresh()->status);
     }
+    public function test_verified_ebook_purchase_grants_private_download_only_after_payment(): void
+    {
+        $teacher = $this->actor('instructor', 'teacher@edumia.test');
+        $student = $this->actor('student', 'reader@edumia.test');
+        Storage::fake('local');
+        Storage::disk('local')->put('edumia/ebooks/security.pdf', '%PDF-1.4 test-content');
+        $ebook = Ebook::query()->create([
+            'author_id' => $teacher->getKey(),
+            'title' => 'Security Handbook', 'slug' => 'security-handbook',
+            'price' => '25.00', 'status' => 'published',
+            'published_at' => now()->subMinute(),
+            'file_path' => 'edumia/ebooks/security.pdf',
+        ]);
+
+        $this->actingAs($student)->post('/checkout/ebooks/'.$ebook->id)->assertRedirect();
+        $order = Order::firstOrFail();
+        $this->assertDatabaseCount('ebook_purchases', 0);
+        $this->get('/my-ebooks/'.$ebook->id.'/download')->assertForbidden();
+        $this->enableStripe();
+        $this->fakeGateway($this->stripeSession($order));
+        $this->start($order);
+        $this->webhook($this->event())->assertOk();
+
+        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertDatabaseHas('ebook_purchases', [
+            'ebook_id' => $ebook->id, 'user_id' => $student->id,
+            'status' => 'completed', 'amount' => '25',
+        ]);
+        $this->get('/my-ebooks/'.$ebook->id.'/download')->assertOk();
+        $this->assertDatabaseCount('enrollments', 0);
+        $this->assertDatabaseCount('payment_histories', 1);
+    }
+
+    public function test_verified_bootcamp_purchase_grants_cohort_and_limits_reservations(): void
+    {
+        $teacher = $this->actor('instructor', 'teacher@edumia.test');
+        $first = $this->actor('student', 'first@edumia.test');
+        $second = $this->actor('student', 'second@edumia.test');
+        $bootcamp = Bootcamp::query()->create([
+            'instructor_id' => $teacher->getKey(),
+            'title' => 'Leadership Cohort', 'slug' => 'leadership-cohort',
+            'price' => '25.00', 'capacity' => 1, 'status' => 'published',
+        ]);
+
+        $this->actingAs($first)->post('/checkout/bootcamps/'.$bootcamp->id)->assertRedirect();
+        $firstOrder = Order::firstOrFail();
+        $this->enableStripe();
+        $this->fakeGateway($this->stripeSession($firstOrder));
+        $this->start($firstOrder);
+        $this->get('/my-bootcamps/'.$bootcamp->id.'/classroom')->assertForbidden();
+
+        $this->actingAs($second)->post('/checkout/bootcamps/'.$bootcamp->id)->assertRedirect();
+        $secondOrder = Order::query()->latest('id')->firstOrFail();
+        $this->post('/checkout/orders/'.$secondOrder->id.'/pay')->assertStatus(409);
+        $this->assertDatabaseCount('bootcamp_purchases', 0);
+
+        $this->actingAs($first);
+        $this->webhook($this->event())->assertOk();
+        $this->assertDatabaseHas('bootcamp_purchases', [
+            'bootcamp_id' => $bootcamp->id, 'user_id' => $first->id, 'status' => 'completed',
+        ]);
+        $this->get('/my-bootcamps/'.$bootcamp->id.'/classroom')->assertOk();
+        $this->actingAs($second)->get('/my-bootcamps/'.$bootcamp->id.'/classroom')->assertForbidden();
+        $this->assertDatabaseCount('bootcamp_purchases', 1);
+        $this->assertDatabaseCount('payment_histories', 1);
+    }
+
 }
