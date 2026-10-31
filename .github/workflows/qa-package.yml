@@ -1,0 +1,81 @@
+name: Edumia integrated QA package
+
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-package.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa-package:
+    name: Build and test development snapshot
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tested main
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, pdo_mysql, xml, tokenizer
+          coverage: none
+
+      - name: Install locked Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install locked npm dependencies and compile assets
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Configure ephemeral PHPUnit environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: Run all quality checks
+        run: |
+          php scripts/verify-source-structure.php
+          php artisan route:list > /tmp/edumia-route-list.txt
+          php artisan test --fail-on-warning
+
+      - name: Prepare QA artifact without secrets
+        run: |
+          set -Eeuo pipefail
+          test ! -f installer/authorize.txt
+          rm -f .env
+          find bootstrap/cache -maxdepth 1 -type f -name '*.php' -delete
+          find storage/logs -maxdepth 1 -type f -name '*.log' -delete
+          printf 'EDUMIA QA SNAPSHOT\nSOURCE_SHA=%s\nSTATUS=DEVELOPMENT_ONLY\nNOT_A_CUSTOMER_RELEASE=YES\n' "${GITHUB_SHA}" > QA_BUILD.txt
+          mkdir -p dist
+          tar -czf dist/edumia-integrated-qa.tar.gz \
+            --exclude='node_modules' \
+            --exclude='public/hot' \
+            --exclude='public/storage' \
+            app artisan bootstrap config database docs installer public resources routes scripts \
+            storage tests vendor composer.json composer.lock package.json package-lock.json \
+            phpunit.xml vite.config.js .env.example README.md QA_BUILD.txt
+          tar -tzf dist/edumia-integrated-qa.tar.gz | grep -q '^public/build/manifest.json$'
+          sha256sum dist/edumia-integrated-qa.tar.gz
+          test ! -e .env
+          echo 'EDUMIA_INTEGRATED_QA_PACKAGE=READY'
+
+      - name: Upload development QA archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: edumia-integrated-qa
+          path: dist/edumia-integrated-qa.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+# This workflow only builds a QA archive; it cannot deploy or alter any live database.
