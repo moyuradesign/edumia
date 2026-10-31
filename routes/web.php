@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Frontend\CourseController;
 use App\Http\Controllers\Frontend\BlogController;
+use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,8 @@ Route::get('/courses', [CourseController::class, 'index'])->name('courses.index'
 Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/contact', [ContactController::class, 'create'])->name('contact.create');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:3,1')->name('contact.store');
 
 Route::prefix('{locale}')
     ->where(['locale' => 'zh|fr|de|ja|km|ko|vi'])
