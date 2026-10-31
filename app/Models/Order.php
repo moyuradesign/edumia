@@ -19,6 +19,10 @@ final class Order extends Model
         'total',
         'expires_at',
         'paid_at',
+        'payment_gateway',
+        'gateway_session_id',
+        'gateway_checkout_url',
+        'gateway_payment_reference',
     ];
 
     protected function casts(): array

@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 final class CourseCheckoutService
 {
     /**
-     * Create an unpayable price-locked draft order. This does NOT initiate,
+     * Create a price-locked draft order. This does NOT initiate,
      * verify or record payment and MUST NOT create an enrollment.
      */
     public function prepare(User $actor, Course $selected): Order
@@ -48,11 +48,14 @@ final class CourseCheckoutService
 
             $existing = Order::query()
                 ->where('user_id', $customer->getKey())
-                ->where('status', 'pending')
+                ->whereIn('status', ['pending', 'awaiting_payment'])
                 ->whereHas('items', fn ($query) => $query->where('course_id', $course->getKey()))
                 ->lockForUpdate()->get();
 
             foreach ($existing as $order) {
+                if ($order->status === 'awaiting_payment') {
+                    return $order;
+                }
                 if ($order->expires_at?->isFuture()
                     && $order->currency_code === $currency
                     && $order->total === $price) {

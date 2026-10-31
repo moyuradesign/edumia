@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureActive::class,
         ]);
         $middleware->redirectGuestsTo('/login');
+        // Stripe posts signed server-to-server events, not browser CSRF tokens.
+        $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
     })
     ->withCommands([__DIR__.'/../app/Console/Commands'])
     ->withExceptions(function (Exceptions $exceptions): void {

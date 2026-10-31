@@ -6,6 +6,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Student\EnrollmentController;
 use App\Http\Controllers\Student\CheckoutController;
+use App\Http\Controllers\Student\PaymentController;
 use App\Http\Controllers\Student\InstructorApplicationController;
 use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\CourseWishlistController;
@@ -49,6 +50,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     Route::get('/checkout/orders', [CheckoutController::class, 'index'])->name('checkout.orders.index');
     Route::post('/checkout/courses/{course}', [CheckoutController::class, 'store'])->middleware('throttle:6,1')->name('checkout.orders.store');
+    Route::post('/checkout/orders/{order}/pay', [PaymentController::class, 'start'])->middleware('throttle:5,1')->name('checkout.orders.pay');
     Route::get('/checkout/orders/{order}', [CheckoutController::class, 'show'])->name('checkout.orders.show');
     Route::patch('/checkout/orders/{order}/cancel', [CheckoutController::class, 'cancel'])->middleware('throttle:6,1')->name('checkout.orders.cancel');
 

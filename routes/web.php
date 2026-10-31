@@ -12,6 +12,10 @@ use App\Http\Controllers\Frontend\BootcampController;
 use App\Http\Controllers\Frontend\NewsletterController;
 use App\Http\Controllers\Frontend\EbookController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Webhooks\StripeWebhookController;
+
+Route::post('/webhooks/stripe', StripeWebhookController::class)
+    ->middleware('throttle:120,1')->name('webhooks.stripe');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/en', fn () => redirect()->route('home'));

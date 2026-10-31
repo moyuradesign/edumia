@@ -15,9 +15,20 @@
 <p><strong>Total: {{ $order->currency_code }} {{ $order->total }}</strong></p>
 <p>Status: <strong>{{ $order->status === 'pending' && $order->expires_at?->isPast() ? 'Quote expired' : ucfirst($order->status) }}</strong></p>
 @if($order->status === 'pending' && $order->expires_at?->isFuture())
-<p>This quote expires at {{ $order->expires_at->format('Y-m-d H:i T') }}. No payment gateway is connected. Creating an order neither charges you nor enrolls you.</p>
+<p>This quote expires at {{ $order->expires_at->format('Y-m-d H:i T') }}. Access is granted only after Stripe confirms a successful payment.</p>
+@if(app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured())
+<form method="post" action="{{ route('checkout.orders.pay', $order) }}">@csrf
+<button class="btn btn-primary" type="submit">Pay securely with Stripe</button></form>
+@else<p>No payment gateway is connected. Creating an order neither charges you nor enrolls you.</p>@endif
 <form method="post" action="{{ route('checkout.orders.cancel', $order) }}">@csrf @method('PATCH')
 <button class="btn btn-quiet" type="submit">Cancel this order</button></form>
+@elseif($order->status === 'awaiting_payment')
+<p>Payment is awaiting verified confirmation. A successful browser return alone does not grant course access.</p>
+@if(app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured() && $order->expires_at?->isFuture())
+<form method="post" action="{{ route('checkout.orders.pay', $order) }}">@csrf
+<button class="btn btn-primary" type="submit">Return to Stripe Checkout</button></form>@endif
+@elseif($order->status === 'paid')
+<p>Payment confirmed. Your learning entitlement is active.</p>
 @else
 <p>This order cannot be paid here. Browse courses to request a new quote, if applicable.</p>
 @endif
