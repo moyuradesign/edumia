@@ -11,7 +11,7 @@ final class KnowledgeBaseTopicRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() ?? false;
+        return $this->user()?->hasPermission('knowledge.manage') ?? false;
     }
 
     public function rules(): array
