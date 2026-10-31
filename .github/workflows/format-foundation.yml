@@ -45,7 +45,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Format stable CSS and JavaScript sources
-        run: npm exec --yes --package=prettier@3.6.2 -- prettier --write resources/css/*.css resources/js/*.js
+        run: npm exec --yes --package=prettier@3.6.2 -- prettier --write "resources/css/**/*.css" "resources/js/**/*.js"
 
       - name: Verify formatted PHP and asset builds
         run: |
