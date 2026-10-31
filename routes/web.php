@@ -8,6 +8,7 @@ use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\KnowledgeBaseController;
+use App\Http\Controllers\Frontend\BootcampController;
 use App\Http\Controllers\Frontend\NewsletterController;
 use App\Http\Controllers\Frontend\EbookController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,8 @@ Route::get('/en', fn () => redirect()->route('home'));
 
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');
+Route::get('/bootcamps', [BootcampController::class, 'index'])->name('bootcamps.index');
+Route::get('/bootcamps/{slug}', [BootcampController::class, 'show'])->name('bootcamps.show');
 Route::get('/ebooks', [EbookController::class, 'index'])->name('ebooks.index');
 Route::get('/ebooks/{slug}', [EbookController::class, 'show'])->name('ebooks.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');

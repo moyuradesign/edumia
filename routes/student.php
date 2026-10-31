@@ -12,6 +12,7 @@ use App\Http\Controllers\Student\CourseReviewController;
 use App\Http\Controllers\Student\EbookLibraryController;
 use App\Http\Controllers\Student\LiveClassController;
 use App\Http\Controllers\Student\CourseForumController;
+use App\Http\Controllers\Student\BootcampEnrollmentController;
 use App\Http\Controllers\Student\LearningController;
 use App\Http\Controllers\Student\QuizAttemptController;
 use App\Http\Controllers\Student\Support\TicketController;
@@ -29,6 +30,11 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     // All roles share this entrypoint; DashboardController chooses the workspace.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/my-bootcamps', [BootcampEnrollmentController::class, 'index'])->name('bootcamps.my');
+    Route::post('/my-bootcamps/{bootcamp}', [BootcampEnrollmentController::class, 'enroll'])
+        ->middleware('throttle:12,1')->name('bootcamps.enroll');
+    Route::get('/my-bootcamps/{bootcamp}/classroom', [BootcampEnrollmentController::class, 'classroom'])->name('bootcamps.classroom');
 
     Route::get('/my-ebooks', [EbookLibraryController::class, 'index'])->name('ebooks.library');
     Route::post('/my-ebooks/{ebook}', [EbookLibraryController::class, 'claim'])->middleware('throttle:10,1')->name('ebooks.claim');

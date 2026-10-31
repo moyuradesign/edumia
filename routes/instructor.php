@@ -6,6 +6,7 @@ use App\Http\Controllers\Instructor\CourseManagementController;
 use App\Http\Controllers\Instructor\AssignmentController;
 use App\Http\Controllers\Instructor\EbookController;
 use App\Http\Controllers\Instructor\LiveClassController;
+use App\Http\Controllers\Instructor\BootcampController;
 use App\Http\Controllers\Instructor\LessonManagementController;
 use App\Http\Controllers\Instructor\QuizManagementController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,15 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
     ->prefix('instructor')
     ->name('instructor.')
     ->group(function (): void {
+        Route::get('/bootcamps', [BootcampController::class, 'index'])->name('bootcamps.index');
+        Route::get('/bootcamps/create', [BootcampController::class, 'create'])->name('bootcamps.create');
+        Route::post('/bootcamps', [BootcampController::class, 'store'])->name('bootcamps.store');
+        Route::get('/bootcamps/{bootcamp}/edit', [BootcampController::class, 'edit'])->name('bootcamps.edit');
+        Route::put('/bootcamps/{bootcamp}', [BootcampController::class, 'update'])->name('bootcamps.update');
+        Route::post('/bootcamps/{bootcamp}/modules', [BootcampController::class, 'module'])->name('bootcamps.modules.store');
+        Route::post('/bootcamps/{bootcamp}/modules/{module}/resources', [BootcampController::class, 'resource'])->name('bootcamps.resources.store');
+        Route::post('/bootcamps/{bootcamp}/sessions', [BootcampController::class, 'session'])->name('bootcamps.sessions.store');
+
         Route::get('/ebooks', [EbookController::class, 'index'])->name('ebooks.index');
         Route::get('/ebooks/create', [EbookController::class, 'create'])->name('ebooks.create');
         Route::post('/ebooks', [EbookController::class, 'store'])->name('ebooks.store');

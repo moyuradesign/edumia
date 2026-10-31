@@ -23,6 +23,7 @@
         <nav class="primary-nav" aria-label="Primary navigation">
             <a href="{{ \App\Helpers\Localization::url($locale) }}" class="{{ $currentPath === '' ? 'active' : '' }}">Home</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'courses') }}" class="{{ str_starts_with($currentPath, 'courses') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_courses', $locale) }}</a>
+            <a href="{{ route('bootcamps.index') }}" class="{{ str_starts_with($currentPath, 'bootcamps') ? 'active' : '' }}">Bootcamps</a>
             <a href="{{ route('ebooks.index') }}" class="{{ $currentPath === 'ebooks' ? 'active' : '' }}">Ebooks</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'blog') }}" class="{{ str_starts_with($currentPath, 'blog') ? 'active' : '' }}">Blog</a>
             <a href="{{ route('help.index') }}" class="{{ str_starts_with($currentPath, 'help') ? 'active' : '' }}">Help</a>
