@@ -7,8 +7,10 @@
 - On a **verified successful Stripe payment**, the same database transaction creates the paid order, existing payment history, customer invoice snapshot, and a signed integer-minor-unit instructor earning entry.
 - Invoice identifiers are unique per order. The buyer can view only their invoice through an authenticated route. The record explicitly states **tax not assessed**, not a jurisdiction-approved tax invoice.
 - Commission defaults to 20% via operator environment variable EDUMIA_COMMISSION_BPS=2000. A product's instructor/author owns the earning entry. All earnings are marked **held**.
-- Signed charge.refunded and charge.dispute.created events are independently confirmed against Stripe's API before local changes. Partial refunds create cumulative negative earning entries; full refunds revoke payment-linked learning access and certificates. Disputes suspend payment-linked access. Duplicate provider events do not duplicate ledger entries.
+- Signed charge.refunded, charge.dispute.created and charge.dispute.closed events are independently confirmed against Stripe's API before local changes. Partial refunds create cumulative negative earning entries; full refunds revoke payment-linked learning access and certificates. Disputes suspend payment-linked access. Duplicate provider events do not duplicate ledger entries.
+- Customers can submit a private refund review request for a paid order. Administrators can mark the case reviewed or closed with a note. These are support decisions only: they never call a refund provider, transfer money, or activate access.
 - A read-only administrator Accounting page shows invoice records, held earnings, payout ledger records, and discrepancies between paid orders, payment history, invoice and earning records. Administrators may scan local data to persist reconciliation exception status.
+- Instructors can inspect only their own held earnings and payout-record history; disbursement is unavailable.
 - The instructor payout schema is present, but **disbursement and withdrawals are intentionally disabled**. Provider reconciliation, payout approval, account verification, VAT/tax, fee settlement, reserve periods, and manual refund workflows remain outstanding.
 - Database migrations are additive and source filenames are descriptive and version-free apart from Laravel's required timestamped migration filenames.
 
@@ -42,7 +44,7 @@ For Stripe, subscribe to:
 
 The webhook signature is checked on the exact raw body; adjustments are confirmed through authenticated provider API reads. Stripe dashboard refund initiation is **not** exposed in Edumia yet. A full refund/dispute preserves original accounting history instead of deleting a sale; access is revoked only for a specifically identified paid entitlement. Partial refunds leave the learner's access unchanged pending explicit business policy.
 
-Dispute resolution, reopening entitlements after a successful appeal, already-paid-out earnings clawback, formal credit notes, and operator response workflows are **not implemented**. Review provider dashboards and transactions manually in sandbox until these features pass acceptance.
+Dispute resolution actions, reopening entitlements after a successful appeal, already-paid-out earnings clawback, formal credit notes, and operator response workflows are **not implemented**. Review provider dashboards and transactions manually in sandbox until these features pass acceptance.
 
 ## Verification
 
