@@ -26,9 +26,9 @@ The 96 existing migrations describe potential entities, not 96 finished features
 - Separate bundled CSS/JS by public/auth and dashboard concerns, with Vite manifest references and asset integrity checks.
 - Add seeded permissions and role-driven navigation, with explicit administrator, instructor and student boundaries.
 - Form Request validation; application services; repositories only if they provide real abstraction.
-- Pin `composer.lock` and `package-lock.json`; make the setup reproducible.
+- Maintain committed `composer.lock` and `package-lock.json` and regenerate them through the tested lockfile workflow when dependencies are intentionally updated.
 - Versionless source filenames; eliminate legacy/duplicate files and stale docs.
-- Establish CI: formatting, lint, migration, PHP unit and feature tests, Vite build, asset/route audit, browser smoke test.
+- CI now validates source structure, formatting, PHP syntax, Composer, Laravel routes, PHP feature tests and Vite asset integrity on PHP 8.3 and 8.5. Add real-browser, upgrade and security acceptance before release.
 
 ### Identity and account management
 
@@ -106,7 +106,7 @@ The 96 existing migrations describe potential entities, not 96 finished features
 | Instructor marketplace | Schema only for tutoring/bootcamps/ebooks | All workflows and interfaces |
 | Admin modules | Basic dashboard and user role update | Full settings, media, CMS, users, analytics, finance and support |
 | Localization | Eight-language helper labels and URL patterns | Translation manager, full coverage, date/number formatting, content localization |
-| Asset build | Vite build succeeds; layouts historically hardcoded old filenames | Manifest integration under development; browser asset verification and future admin bundle |
+| Asset build | Vite manifest integration, shared/admin bundles, pinned dependencies and CI checks | Real-browser asset verification and full responsive/accessibility acceptance |
 | Installer | Fresh MySQL acceptance passed in QA and production | Customer packaging, licensing separation, installation/upgrade docs |
 | Documentation | Prior README contradicts current source | Update README, manuals, changelog, guided installation |
 
