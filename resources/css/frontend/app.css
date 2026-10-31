@@ -1862,3 +1862,37 @@ p {
 .catalogue-filter a { color: var(--accent); font-weight: 800; }
 .course-add-cart { margin-top: 12px; }
 .course-add-cart .btn { width: 100%; }
+
+
+/* Mobile navigation floats beneath the two-row header rather than overlapping search. */
+@media (max-width: 1024px) {
+  html.js-navigation .premium-header .premium-header-layout {
+    position: relative;
+    isolation: isolate;
+  }
+  html.js-navigation .premium-header .premium-header-actions {
+    position: absolute;
+    z-index: 120;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    grid-row: auto;
+    grid-column: auto;
+    max-height: min(72dvh, 600px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 0 0 18px 18px;
+    background: var(--surface);
+    box-shadow: 0 22px 50px rgba(17, 31, 56, .16);
+  }
+  html.js-navigation .premium-header .premium-header-actions.is-open {
+    display: flex;
+  }
+  .premium-header .premium-dropdown {
+    max-height: min(50dvh, 420px);
+  }
+}
