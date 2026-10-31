@@ -11,6 +11,7 @@ use App\Http\Controllers\Student\CourseWishlistController;
 use App\Http\Controllers\Student\CourseReviewController;
 use App\Http\Controllers\Student\EbookLibraryController;
 use App\Http\Controllers\Student\LiveClassController;
+use App\Http\Controllers\Student\CourseForumController;
 use App\Http\Controllers\Student\LearningController;
 use App\Http\Controllers\Student\QuizAttemptController;
 use App\Http\Controllers\Student\Support\TicketController;
@@ -43,6 +44,12 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     Route::get('/learn/{course}/assignments/{assignment}', [AssignmentController::class, 'show'])->name('learning.assignments.show');
     Route::post('/learn/{course}/assignments/{assignment}', [AssignmentController::class, 'submit'])->middleware('throttle:8,1')->name('learning.assignments.submit');
+
+    Route::get('/learn/{course}/forums', [CourseForumController::class, 'index'])->name('learning.forums.index');
+    Route::post('/learn/{course}/forums', [CourseForumController::class, 'store'])->middleware('throttle:5,1')->name('learning.forums.store');
+    Route::get('/learn/{course}/forums/{forum}', [CourseForumController::class, 'show'])->name('learning.forums.show');
+    Route::post('/learn/{course}/forums/{forum}/replies', [CourseForumController::class, 'reply'])
+        ->middleware('throttle:12,1')->name('learning.forums.reply');
 
     Route::get('/learn/{course}/live-classes', [LiveClassController::class, 'index'])->name('learning.live-classes.index');
 

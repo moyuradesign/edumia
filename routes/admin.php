@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\Content\KnowledgeBaseController;
 use App\Http\Controllers\Admin\Content\EbookPublicationController;
 use App\Http\Controllers\Admin\Support\ContactController;
 use App\Http\Controllers\Admin\Support\TicketController;
+use App\Http\Controllers\Admin\Support\ForumModerationController;
 use App\Http\Controllers\Admin\System\GeneralSettingsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Instructor\CourseManagementController;
@@ -36,6 +37,10 @@ Route::middleware(['auth', 'active', 'role:admin'])
 
         Route::get('/settings/general', [GeneralSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('settings.update');
+
+        Route::get('/forums', [ForumModerationController::class, 'index'])->name('forums.index');
+        Route::patch('/forums/{forum}', [ForumModerationController::class, 'topic'])->name('forums.update');
+        Route::patch('/forum-replies/{reply}', [ForumModerationController::class, 'reply'])->name('forum-replies.update');
 
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
         Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
