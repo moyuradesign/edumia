@@ -41,6 +41,16 @@
     </div>
 </header>
 <main id="content">@yield('content')</main>
+<section class="course-section" aria-label="Newsletter subscription"><div class="container">
+<h2>Edumia Newsletter</h2><p>Receive occasional learning updates. Email confirmation is required.</p>
+<form class="stack-form" method="post" action="{{ route('newsletter.subscribe') }}">
+@csrf
+<label>Email address <input type="email" name="email" maxlength="190" required autocomplete="email"></label>
+<label>Name (optional) <input name="name" maxlength="160" autocomplete="name"></label>
+<label class="checkline"><input type="checkbox" name="consent" value="1" required>
+I agree to receive Edumia email updates and understand I can unsubscribe at any time.</label>
+<button class="btn btn-secondary" type="submit">Subscribe</button>
+</form></div></section>
 <footer class="site-footer"><div class="container footer-inner"><div><strong>edumia.</strong><span> — Learning Management System</span></div><div>© {{ date('Y') }} <a href="https://tonsamith.com" rel="author noopener">Ton Samith</a>. {{ \App\Helpers\Localization::label('rights', $locale) }}</div></div></footer>
 </body>
 </html>
