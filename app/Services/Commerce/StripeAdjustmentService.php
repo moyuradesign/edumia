@@ -27,7 +27,7 @@ final class StripeAdjustmentService
         abort_unless(is_string($objectId) && preg_match('/^(ch_|dp_)[A-Za-z0-9_]{6,180}$/D', $objectId), 400);
 
         $dispute = null;
-        if ($type === 'charge.dispute.created') {
+        if (in_array($type, ['charge.dispute.created', 'charge.dispute.closed'], true)) {
             abort_unless(str_starts_with($objectId, 'dp_'), 400);
             $dispute = $this->stripeGet('/v1/disputes/'.$objectId);
             abort_unless(($dispute['id'] ?? null) === $objectId
@@ -80,13 +80,20 @@ final class StripeAdjustmentService
                 abort_unless(($dispute['charge'] ?? null) === $chargeId
                     && ($dispute['currency'] ?? null) === strtolower($order->currency_code)
                     && is_int($dispute['amount'] ?? null)
-                    && $dispute['amount'] > 0 && $dispute['amount'] <= $total, 422);
+                    && $dispute['amount'] > 0 && $dispute['amount'] <= $total
+                    && ($type !== 'charge.dispute.closed'
+                        || in_array($dispute['status'] ?? null, ['won', 'lost', 'warning_closed'], true)), 422);
                 DB::table('commerce_disputes')->updateOrInsert(
                     ['gateway_dispute_id' => $dispute['id']],
                     ['order_id' => $order->getKey(), 'status' => (string) ($dispute['status'] ?? 'needs_response'),
                         'amount_minor' => $dispute['amount'], 'updated_at' => now(), 'created_at' => now()]
                 );
-                $this->revoke($order, 'disputed');
+                // A closed dispute can be won, lost or warning-closed.
+                // Record provider outcome, but NEVER automatically re-enable access
+                // or initiate settlement without a human case review.
+                if ($type === 'charge.dispute.created') {
+                    $this->revoke($order, 'disputed');
+                }
                 if ($order->status !== 'refunded') {
                     $order->forceFill(['status' => 'disputed'])->save();
                 }
@@ -99,7 +106,11 @@ final class StripeAdjustmentService
             ]);
             AuditEvent::query()->create([
                 'actor_id' => null, 'subject_type' => Order::class, 'subject_id' => $order->getKey(),
-                'action' => $type === 'charge.refunded' ? 'commerce.refund_verified' : 'commerce.dispute_verified',
+                'action' => match ($type) {
+                    'charge.refunded' => 'commerce.refund_verified',
+                    'charge.dispute.closed' => 'commerce.dispute_closed_verified',
+                    default => 'commerce.dispute_verified',
+                },
                 'new_values' => ['status' => $order->status, 'gateway' => 'stripe'],
             ]);
         }, 3);

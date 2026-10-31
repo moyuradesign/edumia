@@ -20,7 +20,7 @@ final class CommerceAccountingWorkflowTest extends TestCase
     use RefreshDatabase;
 
     private int $refundedMinor = 0;
-    private bool $simulateDispute = false;
+    private string $disputeStatus = 'needs_response';
 
     private function setupPurchase(): array
     {
@@ -73,7 +73,7 @@ final class CommerceAccountingWorkflowTest extends TestCase
             if (str_contains($request->url(), '/v1/disputes/')) {
                 return Http::response([
                     'id' => 'dp_accounting12345', 'charge' => 'ch_accounting12345',
-                    'currency' => 'usd', 'amount' => 2500, 'status' => 'needs_response',
+                    'currency' => 'usd', 'amount' => 2500, 'status' => $this->disputeStatus,
                 ]);
             }
             if (str_contains($request->url(), '/v1/charges/')) {
@@ -179,6 +179,18 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $this->signed($event)->assertOk();
         $this->assertSame('disputed', $order->fresh()->status);
         $this->assertDatabaseCount('commerce_disputes', 1);
+        $this->disputeStatus = 'won';
+        $closed = [
+            'id' => 'evt_accounting_dispute_closed',
+            'type' => 'charge.dispute.closed',
+            'data' => ['object' => ['id' => 'dp_accounting12345']],
+        ];
+        $this->signed($closed)->assertOk();
+        $this->assertDatabaseHas('commerce_disputes', [
+            'gateway_dispute_id' => 'dp_accounting12345', 'status' => 'won',
+        ]);
+        // Reinstatement requires administrator review; an event is not permission to restore access.
+        $this->assertSame('disputed', $order->fresh()->status);
         $this->assertSame('revoked', Enrollment::firstOrFail()->status);
         $this->get('/learn/'.$course->id)->assertNotFound();
     }

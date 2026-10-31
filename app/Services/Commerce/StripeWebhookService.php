@@ -23,7 +23,7 @@ final class StripeWebhookService
             && is_string($event['type'] ?? null), 400);
 
         $type = $event['type'];
-        if (in_array($type, ['charge.refunded', 'charge.dispute.created'], true)) {
+        if (in_array($type, ['charge.refunded', 'charge.dispute.created', 'charge.dispute.closed'], true)) {
             $adjustments->handle($event, $gateway, $accounting);
             return;
         }
