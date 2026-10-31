@@ -35,7 +35,7 @@ class CourseManagementController extends Controller
     {
         Gate::authorize('update', $course);
 
-        return view('instructor.course-form', ['course' => $course->load(['sections.lessons', 'quizzes.questions']), 'categories' => Category::orderBy('name')->get()]);
+        return view('instructor.course-form', ['course' => $course->load(['sections.lessons', 'quizzes.questions', 'assignments']), 'categories' => Category::orderBy('name')->get()]);
     }
 
     public function update(Request $request, Course $course)

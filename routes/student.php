@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Student\EnrollmentController;
+use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\LearningController;
 use App\Http\Controllers\Student\QuizAttemptController;
 use App\Http\Controllers\Student\Support\TicketController;
@@ -21,6 +22,9 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->middleware('throttle:12,1')->name('enrollments.store');
+
+    Route::get('/learn/{course}/assignments/{assignment}', [AssignmentController::class, 'show'])->name('learning.assignments.show');
+    Route::post('/learn/{course}/assignments/{assignment}', [AssignmentController::class, 'submit'])->middleware('throttle:8,1')->name('learning.assignments.submit');
 
     Route::get('/learn/{course}', [LearningController::class, 'course'])->name('learning.course');
     Route::get('/learn/{course}/lessons/{lesson}', [LearningController::class, 'lesson'])->name('learning.lesson');

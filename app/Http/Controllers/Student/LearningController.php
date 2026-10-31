@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Models\Assignment;
 use App\Models\Course;
+use App\Models\SubmittedAssignment;
 use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
@@ -18,8 +20,14 @@ class LearningController extends Controller
         $sections = $course->sections()->where('is_published', true)->with(['lessons' => fn ($q) => $q->where('is_published', true)])->get();
         $completed = LessonProgress::where('user_id', $request->user()->id)->whereIn('lesson_id', $course->lessons()->select('id'))->pluck('lesson_id')->all();
         $quizzes = $course->quizzes()->where('is_published', true)->withCount('questions')->get();
+        $assignments = Assignment::query()->where('course_id', $course->getKey())
+            ->where('published', true)->orderBy('id')->get();
+        $assignmentSubmissions = SubmittedAssignment::query()
+            ->where('user_id', $request->user()->getKey())
+            ->whereIn('assignment_id', $assignments->pluck('id'))
+            ->get()->keyBy('assignment_id');
 
-        return view('student.learning', ['course' => $course, 'enrollment' => $enrollment, 'sections' => $sections, 'completed' => $completed, 'quizzes' => $quizzes]);
+        return view('student.learning', ['course' => $course, 'enrollment' => $enrollment, 'sections' => $sections, 'completed' => $completed, 'quizzes' => $quizzes, 'assignments' => $assignments, 'assignmentSubmissions' => $assignmentSubmissions]);
     }
 
     public function lesson(Request $request, Course $course, Lesson $lesson)
