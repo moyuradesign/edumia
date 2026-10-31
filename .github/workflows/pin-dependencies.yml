@@ -1,0 +1,69 @@
+name: Pin dependency lockfiles
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pin-dependencies.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edumia-dependency-lock
+  cancel-in-progress: false
+
+jobs:
+  pin-dependencies:
+    name: Resolve, verify and commit lockfiles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Set up minimum supported PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, pdo_mysql, xml, tokenizer
+          coverage: none
+
+      - name: Resolve Composer graph and write lock
+        run: composer update --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve npm graph and write lock
+        run: npm install --no-audit --no-fund
+
+      - name: Validate resolved dependencies and build
+        run: |
+          composer validate --no-check-publish
+          npm ci --no-audit --no-fund
+          npm run build
+          php scripts/verify-source-structure.php
+          php artisan route:list
+          php artisan test
+
+      - name: Commit verified lockfiles on main
+        run: |
+          test -s composer.lock
+          test -s package-lock.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add composer.lock package-lock.json
+          if git diff --cached --quiet; then
+            echo 'Lockfiles already up to date.'
+          else
+            git commit -m 'build: pin verified Composer and npm dependency graphs'
+            git push origin HEAD:main
+          fi
+
+# This workflow does not deploy, modify web servers, or change any database.
+# It only commits lockfiles after the resolved dependencies pass test and build gates.
