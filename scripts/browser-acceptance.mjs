@@ -231,6 +231,8 @@ async function browse(scenario) {
       'Translated contact form is unavailable');
 
     await navigate(page, '/');
+    if (mobile) await page.locator('.site-header .menu-toggle').click();
+    await page.locator('details[data-header-details="profile"] > summary').click();
     await page.locator('.theme-toggle').first().click();
     verify(await page.locator('html').getAttribute('data-theme') === 'dark', 'Theme toggle failed');
     await page.reload({ waitUntil: 'networkidle' });
