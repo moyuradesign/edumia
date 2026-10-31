@@ -111,7 +111,9 @@ function install(array $values): void
         'DB_CONNECTION' => 'mysql', 'DB_HOST' => $values['db_host'],
         'DB_PORT' => $values['db_port'], 'DB_DATABASE' => $values['db_database'],
         'DB_USERNAME' => $values['db_username'], 'DB_PASSWORD' => $values['db_password'],
-        'SESSION_DRIVER' => 'file', 'CACHE_STORE' => 'file',
+        'SESSION_DRIVER' => 'file',
+        'SESSION_SECURE_COOKIE' => str_starts_with($values['app_url'], 'https://') ? 'true' : 'false',
+        'CACHE_STORE' => 'file',
         'QUEUE_CONNECTION' => 'sync',
     ];
     $lines = [];
@@ -285,7 +287,7 @@ h2{font-size:19px;margin:0 0 15px}ul{margin:0;padding:0;list-style:none;display:
 <?php if ($errors): ?><section class="card" role="alert"><h2>Review required</h2><?php foreach ($errors as $error): ?><p class="notice"><?=escape($error)?></p><?php endforeach; ?></section><?php endif; ?>
 <form class="card" method="post" action="" autocomplete="off">
 <h2>2. Site settings</h2><input type="hidden" name="_csrf" value="<?=escape($csrf)?>">
-<div class="grid"><?php field('app_name','Application name','text','Edumia');field('app_url','HTTPS application URL','url','https://edumia.tonsamith.com');field('timezone','Timezone','text','Asia/Phnom_Penh'); ?></div>
+<div class="grid"><?php field('app_name','Application name','text','Edumia');field('app_url','HTTPS application URL','url');field('timezone','Timezone','text','UTC'); ?></div>
 <h2 style="margin-top:25px">3. Database connection</h2>
 <div class="grid"><?php field('db_host','Database host','text','127.0.0.1');field('db_port','Database port','number','3306');field('db_database','Database name');field('db_username','Database username');field('db_password','Database password','password','',false); ?></div>
 <h2 style="margin-top:25px">4. Administrator account</h2>
