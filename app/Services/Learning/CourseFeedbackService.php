@@ -36,7 +36,7 @@ final class CourseFeedbackService
             && $course->published_at !== null, 404);
 
         abort_unless(Enrollment::query()->where('user_id', $user->getKey())
-            ->where('course_id', $course->getKey())->where('status', 'active')->exists(), 403);
+            ->where('course_id', $course->getKey())->whereIn('status', ['active', 'completed'])->exists(), 403);
 
         return DB::transaction(function () use ($user, $course, $data): Review {
             return Review::query()->updateOrCreate(

@@ -6,6 +6,7 @@ use App\Models\Certificate;
 use App\Models\Enrollment;
 use App\Models\LessonProgress;
 use App\Models\QuizSubmission;
+use App\Models\SubmittedAssignment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -23,7 +24,17 @@ class CourseCompletionService
             $enrollment->progress_percent = $percent;
             $publishedQuizzes = $course->quizzes()->where('is_published', true)->pluck('id');
             $passed = QuizSubmission::where('user_id', $enrollment->user_id)->where('passed', true)->whereIn('quiz_id', $publishedQuizzes)->distinct('quiz_id')->count('quiz_id');
-            if ($total > 0 && $finished === $total && $publishedQuizzes->count() === $passed) {
+            $publishedAssignments = $course->assignments()->where('published', true)->pluck('id');
+            $gradedAssignments = SubmittedAssignment::query()
+                ->where('user_id', $enrollment->user_id)
+                ->whereNotNull('graded_at')
+                ->whereIn('assignment_id', $publishedAssignments)
+                ->distinct('assignment_id')
+                ->count('assignment_id');
+
+            if ($total > 0 && $finished === $total
+                && $publishedQuizzes->count() === $passed
+                && $publishedAssignments->count() === $gradedAssignments) {
                 $enrollment->completed_at ??= now();
                 $enrollment->status = 'completed';
                 Certificate::firstOrCreate(['course_id' => $course->id, 'user_id' => $enrollment->user_id],

@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\SubmittedAssignment;
 use App\Models\User;
+use App\Services\CourseCompletionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -71,7 +72,7 @@ final class AssignmentService
         );
         abort_unless(
             Enrollment::query()->where('user_id', $student->getKey())
-                ->where('course_id', $assignment->course_id)->where('status', 'active')->exists(),
+                ->where('course_id', $assignment->course_id)->whereIn('status', ['active', 'completed'])->exists(),
             403
         );
 
@@ -142,5 +143,15 @@ final class AssignmentService
                 'new_values' => ['score' => $submission->score, 'graded' => true],
             ]);
         });
+
+        // Recalculate completion after grading. A certificate requires every
+        // published assignment to be graded, not merely submitted.
+        $enrollment = Enrollment::query()
+            ->where('course_id', $course->getKey())
+            ->where('user_id', $submission->user_id)->first();
+
+        if ($enrollment !== null) {
+            app(CourseCompletionService::class)->refresh($enrollment);
+        }
     }
 }

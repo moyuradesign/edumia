@@ -26,7 +26,7 @@ final class AssignmentController extends Controller
             404
         );
         Enrollment::query()->where('user_id', $request->user()->getKey())
-            ->where('course_id', $course->getKey())->where('status', 'active')->firstOrFail();
+            ->where('course_id', $course->getKey())->whereIn('status', ['active', 'completed'])->firstOrFail();
 
         return view('student.assignments.show', [
             'course' => $course,
