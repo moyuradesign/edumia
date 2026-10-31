@@ -49,13 +49,16 @@ final class CommerceReconciliationService
                         if ($isFailed) {
                             $counts[$kind]++;
                         }
-                        if ($persist) {
+                        if ($persist && $isFailed) {
                             DB::table('commerce_reconciliation_issues')->updateOrInsert(
                                 ['issue_key' => 'order:'.$order->id.':'.$kind],
                                 ['order_id' => $order->id, 'kind' => $kind,
-                                    'status' => $isFailed ? 'open' : 'resolved',
-                                    'updated_at' => now(), 'created_at' => now()]
+                                    'status' => 'open', 'updated_at' => now()]
                             );
+                        } elseif ($persist) {
+                            DB::table('commerce_reconciliation_issues')
+                                ->where('issue_key', 'order:'.$order->id.':'.$kind)
+                                ->update(['status' => 'resolved', 'updated_at' => now()]);
                         }
                     }
                 }

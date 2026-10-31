@@ -8,6 +8,7 @@ use App\Http\Controllers\Instructor\EbookController;
 use App\Http\Controllers\Instructor\LiveClassController;
 use App\Http\Controllers\Instructor\BootcampController;
 use App\Http\Controllers\Instructor\ReportsController;
+use App\Http\Controllers\Instructor\EarningsController;
 use App\Http\Controllers\Instructor\LessonManagementController;
 use App\Http\Controllers\Instructor\QuizManagementController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,7 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
     ->prefix('instructor')
     ->name('instructor.')
     ->group(function (): void {
+        Route::get('/earnings', [EarningsController::class, 'index'])->name('earnings.index');
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
         Route::get('/bootcamps', [BootcampController::class, 'index'])->name('bootcamps.index');
