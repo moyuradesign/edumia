@@ -79,10 +79,23 @@ jobs:
             resources/views/student/saved-courses.blade.php \
             tests/Feature/AssignmentWorkflowTest.php \
             tests/Feature/CourseFeedbackTest.php \
-            docs/module-status.md; do
+            docs/module-status.md \
+            docs/feature-completion-audit.md \
+            app/Models/Application.php \
+            app/Services/Identity/InstructorApplicationService.php \
+            app/Models/Ebook.php \
+            app/Services/Content/EbookLibraryService.php \
+            app/Models/LiveClass.php \
+            app/Services/Learning/LiveClassService.php \
+            resources/views/student/instructor-application.blade.php \
+            resources/views/instructor/ebooks/form.blade.php \
+            resources/views/instructor/live-classes/index.blade.php \
+            tests/Feature/InstructorApplicationTest.php \
+            tests/Feature/EbookLibraryTest.php \
+            tests/Feature/LiveClassWorkflowTest.php; do
             grep -Fxq "$required" /tmp/edumia-qa-archive-contents.txt
           done
-          echo 'EDUMIA_QA_FEATURES=ASSIGNMENTS_GRADEBOOK_SAVED_COURSES_REVIEWS'
+          echo 'EDUMIA_QA_FEATURES=ASSIGNMENTS_GRADEBOOK_FEEDBACK_INSTRUCTOR_APPLICATIONS_EBOOKS_LIVE_CLASSES'
           sha256sum dist/edumia-integrated-qa.tar.gz
           test ! -e .env
           echo 'EDUMIA_INTEGRATED_QA_PACKAGE=READY'
