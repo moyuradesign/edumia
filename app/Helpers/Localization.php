@@ -87,6 +87,19 @@ final class Localization
      * Show an instant in the owner's configured IANA timezone.
      * Persisted dates and gateway timestamps remain unchanged.
      */
+    /**
+     * Safely show signed ledger values stored as integer minor units.
+     * No floating-point conversion or change to settled amounts.
+     */
+    public static function minorMoney(int $minor, string $currency, string $locale = 'en'): string
+    {
+        $negative = $minor < 0;
+        $absolute = abs($minor);
+        $formatted = self::money(intdiv($absolute, 100).'.'.str_pad((string) ($absolute % 100), 2, '0', STR_PAD_LEFT), $currency, $locale);
+
+        return ($negative ? '−' : '').$formatted;
+    }
+
     public static function date(?\DateTimeInterface $date, string $locale = 'en', bool $withTime = false): string
     {
         if ($date === null) {

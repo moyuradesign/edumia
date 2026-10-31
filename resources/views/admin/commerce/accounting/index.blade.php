@@ -11,18 +11,18 @@
 <section class="panel-card"><h2>Invoice records</h2><div class="table-scroll"><table>
 <thead><tr><th>Number</th><th>Customer</th><th>Gross</th><th>Refunded</th><th>Status</th></tr></thead>
 <tbody>@forelse($invoices as $invoice)<tr><td>{{ $invoice->number }}</td><td>{{ $invoice->customer_email }}</td>
-<td>{{ $invoice->currency_code }} {{ number_format($invoice->total_minor / 100, 2) }}</td>
-<td>{{ number_format($invoice->refunded_minor / 100, 2) }}</td><td>{{ $invoice->status }}</td></tr>
+<td>{{ \App\Helpers\Localization::minorMoney((int) ($invoice->total_minor), $invoice->currency_code, \App\Helpers\Localization::resolve()) }}</td>
+<td>{{ \App\Helpers\Localization::minorMoney((int) ($invoice->refunded_minor), $invoice->currency_code, \App\Helpers\Localization::resolve()) }}</td><td>{{ $invoice->status }}</td></tr>
 @empty<tr><td colspan="5">No verified paid orders yet.</td></tr>@endforelse</tbody></table></div>{{ $invoices->links() }}</section>
 <section class="panel-card"><h2>Held instructor earnings</h2><div class="table-scroll"><table>
 <thead><tr><th>Instructor ID</th><th>Currency</th><th>Net held</th></tr></thead>
 <tbody>@forelse($earnings as $earning)<tr><td>{{ $earning->instructor_id }}</td>
-<td>{{ $earning->currency_code }}</td><td>{{ number_format($earning->net_held_minor / 100, 2) }}</td></tr>
+<td>{{ $earning->currency_code }}</td><td>{{ \App\Helpers\Localization::minorMoney((int) ($earning->net_held_minor), $earning->currency_code, \App\Helpers\Localization::resolve()) }}</td></tr>
 @empty<tr><td colspan="3">No earnings recorded.</td></tr>@endforelse</tbody></table></div>
 <p>Balances are held accounting entries only. They are not available for withdrawal or transfer.</p></section>
 <section class="panel-card"><h2>Payout record ledger</h2><div class="table-scroll"><table>
 <thead><tr><th>Instructor</th><th>Amount</th><th>Status</th></tr></thead>
 <tbody>@forelse($payouts as $payout)<tr><td>{{ $payout->instructor_id }}</td>
-<td>{{ $payout->currency_code }} {{ number_format($payout->amount_minor / 100, 2) }}</td><td>{{ $payout->status }}</td></tr>
+<td>{{ \App\Helpers\Localization::minorMoney((int) ($payout->amount_minor), $payout->currency_code, \App\Helpers\Localization::resolve()) }}</td><td>{{ $payout->status }}</td></tr>
 @empty<tr><td colspan="3">No payout records. Disbursements are disabled.</td></tr>@endforelse</tbody></table></div></section>
 @endsection
