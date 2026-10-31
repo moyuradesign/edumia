@@ -61,7 +61,7 @@ final class CourseCheckoutWorkflowTest extends TestCase
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseHas('audit_events', ['action' => 'commerce.order_prepared']);
         $this->post('/courses/'.$course->id.'/enroll')->assertForbidden();
-        $this->get('/learn/'.$course->id)->assertForbidden();
+        $this->get('/learn/'.$course->id)->assertNotFound();
     }
 
     public function test_order_privacy_and_administrator_read_only_view(): void
