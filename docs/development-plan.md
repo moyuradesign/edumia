@@ -2,7 +2,7 @@
 
 ## Product goal
 
-Ship a complete, professionally structured, original Laravel 13 LMS suitable for commercial review. Build features on `development/platform-rebuild`; keep the currently installed site on its existing baseline. The production site is **not** the development test bed.
+Ship a complete, professionally structured, original Laravel 13 LMS suitable for commercial review. Build features directly on `main`; keep the currently installed site on its existing baseline. The production site is **not** the development test bed.
 
 The 96 existing migrations describe potential entities, not 96 finished features. No table or screen is counted complete until its controller, requests, authorization, services, templates, tests, navigation, seed data and documentation work together.
 
@@ -93,7 +93,7 @@ The 96 existing migrations describe potential entities, not 96 finished features
 
 **At release candidate:** fresh empty MySQL install, multi-role browser journeys, functional payment sandbox transactions, all UI assets loaded, email and queues verified, upgrade rehearsal on copied customer data, clean uninstall of installer, archive inspection.
 
-**Only then:** merge approved release to `main`, tag a version, build customer package, deploy once with backup and rollback. Live hotfixes are reserved for production incidents rather than the normal build loop.
+**Only then:** freeze a reviewed `main` commit, tag the release, build the customer package, and deploy with backup and rollback. Live hotfixes are reserved for production incidents rather than the normal build loop.
 
 ## Implementation tracking
 
@@ -112,10 +112,9 @@ The 96 existing migrations describe potential entities, not 96 finished features
 
 ## Repository policy
 
-- `main`: reference release/baseline, protected from incomplete feature changes.
-- `development/platform-rebuild`: all rebuild work.
-- `feature/<module>`: scoped changes merged into development through review.
-- `release/<tag>`: frozen candidate for complete acceptance.
+- `main`: sole development trunk while the product is pre-release.
+- No routine feature branches or ongoing release branches.
+- When all modules pass the release gates, use a reviewed immutable Git tag and reproducible production artifact.
 - Use conventional commits and Git tags for versions, not versioned PHP/CSS/JS filenames.
 - Every module must receive regression tests and reviewed documentation.
 - No partial feature is represented as CodeCanyon-ready.
