@@ -163,9 +163,18 @@ jobs:
           EOF
           sudo a2ensite edumia-qa
           sudo apache2ctl configtest
-          sudo service apache2 restart
-          apache2ctl -M 2>/dev/null | grep -q 'rewrite_module'
-          apache2ctl -M 2>/dev/null | grep -q 'php_module'
+          if ! sudo apache2ctl -k stop; then
+            echo 'Apache was not yet running; starting isolated QA service.'
+          fi
+          if ! sudo apache2ctl -k start; then
+            echo 'Apache startup diagnostics:'
+            sudo apache2ctl configtest
+            sudo tail -n 60 /var/log/apache2/error.log || true
+            exit 1
+          fi
+          modules="$(apache2ctl -M 2>/dev/null)"
+          test "${modules#*rewrite_module}" != "$modules"
+          test "${modules#*php_module}" != "$modules"
           for attempt in $(seq 1 20); do
             if curl -sS --max-time 5 -o /dev/null 'http://127.0.0.1:8766/courses'; then
               break
