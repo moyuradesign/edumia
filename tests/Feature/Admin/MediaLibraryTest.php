@@ -54,9 +54,17 @@ final class MediaLibraryTest extends TestCase
     public function test_student_cannot_access_media_routes(): void
     {
         $student = $this->account('student', 'student@edumia.test');
+        $media = MediaFile::create([
+            'disk' => 'local',
+            'path' => 'edumia/media/existing.pdf',
+            'original_name' => 'existing.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 42,
+            'visibility' => 'private',
+        ]);
 
         $this->actingAs($student)->get('/admin/media')->assertForbidden();
-        $this->get('/admin/media/1/download')->assertForbidden();
+        $this->get('/admin/media/'.$media->id.'/download')->assertForbidden();
         $this->post('/admin/media', [])->assertForbidden();
     }
 }
