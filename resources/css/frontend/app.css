@@ -871,3 +871,47 @@ p {
     animation: none !important;
   }
 }
+
+
+/* Responsive navigation. No-JS clients retain the existing visible links. */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .site-header .header-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-block: 12px;
+  }
+  html.js-navigation .site-header .menu-toggle { display: inline-flex; }
+  html.js-navigation .primary-nav {
+    display: none;
+    flex-basis: 100%;
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-height: min(65vh, 480px);
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  }
+  html.js-navigation .primary-nav.is-open { display: flex; }
+  html.js-navigation .primary-nav a {
+    display: block;
+    padding: 12px 8px;
+    min-height: 44px;
+  }
+  .site-header .brand { font-size: clamp(19px, 5vw, 24px); min-width: 0; white-space: normal; }
+  .site-header .header-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .site-header .header-actions > .btn { padding: 9px 10px; }
+}

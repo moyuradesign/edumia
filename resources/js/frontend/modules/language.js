@@ -13,3 +13,44 @@ export function initLanguageSelector() {
     }
   });
 }
+
+
+/**
+ * Progressive enhancement: without JS, links remain visible.
+ * Mobile navigation remains ordinary inline content, not a modal or focus trap.
+ */
+export function initMobileMenus() {
+  document.documentElement.classList.add('js-navigation');
+
+  document.querySelectorAll('.menu-toggle[aria-controls]').forEach((button) => {
+    const navigation = document.getElementById(button.getAttribute('aria-controls'));
+    if (!navigation) return;
+
+    const setOpen = (open) => {
+      button.setAttribute('aria-expanded', String(open));
+      button.setAttribute('aria-label', button.dataset[open ? 'closeLabel' : 'openLabel'] || 'Menu');
+      navigation.classList.toggle('is-open', open);
+    };
+
+    button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+
+    navigation.addEventListener('click', (event) => {
+      if (event.target.closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        button.focus();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!navigation.contains(event.target) && !button.contains(event.target)) setOpen(false);
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 700) setOpen(false);
+    });
+  });
+}

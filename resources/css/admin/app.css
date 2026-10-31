@@ -390,3 +390,27 @@ progress {
     box-shadow: none !important;
   }
 }
+
+
+/* Accessible dashboard navigation for small screens; unchanged desktop layout. */
+@media (max-width: 700px) {
+  .panel-header .panel-top { flex-wrap: wrap; gap: 10px; }
+  html.js-navigation .panel-header .menu-toggle { display: inline-flex; order: 2; }
+  html.js-navigation .panel-nav {
+    display: none;
+    flex-basis: 100%;
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-height: 65vh;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  }
+  html.js-navigation .panel-nav.is-open { display: flex; }
+  html.js-navigation .panel-nav a { padding: 12px 8px; min-height: 44px; }
+  .panel-header .panel-profile { margin-left: auto; }
+}
+@media print {
+  .menu-toggle { display: none !important; }
+}

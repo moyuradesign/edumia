@@ -1,5 +1,7 @@
 import { initTheme } from './modules/theme.js';
-import { initLanguageSelector } from './modules/language.js';
+import { initLanguageSelector, initMobileMenus } from './modules/language.js';
 
 initTheme();
 initLanguageSelector();
+
+initMobileMenus();

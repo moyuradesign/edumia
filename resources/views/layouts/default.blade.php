@@ -23,7 +23,13 @@
 <header class="site-header">
     <div class="container header-inner">
         <a class="brand" href="{{ \App\Helpers\Localization::url($locale) }}" aria-label="{{ $siteName }} home"><span class="brand-mark">e</span><span>{{ $siteName }}<span class="brand-dot">.</span></span></a>
-        <nav class="primary-nav" aria-label="Primary navigation">
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"
+            aria-label="{{ \App\Helpers\Localization::label('menu_open', $locale) }}"
+            data-open-label="{{ \App\Helpers\Localization::label('menu_open', $locale) }}"
+            data-close-label="{{ \App\Helpers\Localization::label('menu_close', $locale) }}">
+            <span aria-hidden="true">☰</span><span>{{ \App\Helpers\Localization::label('menu', $locale) }}</span>
+        </button>
+        <nav class="primary-nav" id="primary-navigation" aria-label="Primary navigation">
             <a href="{{ \App\Helpers\Localization::url($locale) }}" class="{{ $currentPath === '' ? 'active' : '' }}">{{ \App\Helpers\Localization::label('home', $locale) }}</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'courses') }}" class="{{ str_starts_with($currentPath, 'courses') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_courses', $locale) }}</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'bootcamps') }}" class="{{ str_starts_with($currentPath, 'bootcamps') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_bootcamps', $locale) }}</a>
