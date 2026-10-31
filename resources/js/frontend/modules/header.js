@@ -13,8 +13,10 @@ export function initPremiumHeader() {
   };
 
   menus.forEach((menu) => {
-    menu.addEventListener('toggle', () => {
-      if (menu.open) menus.forEach(other => {
+    // Close siblings on activation, before the native <details> toggle.
+    // A delayed toggle event can otherwise race with a second mobile tap.
+    menu.querySelector('summary')?.addEventListener('click', () => {
+      menus.forEach(other => {
         if (other !== menu) close(other);
       });
     });

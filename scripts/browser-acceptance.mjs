@@ -204,6 +204,9 @@ async function browse(scenario) {
     verify(await page.locator('.premium-mega-menu a[href$="/bootcamps"]').count() >= 1,
       'Mega menu is missing learning links');
     await menuProfile.locator('summary').click();
+    await page.waitForFunction(() =>
+      document.querySelector('details[data-header-details="profile"]')?.open === true, null,
+      { timeout: 5000 });
     verify(await menuProfile.getAttribute('open') !== null, 'Profile menu did not open');
     verify(await menuCategories.getAttribute('open') === null, 'Opening profile should close categories');
     await page.keyboard.press('Escape');
