@@ -71,12 +71,12 @@ final class VerifiedPaymentWorkflowTest extends TestCase
         ], $overrides);
     }
 
-    private function fakeGateway(array $session): void
+    private function fakeGateway(array $session, ?array $verifiedSession = null): void
     {
-        Http::fake(function (HttpRequest $request) use ($session) {
+        Http::fake(function (HttpRequest $request) use ($session, $verifiedSession) {
             $this->assertStringStartsWith('https://api.stripe.com/v1/checkout/sessions', $request->url());
 
-            return Http::response($session, 200);
+            return Http::response($request->method() === 'GET' ? ($verifiedSession ?? $session) : $session, 200);
         });
     }
 
@@ -150,13 +150,12 @@ final class VerifiedPaymentWorkflowTest extends TestCase
     {
         [$student, $course, $order] = $this->pendingOrder();
         $this->enableStripe();
-        $this->fakeGateway($this->stripeSession($order, ['amount_total' => 2500]));
+        $this->fakeGateway($this->stripeSession($order), $this->stripeSession($order, ['amount_total' => 100]));
         $this->start($order);
 
         $this->webhook($this->event(), false)->assertStatus(400);
         $this->assertDatabaseCount('enrollments', 0);
 
-        $this->fakeGateway($this->stripeSession($order, ['amount_total' => 100]));
         $this->webhook($this->event())->assertStatus(422);
         $this->assertSame('awaiting_payment', $order->fresh()->status);
         $this->assertDatabaseCount('payment_histories', 0);
@@ -167,11 +166,10 @@ final class VerifiedPaymentWorkflowTest extends TestCase
     {
         [$student, $course, $order] = $this->pendingOrder();
         $this->enableStripe();
-        $this->fakeGateway($this->stripeSession($order));
+        $this->fakeGateway($this->stripeSession($order), $this->stripeSession($order, ['payment_status' => 'unpaid']));
         $this->start($order);
         $this->patch('/checkout/orders/'.$order->id.'/cancel')->assertStatus(409);
 
-        $this->fakeGateway($this->stripeSession($order, ['payment_status' => 'unpaid']));
         $this->webhook($this->event())->assertStatus(422);
         $this->assertDatabaseCount('enrollments', 0);
         $this->assertDatabaseCount('payment_histories', 0);
