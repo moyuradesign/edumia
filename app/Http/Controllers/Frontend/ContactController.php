@@ -8,16 +8,20 @@ use App\Helpers\Localization;
 use App\Http\Requests\Frontend\ContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\View\View;
 
 final class ContactController extends Controller
 {
-    public function create(): View
+    public function create(Request $request, ?string $locale = null): View
     {
+        $locale = Localization::resolve($locale);
+        App::setLocale($locale);
+
         return view('frontend.default.contact.index', [
-            'locale' => 'en',
-            'languages' => Localization::LANGUAGES,
+            'locale' => $locale, 'languages' => Localization::LANGUAGES,
         ]);
     }
 
@@ -25,7 +29,9 @@ final class ContactController extends Controller
     {
         Contact::create($request->validated());
 
-        return to_route('contact.create')->with(
+        $locale = Localization::resolve($request->route('locale'));
+
+        return redirect()->to(Localization::url($locale, 'contact'))->with(
             'success',
             'Your message has been received. Please keep a copy for your records.'
         );
