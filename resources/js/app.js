@@ -16,7 +16,9 @@
 
   toggle?.addEventListener('click', () => {
     root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    try { localStorage.setItem('edumia-theme', root.dataset.theme); } catch (_) {}
+    try {
+      localStorage.setItem('edumia-theme', root.dataset.theme);
+    } catch (_) {}
     paint();
   });
   selection?.addEventListener('change', () => {

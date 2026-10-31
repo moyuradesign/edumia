@@ -7,7 +7,6 @@ declare(strict_types=1);
  * Run as: php scripts/verify-source-structure.php
  * No Laravel/bootstrap, database, or webserver dependency.
  */
-
 $root = dirname(__DIR__);
 $errors = [];
 $app = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
@@ -30,6 +29,7 @@ foreach ($app as $file) {
     $source = file_get_contents($file->getPathname());
     if ($source === false || trim($source) === '') {
         $errors[] = $path.': source is empty or unreadable';
+
         continue;
     }
 

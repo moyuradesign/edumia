@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Admin\Users\MemberController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Instructor\CourseManagementController;
 use Illuminate\Support\Facades\Route;
 
