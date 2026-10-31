@@ -231,4 +231,45 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $this->assertDatabaseCount('instructor_payout_records', 0);
     }
 
+    public function test_customer_refund_review_is_private_and_never_sends_money(): void
+    {
+        [$student, $teacher, $course, $order] = $this->setupPurchase();
+        $this->sale($order);
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+
+        $this->post('/checkout/orders/'.$order->id.'/refund-requests', [
+            'reason' => 'I would like a refund review due to a course access problem.',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('commerce_refund_requests', [
+            'order_id' => $order->id, 'user_id' => $student->id, 'status' => 'open',
+        ]);
+        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertDatabaseCount('commerce_refunds', 0);
+        $this->post('/checkout/orders/'.$order->id.'/refund-requests', [
+            'reason' => 'A second review request should never be created.',
+        ])->assertSessionHasErrors('reason');
+        $this->assertDatabaseCount('commerce_refund_requests', 1);
+
+        $other = User::create(['name' => 'Other', 'email' => 'other@edumia.test', 'password' => 'Password#12345']);
+        $other->forceFill(['status' => 'active'])->save();
+        $this->actingAs($other)->post('/checkout/orders/'.$order->id.'/refund-requests', [
+            'reason' => 'I do not own this order at all.',
+        ])->assertNotFound();
+
+        $admin = User::create(['name' => 'Admin', 'email' => 'admin@edumia.test', 'password' => 'Password#12345']);
+        $admin->forceFill(['role' => 'admin', 'status' => 'active'])->save();
+        $this->actingAs($admin)->get('/admin/commerce/refund-reviews')->assertOk();
+        $case = DB::table('commerce_refund_requests')->firstOrFail();
+        $this->patch('/admin/commerce/refund-reviews/'.$case->id, [
+            'status' => 'reviewed', 'review_note' => 'We are investigating the customer request.',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('commerce_refund_requests', [
+            'id' => $case->id, 'status' => 'reviewed',
+        ]);
+        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertDatabaseCount('commerce_refunds', 0);
+        $this->assertDatabaseCount('instructor_payout_records', 0);
+    }
+
 }
