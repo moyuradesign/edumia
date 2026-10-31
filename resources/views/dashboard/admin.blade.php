@@ -73,6 +73,7 @@
     <div class="admin-shortcut-grid">
         <a href="{{ route('admin.categories.index') }}"><span aria-hidden="true">▦</span><strong>Categories</strong><small>Organize learning</small></a>
         <a href="{{ route('admin.instructor-applications.index') }}"><span aria-hidden="true">♙</span><strong>Instructors</strong><small>Review applications</small></a>
+        <a href="{{ route('admin.users.index') }}"><span aria-hidden="true">◎</span><strong>Members</strong><small>Search and manage access</small></a>
         <a href="{{ route('admin.commerce.orders.index') }}"><span aria-hidden="true">▤</span><strong>Orders</strong><small>Track purchases</small></a>
         <a href="{{ route('admin.media.index') }}"><span aria-hidden="true">▣</span><strong>Media library</strong><small>Manage assets</small></a>
         <a href="{{ route('admin.settings.edit') }}"><span aria-hidden="true">⚙</span><strong>Settings</strong><small>Platform preferences</small></a>
@@ -115,7 +116,7 @@
     <section class="admin-widget admin-members-widget" id="admin-members" aria-labelledby="admin-members-title">
         <div class="admin-widget-heading">
             <div><span class="admin-widget-kicker">PEOPLE & ACCESS</span><h2 id="admin-members-title">Member management</h2><p>Review and update access using existing role and account safeguards.</p></div>
-            <a href="{{ route('admin.roles.index') }}">Staff roles ↗</a>
+            <div class="admin-welcome-actions"><a href="{{ route('admin.users.index') }}">All members ↗</a><a href="{{ route('admin.roles.index') }}">Staff roles ↗</a></div>
         </div>
         <form class="admin-member-search" method="get" action="{{ route('dashboard') }}">
             <label class="sr-only" for="admin-member-q">Find member by name or email</label>
