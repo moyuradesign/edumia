@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\AccountStatus;
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -38,16 +40,16 @@ class User extends Authenticatable
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === AccountStatus::Active->value;
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' && $this->isActive();
+        return $this->role === UserRole::Administrator->value && $this->isActive();
     }
 
     public function canTeach(): bool
     {
-        return in_array($this->role, ['admin', 'instructor'], true) && $this->isActive();
+        return (UserRole::tryFrom((string) $this->role)?->canTeach() ?? false) && $this->isActive();
     }
 }
