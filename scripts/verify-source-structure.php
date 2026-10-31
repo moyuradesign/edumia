@@ -64,12 +64,12 @@ foreach (['default', 'auth', 'panel'] as $layout) {
     if (is_string($source) && str_contains($source, "asset('build/assets/")) {
         $errors[] = $path.': hardcoded Vite filenames are forbidden';
     }
-    if ($layout !== 'default' && is_string($source) && ! str_contains($source, 'resources/css/admin.css')) {
+    if ($layout !== 'default' && is_string($source) && ! str_contains($source, 'resources/css/admin/app.css')) {
         $errors[] = $path.': authenticated layouts must load admin.css';
     }
 }
 
-$assets = ['resources/css/app.css', 'resources/css/admin.css', 'resources/js/app.js', 'resources/js/admin.js'];
+$assets = ['resources/css/frontend/app.css', 'resources/css/admin/app.css', 'resources/js/frontend/app.js', 'resources/js/admin/app.js'];
 foreach ($assets as $asset) {
     if (! is_file($root.'/'.$asset) || filesize($root.'/'.$asset) === 0) {
         $errors[] = $asset.': missing or empty source entry';
