@@ -88,12 +88,10 @@ final class StripeAdjustmentService
                     ['order_id' => $order->getKey(), 'status' => (string) ($dispute['status'] ?? 'needs_response'),
                         'amount_minor' => $dispute['amount'], 'updated_at' => now(), 'created_at' => now()]
                 );
-                // A closed dispute can be won, lost or warning-closed.
-                // Record provider outcome, but NEVER automatically re-enable access
-                // or initiate settlement without a human case review.
-                if ($type === 'charge.dispute.created') {
-                    $this->revoke($order, 'disputed');
-                }
+                // Delivery can be out of order: a closed dispute may arrive
+                // before the created event. Freeze access until case review.
+                // Never automatically re-enable access even when Stripe says "won".
+                $this->revoke($order, 'disputed');
                 if ($order->status !== 'refunded') {
                     $order->forceFill(['status' => 'disputed'])->save();
                 }
