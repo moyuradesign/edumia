@@ -8,11 +8,20 @@ use App\Mail\NewsletterConfirmation;
 use App\Models\NewsletterSubscriber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Tests\TestCase;
 
 final class NewsletterConsentTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // This suite verifies consent and signed tokens, not the per-minute rate limiter.
+        $this->withoutMiddleware(ThrottleRequests::class);
+    }
 
     public function test_subscription_requires_explicit_consent_and_signed_email_verification(): void
     {
