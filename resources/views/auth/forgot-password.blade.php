@@ -1,8 +1,20 @@
 @extends('layouts.auth')
-@section('title','Forgot password')
-@section('content')<h1>Reset your password</h1><p>Enter your email address to request a password-reset link.</p>
-@if(session('success'))<div class="flash">{{ session('success') }}</div>@endif
-<form class="stack-form" action="{{ route('password.email') }}" method="post">@csrf
-<label>Email<input type="email" name="email" required value="{{ old('email') }}" autocomplete="email"></label>
-<button class="btn btn-primary">Send reset link</button></form><p><a href="{{ route('login') }}">Return to login</a></p>
+@section('title', 'Forgot password')
+@section('content')
+<div class="auth-heading">
+    <span class="auth-eyebrow">ACCOUNT RECOVERY</span>
+    <h1 id="auth-heading">Forgot your password?</h1>
+    <p>Enter your account email and we'll send a reset link if it's registered.</p>
+</div>
+<form class="auth-form" action="{{ route('password.email') }}" method="post">
+    @csrf
+    <x-auth-field name="email" label="Email address" type="email" icon="mail"
+                  :value="old('email')" autocomplete="email" required maxlength="190"/>
+    <button class="auth-submit" type="submit">
+        <span>Send reset link</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+    </button>
+</form>
+<p class="auth-switch"><a href="{{ route('login') }}">Back to sign in</a></p>
 @endsection
