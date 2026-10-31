@@ -1,13 +1,13 @@
 @extends('layouts.panel')
 @section('title', 'Order review')
 @section('content')
-<div class="panel-heading"><div><span class="section-kicker">COURSE CHECKOUT</span><h1>Order review</h1>
+<div class="panel-heading"><div><span class="section-kicker">SECURE CHECKOUT</span><h1>Order review</h1>
 <p>Reference: {{ $order->reference }}</p></div>
 <a class="btn btn-quiet" href="{{ route('checkout.orders.index') }}">My orders</a></div>
 <section class="panel-card">
 <h2>Price summary</h2>
 <div class="table-scroll"><table>
-<thead><tr><th>Course</th><th>Quantity</th><th>Unit price</th><th>Total</th></tr></thead>
+<thead><tr><th>Item</th><th>Quantity</th><th>Unit price</th><th>Total</th></tr></thead>
 <tbody>@foreach($order->items as $item)
 <tr><td>{{ $item->title }}</td><td>{{ $item->quantity }}</td><td>{{ $order->currency_code }} {{ $item->unit_price }}</td>
 <td>{{ $order->currency_code }} {{ $item->line_total }}</td></tr>
@@ -15,7 +15,7 @@
 <p><strong>Total: {{ $order->currency_code }} {{ $order->total }}</strong></p>
 <p>Status: <strong>{{ $order->status === 'pending' && $order->expires_at?->isPast() ? 'Quote expired' : ucfirst($order->status) }}</strong></p>
 @if($order->status === 'pending' && $order->expires_at?->isFuture())
-<p>This quote expires at {{ $order->expires_at->format('Y-m-d H:i T') }}. Access is granted only after Stripe confirms a successful payment.</p>
+<p>This quote expires at {{ $order->expires_at->format('Y-m-d H:i T') }}. Access is granted only after the payment provider confirms a successful transaction.</p>
 @if(app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured())
 <form method="post" action="{{ route('checkout.orders.pay', $order) }}">@csrf
 <button class="btn btn-primary" type="submit">Pay securely with Stripe</button></form>
@@ -23,10 +23,13 @@
 <form method="post" action="{{ route('checkout.orders.cancel', $order) }}">@csrf @method('PATCH')
 <button class="btn btn-quiet" type="submit">Cancel this order</button></form>
 @elseif($order->status === 'awaiting_payment')
-<p>Payment is awaiting verified confirmation. A successful browser return alone does not grant course access.</p>
+<p>Payment is awaiting verified confirmation. A successful browser return alone does not grant access.</p>
 @if(app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured() && $order->expires_at?->isFuture())
 <form method="post" action="{{ route('checkout.orders.pay', $order) }}">@csrf
-<button class="btn btn-primary" type="submit">Return to Stripe Checkout</button></form>@endif
+<button class="btn btn-primary" type="submit">Return to Stripe Checkout</button></form>
+@elseif($order->expires_at?->isPast())
+<p>The hosted payment session may have expired. Do not retry payment until its status has been reconciled; contact support if you were charged.</p>
+@endif
 @elseif(in_array($order->status, ['paid', 'partially_refunded', 'refunded', 'disputed'], true))
 <p>Payment status: {{ ucfirst(str_replace('_', ' ', $order->status)) }}. Refunds or disputes may suspend access.</p>
 <a class="btn btn-quiet" href="{{ route('checkout.orders.invoice', $order) }}">View payment invoice</a>

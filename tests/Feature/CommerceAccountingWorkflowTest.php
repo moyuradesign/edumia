@@ -50,6 +50,7 @@ final class CommerceAccountingWorkflowTest extends TestCase
             'client_reference_id' => $order->reference,
             'metadata' => ['order_reference' => $order->reference],
             'currency' => 'usd', 'amount_total' => 2500,
+            'expires_at' => now()->addMinutes(55)->timestamp,
             'mode' => 'payment', 'payment_status' => 'paid', 'status' => 'complete',
             'livemode' => false, 'payment_intent' => 'pi_accounting123456',
         ];

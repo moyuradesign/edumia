@@ -68,7 +68,7 @@ final class StripeCheckoutGateway
         $session = $response->json();
         abort_unless(is_array($session)
             && is_string($session['id'] ?? null)
-            && str_starts_with($session['id'], 'cs_')
+            && preg_match('/^cs_[A-Za-z0-9_]{8,180}$/D', $session['id']) === 1
             && is_string($session['url'] ?? null)
             && $this->checkoutUrlSafe($session['url'])
             && ($session['client_reference_id'] ?? null) === $order->reference
@@ -76,10 +76,15 @@ final class StripeCheckoutGateway
             && ($session['currency'] ?? null) === 'usd'
             && ($session['amount_total'] ?? null) === $amount
             && ($session['mode'] ?? null) === 'payment'
+            && is_int($session['expires_at'] ?? null)
+            && $session['expires_at'] >= now()->addMinute()->timestamp
+            && $session['expires_at'] <= now()->addDay()->timestamp
             && ($session['livemode'] ?? null) === (config('payments.stripe.mode') === 'live'),
             502, 'Gateway checkout validation failed.');
 
-        return ['id' => $session['id'], 'url' => $session['url']];
+        // Preserve the provider's actual expiry so seat reservations are never
+        // released while the hosted Checkout Session can still be paid.
+        return ['id' => $session['id'], 'url' => $session['url'], 'expires_at' => $session['expires_at']];
     }
 
     public function retrieveSession(string $sessionId): array

@@ -186,7 +186,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $key = $_POST['authorization'] ?? '';
         $storedKey = trim((string) file_get_contents(EDUMIA_TOKEN_FILE));
         if (!is_string($key) || !hash_equals($storedKey, $key)) {
-            $errors[] = 'Invalid deployment authorization token.';
+            $errors[] = 'Invalid one-time installation code.';
         } else {
             $required = ['app_name', 'app_url', 'timezone', 'db_host', 'db_port', 'db_database', 'db_username', 'db_password', 'admin_name', 'admin_email', 'admin_password', 'admin_password_confirmation'];
             $values = [];
@@ -251,7 +251,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 }
 
 if ($success) {
-    echo '<!doctype html><html lang="en"><meta charset="utf-8"><title>Edumia installed</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px system-ui;background:#f8fafc;color:#14213d;display:grid;place-items:center;min-height:100vh}.card{background:white;padding:40px;border-radius:18px;max-width:560px;box-shadow:0 20px 80px #14213d18}a{color:#1d4ed8}</style><main class="card"><h1>Edumia installed</h1><p>Configuration saved, database migrated, and first administrator created. The installer is now locked.</p><p><strong>Delete the entire root-level <code>installer/</code> directory using your hosting file manager.</strong></p><p><a href="/">Open Edumia</a></p></main></html>';
+    echo '<!doctype html><html lang="en"><meta charset="utf-8"><title>Edumia installed</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px system-ui;background:#f8fafc;color:#14213d;display:grid;place-items:center;min-height:100vh}.card{background:white;padding:40px;border-radius:18px;max-width:560px;box-shadow:0 20px 80px #14213d18}a{color:#1d4ed8}</style><main class="card"><h1>Edumia installed</h1><p>Configuration saved, database migrated, and first administrator created. The installer is now locked.</p><p><strong>Delete the entire root-level <code>installer/</code> directory using your hosting file manager.</strong></p><p><a href="'.escape($values['app_url']).'">Open Edumia</a></p></main></html>';
     exit;
 }
 
@@ -281,17 +281,18 @@ h2{font-size:19px;margin:0 0 15px}ul{margin:0;padding:0;list-style:none;display:
 <?php foreach ($checks as $label => $ok): ?>
 <li class="check"><span><?=escape($label)?></span><span class="<?=$ok?'pass':'fail'?>"><?=$ok?'PASS':'ACTION REQUIRED'?></span></li>
 <?php endforeach; ?>
-</ul><?php if (!$ready): ?><p class="notice">Complete the listed requirements. In your hosting file manager, create <code>installer/authorize.txt</code> containing your own unique random authorization token (at least 16 characters). The token is never shipped in the ZIP.</p><?php endif; ?></section>
+</ul><?php if (!$ready): ?><p class="notice">Complete the listed requirements. In your hosting file manager, create <code>installer/authorize.txt</code> containing a unique random one-time installation code (at least 16 characters). This is separate from any marketplace purchase code. The token is never shipped in the ZIP.</p><?php endif; ?></section>
 <?php if ($errors): ?><section class="card" role="alert"><h2>Review required</h2><?php foreach ($errors as $error): ?><p class="notice"><?=escape($error)?></p><?php endforeach; ?></section><?php endif; ?>
-<form class="card" method="post" action="/installer" autocomplete="off">
+<form class="card" method="post" action="" autocomplete="off">
 <h2>2. Site settings</h2><input type="hidden" name="_csrf" value="<?=escape($csrf)?>">
 <div class="grid"><?php field('app_name','Application name','text','Edumia');field('app_url','HTTPS application URL','url','https://edumia.tonsamith.com');field('timezone','Timezone','text','Asia/Phnom_Penh'); ?></div>
 <h2 style="margin-top:25px">3. Database connection</h2>
 <div class="grid"><?php field('db_host','Database host','text','127.0.0.1');field('db_port','Database port','number','3306');field('db_database','Database name');field('db_username','Database username');field('db_password','Database password','password','',false); ?></div>
 <h2 style="margin-top:25px">4. Administrator account</h2>
 <div class="grid"><?php field('admin_name','Administrator full name');field('admin_email','Administrator email','email');field('admin_password','Strong administrator password','password');field('admin_password_confirmation','Confirm administrator password','password'); ?></div>
-<h2 style="margin-top:25px">5. Deployment authorization</h2>
-<div class="grid"><?php field('authorization','Purchase Code','password'); ?></div>
+<h2 style="margin-top:25px">5. Installation access</h2>
+<p class="notice">Enter the one-time installation code that you created in <code>installer/authorize.txt</code> using your hosting file manager. This protects initial administrator creation. It is not an Envato purchase code or marketplace license check.</p>
+<div class="grid"><?php field('authorization','One-time installation code','password'); ?></div>
 <div class="buttons"><label style="display:flex;align-items:start;gap:10px;font-weight:500"><input type="checkbox" name="accept" value="yes" required style="width:auto;margin-top:5px">I am authorized to install Edumia in a new database. I understand this creates configuration and executes Laravel migrations.</label><button class="button" type="submit" <?=$ready?'':'disabled'?>>Install Edumia</button></div>
 </form><p class="foot">© <?=date('Y')?> <a href="https://tonsamith.com" rel="noopener noreferrer">Ton Samith</a>. Remove this installer folder after installation.</p>
 </main></body></html>

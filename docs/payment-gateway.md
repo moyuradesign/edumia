@@ -26,7 +26,7 @@ STRIPE_WEBHOOK_SECRET=whsec_your_signing_secret
 ## Business-state guarantees
 
 - Preparing an order does **not** initiate payment. Orders store item title, currency, amount and quantity as an immutable snapshot for checkout.
-- The learner must explicitly start hosted Checkout. The server creates the payment session, records its trusted ID, and redirects to the validated `https://checkout.stripe.com` host.
+- The learner must explicitly start hosted Checkout. Stripe's returned Session expiration is validated and saved as the local order expiration so seat reservations cannot lapse while hosted Checkout remains payable. The server creates the payment session, records its trusted ID, and redirects to the validated `https://checkout.stripe.com` host.
 - The success URL, cancellation URL, query parameters, learner session and user-submitted values can **never** mark an order paid.
 - Webhooks require a valid SHA-256 timestamped signature over the raw body, a five-minute tolerance, and matching server-retrieved Checkout Session details: session ID, order reference, metadata, USD minor units, live/test mode, `complete` status and `paid` status.
 - A single DB transaction writes the payment record, paid order, event identity, audit event and the proper learning access. The event ledger and payment references are unique to prevent double fulfillment.

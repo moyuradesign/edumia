@@ -27,7 +27,7 @@ A CodeCanyon submission must not be based only on source code appearance, route 
 - An instructor cannot edit another instructor's course; a student cannot access instructor/admin actions.
 - Verified and active-account rules are applied uniformly; suspended accounts lose protected access.
 - Authentication, password reset, CSRF, session fixation prevention, throttling and email workflows are verified.
-- Installer is one-time, server-side authorized and absent from finished packages' public surface.
+- Installer is one-time, server-side authorized and removed after customer setup; do not label a local access code as a verified marketplace purchase code.
 
 ## Gate 4 — Learning workflows
 

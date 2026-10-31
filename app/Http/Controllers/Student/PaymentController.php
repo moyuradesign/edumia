@@ -56,6 +56,7 @@ final class PaymentController extends Controller
                 'payment_gateway' => 'stripe',
                 'gateway_session_id' => $session['id'],
                 'gateway_checkout_url' => $session['url'],
+                'expires_at' => now()->setTimestamp($session['expires_at']),
             ])->save();
 
             return $session['url'];

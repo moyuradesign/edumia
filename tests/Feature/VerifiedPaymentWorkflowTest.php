@@ -66,6 +66,7 @@ final class VerifiedPaymentWorkflowTest extends TestCase
             'metadata' => ['order_reference' => $order->reference],
             'currency' => 'usd',
             'amount_total' => 2500,
+            'expires_at' => now()->addMinutes(55)->timestamp,
             'mode' => 'payment',
             'payment_status' => 'paid',
             'status' => 'complete',
@@ -273,6 +274,52 @@ final class VerifiedPaymentWorkflowTest extends TestCase
         $this->assertDatabaseCount('enrollments', 0);
         $this->post('/checkout/courses/'.$course->id)->assertRedirect();
         $this->assertDatabaseCount('orders', 2);
+    }
+
+    public function test_expiry_of_checkout_session_extends_bootcamp_seat_reservation(): void
+    {
+        $teacher = $this->actor('instructor', 'trainer@edumia.test');
+        $first = $this->actor('student', 'buyer-one@edumia.test');
+        $second = $this->actor('student', 'buyer-two@edumia.test');
+        $bootcamp = Bootcamp::query()->create([
+            'instructor_id' => $teacher->id, 'title' => 'Single Seat Workshop',
+            'slug' => 'single-seat-workshop', 'price' => '25.00',
+            'capacity' => 1, 'status' => 'published',
+        ]);
+        $this->actingAs($first)->post('/checkout/bootcamps/'.$bootcamp->id)->assertRedirect();
+        $firstOrder = Order::firstOrFail();
+        $originalExpiry = $firstOrder->expires_at;
+
+        // The buyer starts Stripe Checkout just before the draft order expires.
+        $this->travel(50)->minutes();
+        $this->enableStripe();
+        $this->fakeGateway($this->stripeSession($firstOrder));
+        $this->post('/checkout/orders/'.$firstOrder->id.'/pay')->assertRedirect();
+        $this->assertTrue($firstOrder->fresh()->expires_at->greaterThan($originalExpiry));
+        $this->assertTrue($firstOrder->fresh()->expires_at->greaterThan(now()->addMinutes(50)));
+
+        // After the original quote's expiry, Checkout remains payable and
+        // the second buyer MUST NOT be allowed to reserve the same seat.
+        $this->travel(15)->minutes();
+        $this->actingAs($second)->post('/checkout/bootcamps/'.$bootcamp->id)->assertRedirect();
+        $otherOrder = Order::query()->latest('id')->firstOrFail();
+        $this->post('/checkout/orders/'.$otherOrder->id.'/pay')->assertStatus(409);
+        $this->assertSame('pending', $otherOrder->fresh()->status);
+        $this->assertDatabaseCount('bootcamp_purchases', 0);
+        $this->assertDatabaseCount('payment_histories', 0);
+    }
+
+    public function test_invalid_gateway_expiry_fails_without_reserving_or_enrolling(): void
+    {
+        [$student, $course, $order] = $this->pendingOrder();
+        $this->enableStripe();
+        $this->fakeGateway($this->stripeSession($order, [
+            'expires_at' => now()->subMinute()->timestamp,
+        ]));
+        $this->post('/checkout/orders/'.$order->id.'/pay')->assertStatus(502);
+        $this->assertSame('pending', $order->fresh()->status);
+        $this->assertDatabaseCount('enrollments', 0);
+        $this->assertDatabaseCount('payment_histories', 0);
     }
 
 }
