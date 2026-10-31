@@ -15,18 +15,20 @@ A Laravel 13 learning-management platform by **Ton Samith**.
 - [System architecture and source tree](docs/architecture.md)
 - [Complete development plan and module delivery criteria](docs/development-plan.md)
 - [CodeCanyon and production quality gates](docs/quality-gates.md)
+- [Secure payments: operator setup, verification and limitations](docs/payment-gateway.md)
 
 ## Currently implemented foundation
 
 - Server-side registration and login with student as default role.
 - Administrator/instructor/student access guards and separate role-specific dashboard controllers.
 - Basic database-backed courses, sections, lessons and enrollment.
+- Opt-in Stripe-hosted Checkout and **server-verified** paid entitlements for courses, ebooks and bootcamps, disabled until operator configuration and acceptance. No real-money payment, refund or chargeback readiness is claimed.
 - Basic quiz submission, grading, progress and certificate records.
 - Dedicated role/status management with validated requests, transactions and audit events.
 - Reusable `edumia:health` command for safe installation and runtime diagnostics.
 - Eight locale URL patterns with English fallback.
 - Standalone removable installer that has passed isolated MySQL migration and first-admin acceptance.
-- 96 original schema migrations plus a new audit-event migration, including many areas **not yet implemented in product controllers or UI**.
+- 96 original schema migrations plus incremental audit, course-order and verified-payment migrations, including many areas **not yet implemented in product controllers or UI**.
 
 A schema table does not mean the corresponding marketplace, payment, bootcamp, tutoring, support or CMS feature exists. Refer to the development plan for the missing work.
 
