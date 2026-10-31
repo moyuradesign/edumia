@@ -112,7 +112,8 @@ jobs:
             > "$RUNNER_TEMP/edumia-qa-webserver.log" 2>&1 &
           echo "$!" > "$RUNNER_TEMP/edumia-qa-server.pid"
           for attempt in $(seq 1 30); do
-            if curl -fsS --max-time 4 http://127.0.0.1:8765/installer | grep -q "Edumia Installer"; then
+            if curl -fsS --max-time 4 -o "$RUNNER_TEMP/edumia-installer-probe.html" http://127.0.0.1:8765/installer \
+              && grep -q "Edumia Installer" "$RUNNER_TEMP/edumia-installer-probe.html"; then
               echo 'EDUMIA_INSTALLER_HTTP=READY'
               exit 0
             fi
