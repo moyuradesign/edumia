@@ -5,8 +5,8 @@
 Edumia is being rebuilt as an original, commercially distributable Laravel 13 learning-management platform. This document describes the **target** architecture. Directory examples are not a claim that modules have been implemented.
 
 - Production: `https://edumia.tonsamith.com` (installed baseline; do not use it for development).
-- Production baseline: commit `45eec2cef4e2deef19a9595b4da27c20d88d3153`, plus a narrowly scoped installer hotfix and Nginx fixes applied on the server.
-- Development: `development/platform-rebuild` (new work belongs here until release acceptance).
+- Installed baseline: commit `45eec2cef4e2deef19a9595b4da27c20d88d3153`, plus controlled installer/Nginx changes on the server; do not confuse this with the development HEAD.
+- Development: `main` is the single development trunk. The installed website uses an explicit, separately built release and does not auto-deploy GitHub changes.
 - Author/rights holder: Ton Samith.
 - PHP 8.3–8.5; Laravel 13; MySQL 8; Blade; Vite.
 - No copying of the purchased Academy-LMS application code.
@@ -189,7 +189,7 @@ Use module controllers for HTTP orchestration, request classes for authorization
 
 ## Asset contract
 
-- Use Laravel `@vite(['resources/css/app.css', 'resources/js/app.js'])` in public/auth layouts and eventually use separate `admin.css`/`admin.js` entries for authenticated workspaces.
+- Use Laravel `@vite` and two purposeful bundles: shared public `app.css`/`app.js`, plus `admin.css`/`admin.js` for authentication and authenticated workspaces. These source filenames stay stable.
 - Keep source filenames stable and descriptive. Vite **may** produce hashed output filenames for cache invalidation; these are generated artifacts and not version-named source files.
 - Do not hardcode `public/build/assets/*` filenames in templates.
 - A release must include `public/build/manifest.json` and the exact files it references. Verify asset HTTP 200, expected MIME types, styles, JavaScript behavior, mobile layout and light/dark mode.
