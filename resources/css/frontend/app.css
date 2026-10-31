@@ -1896,3 +1896,10 @@ p {
     max-height: min(50dvh, 420px);
   }
 }
+
+/* Profile and mega-menu finishing details: circular identity, visible focus, safe scrolling. */
+.premium-avatar-initial { display: grid; place-items: center; width: 100%; height: 100%; font-size: 17px; font-weight: 850; line-height: 1; }
+.premium-header .premium-popover > summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.premium-header .premium-dropdown { overscroll-behavior: contain; }
+.premium-header .premium-account-menu > a:focus-visible, .premium-header .premium-mega-menu a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (min-width: 1025px) { .premium-header .premium-mega-menu { max-height: min(74dvh, 650px); overflow-y: auto; } }

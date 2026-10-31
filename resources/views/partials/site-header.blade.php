@@ -101,9 +101,13 @@
             <details class="premium-popover premium-account-popover" data-header-details="profile">
                 <summary class="premium-profile-trigger" aria-label="{{ \App\Helpers\Localization::label('nav_account', $locale) }}">
                     <span class="premium-avatar" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
-                            <circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-4.3 3-6.3 7-6.3s6.4 2 7 6.3"/>
-                        </svg>
+                        @auth
+                            <span class="premium-avatar-initial">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                        @else
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+                                <circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-4.3 3-6.3 7-6.3s6.4 2 7 6.3"/>
+                            </svg>
+                        @endauth
                     </span>
                     <span class="premium-profile-chevron" aria-hidden="true">⌄</span>
                 </summary>

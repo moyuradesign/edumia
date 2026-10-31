@@ -39,6 +39,13 @@ export function initPremiumHeader() {
       close(active, true);
     }
   });
+  // Focus moving to another part of the page should dismiss an open dropdown.
+  document.addEventListener('focusin', (event) => {
+    menus.forEach(menu => {
+      if (!menu.contains(event.target)) close(menu);
+    });
+  });
+
   // Mobile viewport height may change while menus expand or the browser UI moves.
   // Do not close dropdowns on those resize events: native <details> handles layout.
 }

@@ -149,6 +149,7 @@ final class HeaderFooterExperienceTest extends TestCase
 
         $this->actingAs($member)->get('/')->assertOk()
             ->assertSee('Member Learner')
+            ->assertSee('premium-avatar-initial', false)
             ->assertSee('href="'.route('dashboard').'"', false)
             ->assertSee('href="'.route('account.preferences.edit').'"', false)
             ->assertSee('href="'.route('checkout.orders.index').'"', false)
