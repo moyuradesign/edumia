@@ -24,3 +24,8 @@ Headless mobile/tablet viewport simulation cannot replace a physical-device revi
 - A failed automated installer or browser test blocks the QA artifact.
 - Never auto-activate payment gateways from the acceptance workflow.
 - No job in this workflow pushes, uploads, or deploys to a live Edumia installation.
+
+
+## Physical devices and real shared hosting
+
+The evidence-based sign-off documents are [Physical-device acceptance](device-acceptance.md) and [Shared-host acceptance](shared-host-acceptance.md). Both gates remain OPEN until actual hardware and real hosting are tested. Neither CI browser emulation nor a disposable MySQL runner can automatically close them.
