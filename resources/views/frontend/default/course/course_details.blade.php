@@ -3,16 +3,16 @@
 @section('content')
 <section class="detail-section"><div class="container"><a class="back-link" href="{{ \App\Helpers\Localization::url($locale,'courses') }}">← Back to courses</a>
 <div class="detail-grid"><div><span class="section-kicker">{{ $course->category?->name??'Learning' }}</span><h1>{{ $course->title }}</h1><p class="detail-lead">{{ $course->summary }}</p>
-<div class="detail-stats"><span>{{ $course->lessons_count }} lessons</span><span>{{ ucfirst($course->level) }}</span><span>{{ $course->isFree()?'Free':('$'.$course->price) }}</span></div>
+<div class="detail-stats"><span>{{ $course->lessons_count }} lessons</span><span>{{ ucfirst($course->level) }}</span><span>{{ $course->isFree() ? \App\Helpers\Localization::label('free', $locale) : \App\Helpers\Localization::money((string) $course->price, (string) $course->currency_code, $locale) }}</span></div>
 <p>{{ $course->description }}</p><div class="curriculum"><h2>Course curriculum</h2>
 @foreach($course->sections as $section)<h3>{{ $section->title }}</h3><ul>@foreach($section->lessons as $lesson)<li>✓ {{ $lesson->title }}</li>@endforeach</ul>@endforeach
 </div></div><aside class="detail-aside"><div class="detail-cover tone-amber"><span>✦</span><b>edumia.</b></div><div class="detail-aside-body">
-<p>Instructor: <strong>{{ $course->instructor->name }}</strong></p>
+<p>{{ \App\Helpers\Localization::label('instructor', $locale) }}: <strong>{{ $course->instructor->name }}</strong></p>
 @if(auth()->check())
-@if(auth()->user()->enrollments()->where('course_id',$course->id)->exists())<a class="btn btn-primary btn-block" href="{{ route('learning.course',$course) }}">Continue learning</a>
+@if(auth()->user()->enrollments()->where('course_id',$course->id)->whereIn('status', ['active', 'completed'])->exists())<a class="btn btn-primary btn-block" href="{{ route('learning.course',$course) }}">Continue learning</a>
 @elseif($course->isFree())<form action="{{ route('enrollments.store',$course) }}" method="post">@csrf<button class="btn btn-primary btn-block">Enroll for free</button></form>
 @else
-<p>Secure payments are not yet available. You may prepare a price quote without paying or receiving access.</p>
+<p>Paid access is granted only after a verified payment. You can review an order before any charge.</p>
 <form action="{{ route('checkout.orders.store', $course) }}" method="post">@csrf
 <button type="submit" class="btn btn-primary btn-block">Review pending order</button></form>
 @endif

@@ -9,13 +9,13 @@
 <div class="table-scroll"><table>
 <thead><tr><th>Item</th><th>Quantity</th><th>Unit price</th><th>Total</th></tr></thead>
 <tbody>@foreach($order->items as $item)
-<tr><td>{{ $item->title }}</td><td>{{ $item->quantity }}</td><td>{{ $order->currency_code }} {{ $item->unit_price }}</td>
-<td>{{ $order->currency_code }} {{ $item->line_total }}</td></tr>
+<tr><td>{{ $item->title }}</td><td>{{ $item->quantity }}</td><td>{{ \App\Helpers\Localization::money((string) $item->unit_price, $order->currency_code, \App\Helpers\Localization::resolve()) }}</td>
+<td>{{ \App\Helpers\Localization::money((string) $item->line_total, $order->currency_code, \App\Helpers\Localization::resolve()) }}</td></tr>
 @endforeach</tbody></table></div>
-<p><strong>Total: {{ $order->currency_code }} {{ $order->total }}</strong></p>
+<p><strong>Total: {{ \App\Helpers\Localization::money((string) $order->total, $order->currency_code, \App\Helpers\Localization::resolve()) }}</strong></p>
 <p>Status: <strong>{{ $order->status === 'pending' && $order->expires_at?->isPast() ? 'Quote expired' : ucfirst($order->status) }}</strong></p>
 @if($order->status === 'pending' && $order->expires_at?->isFuture())
-<p>This quote expires at {{ $order->expires_at->format('Y-m-d H:i T') }}. Access is granted only after the payment provider confirms a successful transaction.</p>
+<p>This quote expires at {{ \App\Helpers\Localization::date($order->expires_at, \App\Helpers\Localization::resolve(), true) }}. Access is granted only after the payment provider confirms a successful transaction.</p>
 @if(app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured())
 <form method="post" action="{{ route('checkout.orders.pay', $order) }}">@csrf
 <button class="btn btn-primary" type="submit">Pay securely with Stripe</button></form>

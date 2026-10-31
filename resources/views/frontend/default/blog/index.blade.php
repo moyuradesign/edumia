@@ -5,7 +5,7 @@
 <section class="course-section"><div class="container"><div class="course-grid">
     @forelse($posts as $post)
         <article class="course-card"><div class="course-body">
-            <span class="course-category">{{ $post->published_at?->format('M d, Y') }}</span>
+            <span class="course-category">{{ \App\Helpers\Localization::date($post->published_at, $locale) }}</span>
             <h2>{{ $post->title }}</h2><p>{{ $post->excerpt }}</p>
             <a class="course-link" href="{{ \App\Helpers\Localization::url($locale, 'blog/'.$post->slug) }}">Read article →</a>
         </div></article>

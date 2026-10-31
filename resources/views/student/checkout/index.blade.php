@@ -12,9 +12,9 @@
 <tr>
 <td>{{ substr($order->reference, 0, 8) }}</td>
 <td>{{ $order->items->pluck('title')->implode(', ') }}</td>
-<td>{{ $order->currency_code }} {{ $order->total }}</td>
+<td>{{ \App\Helpers\Localization::money((string) $order->total, $order->currency_code, \App\Helpers\Localization::resolve()) }}</td>
 <td>{{ $order->status === 'pending' && $order->expires_at?->isPast() ? 'Quote expired' : ucwords(str_replace('_', ' ', $order->status)) }}</td>
-<td>{{ $order->created_at->format('Y-m-d') }}</td>
+<td>{{ \App\Helpers\Localization::date($order->created_at, \App\Helpers\Localization::resolve()) }}</td>
 <td><a href="{{ route('checkout.orders.show', $order) }}">View</a></td>
 </tr>
 @empty<tr><td colspan="6">You have not created an order yet.</td></tr>@endforelse

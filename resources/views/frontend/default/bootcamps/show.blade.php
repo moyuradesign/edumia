@@ -1,16 +1,16 @@
 @extends('layouts.default')
 @section('title', $bootcamp->title.' — Edumia')
 @section('content')
-<section class="page-hero"><div class="container"><a class="back-link" href="{{ \App\Helpers\Localization::url($locale, 'bootcamps') }}">← All bootcamps</a>
+<section class="page-hero"><div class="container"><a class="back-link" href="{{ \App\Helpers\Localization::url($locale, 'bootcamps') }}">← {{ \App\Helpers\Localization::label('all_bootcamps', $locale) }}</a>
 <p class="section-kicker">EDUMIA BOOTCAMPS</p><h1>{{ $bootcamp->title }}</h1>
-<p>Instructor: {{ $bootcamp->instructor?->name ?? 'Edumia' }} ·
-{{ $bootcamp->isFree() ? 'Free' : '$'.$bootcamp->price }} ·
-{{ $bootcamp->start_date?->format('M d, Y') }} – {{ $bootcamp->end_date?->format('M d, Y') }}</p>
+<p>{{ \App\Helpers\Localization::label('instructor', $locale) }}: {{ $bootcamp->instructor?->name ?? 'Edumia' }} ·
+{{ $bootcamp->isFree() ? \App\Helpers\Localization::label('free', $locale) : \App\Helpers\Localization::money((string) $bootcamp->price, 'USD', $locale) }} ·
+{{ \App\Helpers\Localization::date($bootcamp->start_date, $locale) }} – {{ \App\Helpers\Localization::date($bootcamp->end_date, $locale) }}</p>
 </div></section>
 <section class="course-section"><div class="container">
-<article class="panel-card"><h2>About this cohort</h2><div class="lesson-content">{!! nl2br(e($bootcamp->description ?? '')) !!}</div>
-<p>Capacity: {{ $bootcamp->capacity ?? 'Unlimited' }} learners</p></article>
-<article class="panel-card"><h2>What you will learn</h2>
+<article class="panel-card"><h2>{{ \App\Helpers\Localization::label('about_cohort', $locale) }}</h2><div class="lesson-content">{!! nl2br(e($bootcamp->description ?? '')) !!}</div>
+<p>{{ \App\Helpers\Localization::label('capacity', $locale) }}: {{ $bootcamp->capacity ?? 'Unlimited' }} learners</p></article>
+<article class="panel-card"><h2>{{ \App\Helpers\Localization::label('what_learn', $locale) }}</h2>
 @foreach($bootcamp->modules as $module)
 <div class="builder-section"><h3>{{ $module->title }}</h3><p>{{ $module->description }}</p></div>
 @endforeach</article>
