@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
+use App\Services\System\SettingsRepository;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
@@ -14,13 +15,17 @@ use Illuminate\View\View;
 
 final class RegisteredUserController extends Controller
 {
-    public function create(): View
+    public function create(SettingsRepository $settings): View
     {
+        abort_unless($settings->registrationEnabled(), 403, 'Registration is currently closed.');
+
         return view('auth.register');
     }
 
-    public function store(RegisterRequest $request): RedirectResponse
+    public function store(RegisterRequest $request, SettingsRepository $settings): RedirectResponse
     {
+        abort_unless($settings->registrationEnabled(), 403, 'Registration is currently closed.');
+
         $data = $request->validated();
 
         // Student is the default database role. Never accept an incoming role.
