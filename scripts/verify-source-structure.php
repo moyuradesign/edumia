@@ -50,7 +50,7 @@ foreach ($app as $file) {
 foreach (['auth', 'admin', 'instructor', 'student'] as $audience) {
     if (! is_file($root.'/routes/'.$audience.'.php')) {
         $errors[] = 'routes/'.$audience.'.php is missing';
-    } elseif (! str_contains((string) file_get_contents($root.'/routes/web.php'), "require __DIR__.'/'.$audience.'.php';")) {
+    } elseif (! str_contains((string) file_get_contents($root.'/routes/web.php'), "require __DIR__.'/$audience.php';")) {
         $errors[] = 'routes/web.php must include '.$audience.'.php';
     }
 }
