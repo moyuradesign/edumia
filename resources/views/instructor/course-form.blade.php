@@ -44,5 +44,50 @@
 <button class="btn btn-small">Add question</button></form>
 @if($quiz->questions->isNotEmpty())<form action="{{ route('instructor.quizzes.publish',[$course,$quiz]) }}" method="post" class="inline-form">@csrf<button class="btn btn-secondary btn-small">Publish quiz</button></form>@endif
 @endif</div>@endforeach</section>
+<section class="panel-card">
+    <h2>Assignments</h2>
+    <p>Create published assignments that enrolled learners can submit and instructors can grade.</p>
+    <form class="stack-form compact-form" method="post" action="{{ route('instructor.assignments.store', $course) }}">
+        @csrf
+        <label>Assignment title <input name="title" required maxlength="190"></label>
+        <label>Instructions <textarea name="instructions" required maxlength="30000" rows="5"></textarea></label>
+        <div class="form-two">
+            <label>Optional deadline <input name="due_at" type="datetime-local"></label>
+            <label>Maximum score <input name="max_score" type="number" min="1" max="1000" value="100" required></label>
+        </div>
+        <label>Optional lesson <select name="lesson_id">
+            <option value="">No linked lesson</option>
+            @foreach($course->lessons as $lesson)
+                <option value="{{ $lesson->id }}">{{ $lesson->title }}</option>
+            @endforeach
+        </select></label>
+        <label class="checkline"><input type="checkbox" name="published" value="1"> Publish for enrolled learners</label>
+        <button class="btn btn-primary" type="submit">Create assignment</button>
+    </form>
+    @foreach($course->assignments as $assignment)
+    <div class="builder-section">
+        <h3>{{ $assignment->title }} <small>({{ $assignment->published ? 'Published' : 'Draft' }})</small></h3>
+        <p>{{ $assignment->max_score }} points · {{ $assignment->due_at?->format('M d, Y H:i') ?? 'No deadline' }}</p>
+        <p><a href="{{ route('instructor.assignments.gradebook', [$course, $assignment]) }}">Open gradebook</a></p>
+        <details><summary>Edit assignment</summary>
+            <form class="stack-form compact-form" method="post" action="{{ route('instructor.assignments.update', [$course, $assignment]) }}">
+                @csrf @method('PUT')
+                <label>Title <input name="title" required maxlength="190" value="{{ $assignment->title }}"></label>
+                <label>Instructions <textarea name="instructions" rows="5" required maxlength="30000">{{ $assignment->instructions }}</textarea></label>
+                <label>Deadline <input type="datetime-local" name="due_at" value="{{ $assignment->due_at?->format('Y-m-d\TH:i') }}"></label>
+                <label>Maximum score <input type="number" name="max_score" min="1" max="1000" value="{{ $assignment->max_score }}" required></label>
+                <label>Linked lesson <select name="lesson_id">
+                    <option value="">None</option>
+                    @foreach($course->lessons as $lesson)
+                        <option value="{{ $lesson->id }}" @selected($lesson->id === $assignment->lesson_id)>{{ $lesson->title }}</option>
+                    @endforeach
+                </select></label>
+                <label class="checkline"><input type="checkbox" name="published" value="1" @checked($assignment->published)> Published</label>
+                <button class="btn btn-secondary" type="submit">Update assignment</button>
+            </form>
+        </details>
+    </div>
+    @endforeach
+</section>
 @endif
 @endsection
