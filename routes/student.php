@@ -10,6 +10,7 @@ use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\CourseWishlistController;
 use App\Http\Controllers\Student\CourseReviewController;
 use App\Http\Controllers\Student\EbookLibraryController;
+use App\Http\Controllers\Student\LiveClassController;
 use App\Http\Controllers\Student\LearningController;
 use App\Http\Controllers\Student\QuizAttemptController;
 use App\Http\Controllers\Student\Support\TicketController;
@@ -42,6 +43,8 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     Route::get('/learn/{course}/assignments/{assignment}', [AssignmentController::class, 'show'])->name('learning.assignments.show');
     Route::post('/learn/{course}/assignments/{assignment}', [AssignmentController::class, 'submit'])->middleware('throttle:8,1')->name('learning.assignments.submit');
+
+    Route::get('/learn/{course}/live-classes', [LiveClassController::class, 'index'])->name('learning.live-classes.index');
 
     Route::get('/learn/{course}', [LearningController::class, 'course'])->name('learning.course');
     Route::get('/learn/{course}/lessons/{lesson}', [LearningController::class, 'lesson'])->name('learning.lesson');

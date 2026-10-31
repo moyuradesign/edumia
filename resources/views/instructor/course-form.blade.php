@@ -34,6 +34,9 @@
 <div class="form-two"><label>Optional video URL<input type="url" name="video_url" maxlength="255" placeholder="https://"></label><label>Duration in seconds<input type="number" min="0" name="duration_seconds" value="0"></label></div>
 <button class="btn btn-small btn-secondary">Add lesson</button></form></div>@endforeach
 </section>
+<section class="panel-card"><h2>Live class sessions</h2>
+<p>Schedule external meetings. Joining links are visible only to enrolled learners.</p>
+<a class="btn btn-secondary" href="{{ route('instructor.live-classes.index', $course) }}">Manage live classes</a></section>
 <section class="panel-card"><h2>Knowledge checks</h2><form class="form-row" action="{{ route('instructor.quizzes.store',$course) }}" method="post">@csrf
 <label class="grow">Quiz title<input name="title" required maxlength="190"></label><label>Pass %<input type="number" name="passing_score" min="0" max="100" value="70" required></label><label>Attempts<input type="number" name="attempts_allowed" min="1" max="20" value="3" required></label><button class="btn btn-secondary">Create quiz</button></form>
 @foreach($course->quizzes as $quiz)<div class="builder-section"><h3>{{ $quiz->title }} <small>({{ $quiz->questions->count() }} questions · {{ $quiz->is_published?'published':'draft' }})</small></h3>

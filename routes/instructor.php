@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Instructor\CourseManagementController;
 use App\Http\Controllers\Instructor\AssignmentController;
 use App\Http\Controllers\Instructor\EbookController;
+use App\Http\Controllers\Instructor\LiveClassController;
 use App\Http\Controllers\Instructor\LessonManagementController;
 use App\Http\Controllers\Instructor\QuizManagementController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
         Route::put('/courses/{course}', [CourseManagementController::class, 'update'])->name('courses.update');
         Route::delete('/courses/{course}', [CourseManagementController::class, 'destroy'])->name('courses.destroy');
         Route::post('/courses/{course}/submit', [CourseManagementController::class, 'submit'])->name('courses.submit');
+
+        Route::get('/courses/{course}/live-classes', [LiveClassController::class, 'index'])->name('live-classes.index');
+        Route::post('/courses/{course}/live-classes', [LiveClassController::class, 'store'])->name('live-classes.store');
+        Route::put('/courses/{course}/live-classes/{liveClass}', [LiveClassController::class, 'update'])->name('live-classes.update');
 
         Route::post('/courses/{course}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
         Route::put('/courses/{course}/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
