@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    Options -MultiViews -Indexes
+    RewriteEngine On
+
+    # Keep the standalone installer outside the public document root.
+    # /installer is handled by public/index.php only before setup.
+    RewriteRule ^installer/?$ index.php [L,QSA]
+
+    # Existing static files (including compiled Vite assets) are served as-is.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
