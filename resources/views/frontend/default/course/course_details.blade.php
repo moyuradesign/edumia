@@ -26,6 +26,10 @@
         <button class="btn btn-secondary btn-block" type="submit">Save course for later</button></form>
 @endif
 @endauth
+<form class="course-add-cart" method="post" action="{{ route('cart.items.store', $course) }}">
+@csrf
+<button type="submit" class="btn btn-quiet btn-block">Add to cart</button>
+</form>
 </div></aside></div></div></section>
 <section class="course-section"><div class="container">
     <h2>Learner reviews</h2>

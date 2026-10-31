@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Frontend\CourseController;
+use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\HomeController;
@@ -19,6 +20,11 @@ Route::post('/webhooks/stripe', StripeWebhookController::class)
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/en', fn () => redirect()->route('home'));
+
+// Session-only course cart; final orders still use the existing authenticated checkout.
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/courses/{course}', [CartController::class, 'store'])->middleware('throttle:30,1')->name('cart.items.store');
+Route::delete('/cart/courses/{course}', [CartController::class, 'destroy'])->middleware('throttle:30,1')->name('cart.items.destroy');
 
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');

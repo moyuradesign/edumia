@@ -139,6 +139,13 @@ async function browse(scenario) {
     verify((await page.title()).length > 0, 'Missing document title');
     verify(await page.locator('h1').first().isVisible(), 'Homepage heading not visible');
     verify(assets >= 2, 'Compiled JS and CSS assets must load via HTTP');
+    // Premium header and footer: direct interaction, keyboard closure, and no overflow.
+    const menuCategories = page.locator('details[data-header-details="categories"]');
+    const menuProfile = page.locator('details[data-header-details="profile"]');
+    verify(await page.locator('.premium-header-search input[name="q"]').count() === 1,
+      'Search bar missing from center header');
+    verify(await page.locator('.premium-footer-newsletter input[name="consent"]').count() === 1,
+      'Premium footer newsletter consent missing');
     const mobile = scenario.viewport.width <= 1024;
     if (mobile) {
       const toggle = page.locator('.site-header .menu-toggle');
@@ -191,12 +198,30 @@ async function browse(scenario) {
     verify(await page.locator('.home-hero-search input[name="q"]').count() === 1,
       'Homepage search must remain accessible inside the first slide');
 
+    if (mobile) await page.locator('.site-header .menu-toggle').click();
+    await menuCategories.locator('summary').click();
+    verify(await menuCategories.getAttribute('open') !== null, 'Categories mega menu did not open');
+    verify(await page.locator('.premium-mega-menu a[href$="/bootcamps"]').count() >= 1,
+      'Mega menu is missing learning links');
+    await menuProfile.locator('summary').click();
+    verify(await menuProfile.getAttribute('open') !== null, 'Profile menu did not open');
+    verify(await menuCategories.getAttribute('open') === null, 'Opening profile should close categories');
+    await page.keyboard.press('Escape');
+    verify(await menuProfile.getAttribute('open') === null, 'Escape did not close profile menu');
+    if (mobile) await page.locator('.site-header .menu-toggle').click();
+    await page.locator('.premium-header-search input[name="q"]').fill('sample');
+    await page.locator('.premium-header-search button').click();
+    await page.waitForURL(/\/courses\?q=sample/);
+    await navigate(page, '/');
+
     const horizontalOverflow = await page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
     verify(horizontalOverflow <= 2, scenario.name + ' has horizontal overflow (' + horizontalOverflow + 'px)');
     await page.screenshot({ path: path.join(evidence, scenario.name + '.png') });
 
     await navigate(page, '/courses?q=sample');
+    if (mobile) await page.locator('.site-header .menu-toggle').click();
+    await page.locator('details[data-header-details="profile"] > summary').click();
     await page.locator('#language-select').selectOption({ label: 'Français' });
     await page.waitForURL(/\/fr\/courses\?q=sample/);
     verify(await page.locator('html').getAttribute('lang') === 'fr', 'French URL language not applied');

@@ -19,11 +19,16 @@ class CourseController extends Controller
         $locale = Text::resolve($locale);
         App::setLocale($locale);
         $query = substr(trim((string) $request->query('q', '')), 0, 100);
+        $categoryInput = $request->query('category', '');
+        $category = is_string($categoryInput) && preg_match('/^[a-z0-9-]{1,190}$/D', $categoryInput)
+            ? $categoryInput : '';
         $courses = Course::published()->with('category')->withCount('lessons')
             ->when($query !== '', fn ($q) => $q->where(fn ($sub) => $sub->where('title', 'like', '%'.$query.'%')->orWhere('summary', 'like', '%'.$query.'%')))
+            ->when($category !== '', fn ($q) => $q->whereHas('category',
+                fn ($categories) => $categories->where('status', 'active')->where('slug', $category)))
             ->latest('published_at')->paginate(12)->withQueryString();
 
-        return view('frontend.default.course.index', compact('locale', 'query', 'courses') + ['languages' => Text::LANGUAGES]);
+        return view('frontend.default.course.index', compact('locale', 'query', 'category', 'courses') + ['languages' => Text::LANGUAGES]);
     }
 
     public function show(Request $request, string $slug): View
