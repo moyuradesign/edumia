@@ -210,4 +210,43 @@ final class AssignmentWorkflowTest extends TestCase
 
         $this->assertDatabaseCount('assignments', 0);
     }
+    public function test_certificate_is_issued_only_after_all_published_assignments_are_graded(): void
+    {
+        $teacher = $this->member('instructor', 'teacher@edumia.test');
+        $student = $this->member('student', 'student@edumia.test');
+        $course = $this->course($teacher);
+        $section = $course->sections()->create(['title' => 'Module One', 'is_published' => true]);
+        $lesson = $section->lessons()->create([
+            'course_id' => $course->id,
+            'title' => 'First lesson',
+            'slug' => 'first-lesson',
+            'is_published' => true,
+        ]);
+        $assignment = $this->assignment($course);
+
+        $this->actingAs($student)->post('/courses/'.$course->id.'/enroll')->assertRedirect();
+        $this->post('/learn/'.$course->id.'/lessons/'.$lesson->id.'/complete')->assertRedirect();
+        $this->assertDatabaseCount('certificates', 0);
+
+        $this->post('/learn/'.$course->id.'/assignments/'.$assignment->id, [
+            'response' => 'A thoughtful explanation of my learning process.',
+        ])->assertRedirect();
+        $this->assertDatabaseCount('certificates', 0);
+
+        $submission = SubmittedAssignment::firstOrFail();
+        $this->actingAs($teacher)->put(
+            '/instructor/courses/'.$course->id.'/assignments/'.$assignment->id.'/submissions/'.$submission->id.'/grade',
+            ['score' => 85, 'feedback' => 'The course goals were met.']
+        )->assertRedirect();
+
+        $this->assertDatabaseHas('enrollments', [
+            'course_id' => $course->id,
+            'user_id' => $student->id,
+            'status' => 'completed',
+        ]);
+        $this->assertDatabaseCount('certificates', 1);
+        $this->actingAs($student)->get('/learn/'.$course->id.'/assignments/'.$assignment->id)
+            ->assertOk()->assertSee('The course goals were met.');
+    }
+
 }
