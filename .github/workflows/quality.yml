@@ -72,7 +72,7 @@ jobs:
         run: |
           php -r '
           $manifest = json_decode(file_get_contents("public/build/manifest.json"), true, 512, JSON_THROW_ON_ERROR);
-          foreach (["resources/css/app.css", "resources/css/admin.css", "resources/js/app.js", "resources/js/admin.js"] as $source) {
+          foreach (["resources/css/frontend/app.css", "resources/css/admin/app.css", "resources/js/frontend/app.js", "resources/js/admin/app.js"] as $source) {
               if (!isset($manifest[$source]["file"]) || !is_file("public/build/".$manifest[$source]["file"])) {
                   fwrite(STDERR, "Missing built asset for ".$source.PHP_EOL);
                   exit(1);
