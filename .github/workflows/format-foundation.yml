@@ -1,0 +1,70 @@
+name: Format Edumia foundation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/format-foundation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edumia-foundation-format
+  cancel-in-progress: false
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, pdo_mysql, xml, tokenizer
+          coverage: none
+
+      - name: Install pinned Composer packages
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Apply Laravel Pint
+        run: vendor/bin/pint app bootstrap config routes database tests scripts
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pinned npm packages
+        run: npm ci --no-audit --no-fund
+
+      - name: Format stable CSS and JavaScript sources
+        run: npm exec --yes --package=prettier@3.6.2 -- prettier --write resources/css/*.css resources/js/*.js
+
+      - name: Verify formatted PHP and asset builds
+        run: |
+          php scripts/verify-source-structure.php
+          find app bootstrap config routes tests scripts database/migrations -type f -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+          npm run build
+          php artisan route:list
+          php artisan test
+
+      - name: Commit formatting without creating branches
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app bootstrap config routes database tests scripts resources/css resources/js
+          if git diff --cached --quiet; then
+            echo 'Source already follows the selected standards.'
+          else
+            git commit -m 'style: normalize Laravel PHP and frontend sources'
+            git push origin HEAD:main
+          fi
+
+# One-time formatting, no database/production deployment or secret access.
