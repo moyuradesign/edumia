@@ -915,3 +915,24 @@ p {
   .site-header .header-actions { flex-wrap: wrap; justify-content: flex-end; }
   .site-header .header-actions > .btn { padding: 9px 10px; }
 }
+
+
+/* Tablet and narrower laptop widths need a collapsed navigation as well. */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .site-header .header-inner { flex-wrap: wrap; gap: 12px; padding-block: 12px; }
+  html.js-navigation .site-header .menu-toggle { display: inline-flex; order: 2; }
+  html.js-navigation .primary-nav {
+    display: none;
+    flex-basis: 100%;
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-height: min(65vh, 500px);
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  }
+  html.js-navigation .primary-nav.is-open { display: flex; }
+  html.js-navigation .primary-nav a { padding: 12px 8px; min-height: 44px; }
+  .site-header .header-actions { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
+}

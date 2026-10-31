@@ -139,7 +139,7 @@ async function browse(scenario) {
     verify((await page.title()).length > 0, 'Missing document title');
     verify(await page.locator('h1').first().isVisible(), 'Homepage heading not visible');
     verify(assets >= 2, 'Compiled JS and CSS assets must load via HTTP');
-    const mobile = scenario.viewport.width <= 700;
+    const mobile = scenario.viewport.width <= 1024;
     if (mobile) {
       const toggle = page.locator('.site-header .menu-toggle');
       verify(await toggle.isVisible(), scenario.name + ' is missing accessible menu control');

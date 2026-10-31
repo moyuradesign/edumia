@@ -4,6 +4,11 @@ on:
   push:
     paths:
       - '.github/workflows/qa-package.yml'
+      - 'scripts/browser-acceptance.mjs'
+      - 'public/.htaccess'
+      - 'resources/css/frontend/app.css'
+      - 'resources/css/admin/app.css'
+      - 'resources/js/frontend/modules/language.js'
   workflow_dispatch:
 
 permissions:

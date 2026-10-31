@@ -50,7 +50,7 @@ export function initMobileMenus() {
     });
 
     window.addEventListener('resize', () => {
-      if (window.innerWidth > 700) setOpen(false);
+      if (window.innerWidth > 1024) setOpen(false);
     });
   });
 }
