@@ -154,6 +154,43 @@ async function browse(scenario) {
       verify(await page.locator('#primary-navigation').isVisible(), 'Desktop navigation must remain visible');
     }
 
+    // Test real layout geometry at all requested two-to-six-column breakpoints.
+    const carousel = page.locator('[data-hero-slider]');
+    verify(await carousel.isVisible(), 'Premium hero slider is missing');
+    verify(await carousel.locator('[data-hero-slide]').count() === 3, 'Slider needs three panels');
+    verify(await carousel.getAttribute('data-current-slide') === '0', 'First slide must start active');
+    const secondSlide = carousel.locator('[data-hero-slide]').nth(1);
+    verify(await secondSlide.getAttribute('aria-hidden') === 'true', 'Inactive slide must be hidden from accessibility tree');
+    await carousel.locator('[data-hero-next]').click();
+    verify(await carousel.getAttribute('data-current-slide') === '1', 'Next control did not change slide');
+    verify(await secondSlide.getAttribute('aria-hidden') === 'false', 'Active slide remained hidden');
+    await carousel.locator('[data-hero-dot="2"]').click();
+    verify(await carousel.getAttribute('data-current-slide') === '2', 'Direct slide selection failed');
+    await carousel.locator('[data-hero-prev]').click();
+    verify(await carousel.getAttribute('data-current-slide') === '1', 'Previous control failed');
+    await carousel.locator('[data-hero-pause]').click();
+    verify(await carousel.locator('[data-hero-pause]').getAttribute('aria-pressed') === 'true',
+      'Pause control did not update its state');
+    await carousel.locator('[data-hero-dot="0"]').click();
+    verify(await carousel.getAttribute('data-current-slide') === '0', 'Slider did not return to first panel');
+
+    const breakpoints = [
+      [390, 2], [600, 2], [601, 3], [768, 3], [899, 3],
+      [900, 4], [1024, 4], [1199, 4], [1200, 5], [1440, 5], [1599, 5], [1600, 6], [1800, 6],
+    ];
+    for (const [width, columns] of breakpoints) {
+      await page.setViewportSize({ width, height: 900 });
+      const computed = await page.locator('.home-course-grid').evaluate(el =>
+        getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
+      verify(computed === columns, width + 'px viewport has ' + computed + ' columns instead of ' + columns);
+      if (width === 390 || width === 1800) {
+        await page.screenshot({ path: path.join(evidence, 'home-grid-' + width + '.png') });
+      }
+    }
+    await page.setViewportSize(scenario.viewport);
+    verify(await page.locator('.home-hero-search input[name="q"]').count() === 1,
+      'Homepage search must remain accessible inside the first slide');
+
     const horizontalOverflow = await page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
     verify(horizontalOverflow <= 2, scenario.name + ' has horizontal overflow (' + horizontalOverflow + 'px)');

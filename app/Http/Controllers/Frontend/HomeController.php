@@ -18,6 +18,6 @@ class HomeController extends Controller
 
         return view('frontend.default.home.index', ['locale' => $locale, 'languages' => Text::LANGUAGES,
             'siteSettings' => app(\App\Services\System\SettingsRepository::class)->general(),
-            'courses' => Course::published()->with('category')->withCount('lessons')->latest('published_at')->limit(6)->get()]);
+            'courses' => Course::published()->with('category')->withCount('lessons')->latest('published_at')->limit(12)->get()]);
     }
 }

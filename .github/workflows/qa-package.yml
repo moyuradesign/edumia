@@ -16,6 +16,11 @@ on:
       - 'resources/js/admin/app.js'
       - 'resources/js/admin/modules/auth.js'
       - 'tests/Feature/AuthExperienceTest.php'
+      - 'tests/Feature/HomepageExperienceTest.php'
+      - 'resources/views/frontend/default/home/index.blade.php'
+      - 'resources/js/frontend/modules/hero-slider.js'
+      - 'resources/js/frontend/app.js'
+      - 'app/Http/Controllers/Frontend/HomeController.php'
   workflow_dispatch:
 
 permissions:
