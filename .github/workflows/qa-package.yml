@@ -79,7 +79,7 @@ jobs:
           EDUMIA_QA_INSTALL_CODE: qa-only-installer-auth-2026
         run: |
           set -Eeuo pipefail
-          QA_ROOT="$RUNNER_TEMP/edumia-customer"
+          QA_ROOT="/tmp/edumia-customer-${GITHUB_RUN_ID}"
           mkdir -p "$QA_ROOT"
           tar -cf - --exclude='./.git' --exclude='./.env' --exclude='./node_modules' \
             --exclude='./dist' --exclude='./qa-browser-evidence' --exclude='./.phpunit.cache' . \
