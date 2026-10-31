@@ -11,7 +11,7 @@ class ExampleTest extends TestCase
 
     public function test_public_pages_render_even_with_empty_catalogue(): void
     {
-        $this->get('/')->assertOk()->assertSee('edumia.');
+        $this->get('/')->assertOk()->assertSee('Edumia');
         $this->get('/courses')->assertOk()->assertSee('No published courses found');
         $this->get('/courses/unknown-course')->assertNotFound();
     }

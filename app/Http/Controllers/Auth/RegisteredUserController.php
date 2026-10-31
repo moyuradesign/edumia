@@ -36,6 +36,10 @@ final class RegisteredUserController extends Controller
             'locale' => $data['locale'] ?? $settings->general()['default_locale'],
         ]);
 
+        // Load database defaults (active/student) into the model before
+        // Auth::login caches the newly registered user for this session.
+        $user->refresh();
+
         event(new Registered($user));
         Auth::login($user);
         $request->session()->regenerate();
