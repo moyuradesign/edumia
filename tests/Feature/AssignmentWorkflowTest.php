@@ -69,7 +69,7 @@ final class AssignmentWorkflowTest extends TestCase
             ->assertOk()->assertSee('No learner submissions');
 
         $this->actingAs($student)
-            ->get('/learn/'.$course->id.'/assignments/'.$assignment->id)->assertForbidden();
+            ->get('/learn/'.$course->id.'/assignments/'.$assignment->id)->assertNotFound();
 
         $this->post('/courses/'.$course->id.'/enroll')->assertRedirect();
         $this->get('/learn/'.$course->id)->assertOk()->assertSee('Reflection');
