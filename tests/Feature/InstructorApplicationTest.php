@@ -61,7 +61,7 @@ final class InstructorApplicationTest extends TestCase
         $this->assertSame('instructor', $student->fresh()->role);
         $this->assertSame('approved', $application->fresh()->status);
         $this->assertDatabaseHas('audit_events', ['action' => 'instructor_application.reviewed']);
-        $this->actingAs($student)->get('/instructor/courses/create')->assertOk();
+        $this->actingAs($student->fresh())->get('/instructor/courses/create')->assertOk();
     }
 
     public function test_rejection_keeps_student_role_and_allows_fresh_application(): void
