@@ -57,11 +57,16 @@ jobs:
           npm ci --no-audit --no-fund
           npm run build
 
+      - name: Prepare isolated CI application configuration
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
       - name: Verify Laravel routes
         run: php artisan route:list
 
       - name: Run feature and architecture tests
-        run: php artisan test
+        run: php artisan test --fail-on-warning
 
       - name: Verify compiled asset entrypoints
         run: |
