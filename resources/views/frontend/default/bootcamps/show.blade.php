@@ -1,7 +1,7 @@
 @extends('layouts.default')
 @section('title', $bootcamp->title.' — Edumia')
 @section('content')
-<section class="page-hero"><div class="container"><a class="back-link" href="{{ route('bootcamps.index') }}">← All bootcamps</a>
+<section class="page-hero"><div class="container"><a class="back-link" href="{{ \App\Helpers\Localization::url($locale, 'bootcamps') }}">← All bootcamps</a>
 <p class="section-kicker">EDUMIA BOOTCAMPS</p><h1>{{ $bootcamp->title }}</h1>
 <p>Instructor: {{ $bootcamp->instructor?->name ?? 'Edumia' }} ·
 {{ $bootcamp->isFree() ? 'Free' : '$'.$bootcamp->price }} ·

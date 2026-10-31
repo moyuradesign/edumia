@@ -9,7 +9,7 @@
 <span class="course-category">{{ $bootcamp->isFree() ? 'Free cohort' : '$'.$bootcamp->price }}</span>
 <h2>{{ $bootcamp->title }}</h2><p>{{ \Illuminate\Support\Str::limit($bootcamp->description, 160) }}</p>
 <p>{{ $bootcamp->start_date?->format('M d, Y') }} · {{ $bootcamp->capacity ?? 'Open' }} seats</p>
-<a class="course-link" href="{{ route('bootcamps.show', $bootcamp->slug) }}">View bootcamp →</a>
+<a class="course-link" href="{{ \App\Helpers\Localization::url($locale, 'bootcamps/'.$bootcamp->slug) }}">View bootcamp →</a>
 </div></article>
 @empty<div class="empty-state"><h2>No bootcamps yet</h2><p>Explore our course catalogue for more learning options.</p></div>
 @endforelse</div>{{ $bootcamps->links() }}</div></section>

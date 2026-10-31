@@ -6,7 +6,7 @@
     <div class="panel-card" style="max-width:720px;margin-inline:auto">
         @if(session('success'))<div class="flash" role="status">{{ session('success') }}</div>@endif
         @if($errors->any())<div class="flash error" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-        <form class="stack-form" method="post" action="{{ route('contact.store') }}">
+        <form class="stack-form" method="post" action="{{ \App\Helpers\Localization::url($locale, 'contact') }}">
             @csrf
             <label>Full name <input name="name" required maxlength="150" autocomplete="name" value="{{ old('name') }}"></label>
             <label>Email <input type="email" name="email" required maxlength="190" autocomplete="email" value="{{ old('email') }}"></label>

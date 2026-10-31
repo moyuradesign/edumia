@@ -2,7 +2,7 @@
 @section('title', $ebook->title.' — Edumia')
 @section('content')
 <section class="page-hero"><div class="container">
-<a class="back-link" href="{{ route('ebooks.index') }}">← All ebooks</a>
+<a class="back-link" href="{{ \App\Helpers\Localization::url($locale, 'ebooks') }}">← All ebooks</a>
 <p class="section-kicker">EDUMIA DIGITAL LIBRARY</p><h1>{{ $ebook->title }}</h1>
 <p>By {{ $ebook->author?->name ?? 'Edumia' }} · {{ $ebook->isFree() ? 'Free' : '$'.$ebook->price }}</p>
 </div></section>

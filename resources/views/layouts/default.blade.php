@@ -21,22 +21,22 @@
     <div class="container header-inner">
         <a class="brand" href="{{ \App\Helpers\Localization::url($locale) }}" aria-label="Edumia home"><span class="brand-mark">e</span><span>edumia<span class="brand-dot">.</span></span></a>
         <nav class="primary-nav" aria-label="Primary navigation">
-            <a href="{{ \App\Helpers\Localization::url($locale) }}" class="{{ $currentPath === '' ? 'active' : '' }}">Home</a>
+            <a href="{{ \App\Helpers\Localization::url($locale) }}" class="{{ $currentPath === '' ? 'active' : '' }}">{{ \App\Helpers\Localization::label('home', $locale) }}</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'courses') }}" class="{{ str_starts_with($currentPath, 'courses') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_courses', $locale) }}</a>
-            <a href="{{ route('bootcamps.index') }}" class="{{ str_starts_with($currentPath, 'bootcamps') ? 'active' : '' }}">Bootcamps</a>
-            <a href="{{ route('ebooks.index') }}" class="{{ $currentPath === 'ebooks' ? 'active' : '' }}">Ebooks</a>
-            <a href="{{ \App\Helpers\Localization::url($locale, 'blog') }}" class="{{ str_starts_with($currentPath, 'blog') ? 'active' : '' }}">Blog</a>
-            <a href="{{ route('help.index') }}" class="{{ str_starts_with($currentPath, 'help') ? 'active' : '' }}">Help</a>
-            <a href="{{ route('contact.create') }}" class="{{ $currentPath === 'contact' ? 'active' : '' }}">Contact</a>
+            <a href="{{ \App\Helpers\Localization::url($locale, 'bootcamps') }}" class="{{ str_starts_with($currentPath, 'bootcamps') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_bootcamps', $locale) }}</a>
+            <a href="{{ \App\Helpers\Localization::url($locale, 'ebooks') }}" class="{{ $currentPath === 'ebooks' ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_ebooks', $locale) }}</a>
+            <a href="{{ \App\Helpers\Localization::url($locale, 'blog') }}" class="{{ str_starts_with($currentPath, 'blog') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_blog', $locale) }}</a>
+            <a href="{{ \App\Helpers\Localization::url($locale, 'help') }}" class="{{ str_starts_with($currentPath, 'help') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_help', $locale) }}</a>
+            <a href="{{ \App\Helpers\Localization::url($locale, 'contact') }}" class="{{ $currentPath === 'contact' ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_contact', $locale) }}</a>
         </nav>
         <div class="header-actions">
             <label class="sr-only" for="language-select">{{ \App\Helpers\Localization::label('language', $locale) }}</label>
             <select id="language-select" class="language-select" aria-label="{{ \App\Helpers\Localization::label('language', $locale) }}">
                 @foreach ($languages as $code => $name)
-                    <option value="{{ \App\Helpers\Localization::url($code, $currentPath) }}" @selected($locale === $code)>{{ $name }}</option>
+                    <option value="{{ \App\Helpers\Localization::url($code, $currentPath).(request()->only(['q', 'page']) ? '?'.http_build_query(request()->only(['q', 'page'])) : '') }}" @selected($locale === $code)>{{ $name }}</option>
                 @endforeach
             </select>
-            @auth <a class="btn btn-quiet" href="{{ route('dashboard') }}">Dashboard</a> @else <a class="btn btn-quiet" href="{{ route('login') }}">Sign in</a><a class="btn btn-primary" href="{{ route('register') }}">Join</a> @endauth
+            @auth <a class="btn btn-quiet" href="{{ route('dashboard') }}">{{ \App\Helpers\Localization::label('dashboard', $locale) }}</a> @else <a class="btn btn-quiet" href="{{ route('login') }}">{{ \App\Helpers\Localization::label('sign_in', $locale) }}</a><a class="btn btn-primary" href="{{ route('register') }}">{{ \App\Helpers\Localization::label('join', $locale) }}</a> @endauth
             <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span class="theme-icon">◐</span><span class="theme-label">{{ \App\Helpers\Localization::label('dark', $locale) }}</span></button>
         </div>
     </div>
