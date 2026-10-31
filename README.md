@@ -6,7 +6,7 @@ A Laravel 13 learning-management platform by **Ton Samith**.
 
 - Repository: https://github.com/moyuradesign/edumia
 - Production baseline: https://edumia.tonsamith.com (preserved during rebuild)
-- Development branch: `development/platform-rebuild`
+- Development branch: `main` (single trunk until release candidate)
 - Runtime: PHP 8.3–8.5, Laravel 13, MySQL 8, Blade and Vite
 - Brand UI: orange primary, blue secondary; light/dark; English + seven URL language variants
 
@@ -24,7 +24,7 @@ A Laravel 13 learning-management platform by **Ton Samith**.
 - Basic quiz submission, grading, progress and certificate records.
 - Eight locale URL patterns with English fallback.
 - Standalone removable installer that has passed isolated MySQL migration and first-admin acceptance.
-- 96 schema migrations, including many areas **not yet implemented in product controllers or UI**.
+- 96 original schema migrations plus a new audit-event migration, including many areas **not yet implemented in product controllers or UI**.
 
 A schema table does not mean the corresponding marketplace, payment, bootcamp, tutoring, support or CMS feature exists. Refer to the development plan for the missing work.
 
@@ -49,7 +49,7 @@ The build currently does not yet have committed Composer and npm lockfiles; obta
 
 Use Laravel-standard `app/Http/Controllers/{Admin,Auth,Frontend,Instructor,Student}`, Form Requests, policies, services and views grouped by audience and module. Use clean descriptive source filenames without release suffixes. Laravel migration timestamps remain as required by the framework; compiled Vite asset hashes are generated output, not source versions.
 
-The target CSS/JS strategy is one public/auth bundle and one authenticated dashboard bundle, rather than dozens of versioned per-feature CSS files.
+The CSS/JS strategy is a shared public bundle and an additional authenticated workspace bundle, rather than dozens of versioned per-feature CSS files.
 
 ## Security and install
 
