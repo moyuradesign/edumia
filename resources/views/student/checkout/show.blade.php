@@ -27,8 +27,9 @@
 @if(app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured() && $order->expires_at?->isFuture())
 <form method="post" action="{{ route('checkout.orders.pay', $order) }}">@csrf
 <button class="btn btn-primary" type="submit">Return to Stripe Checkout</button></form>@endif
-@elseif($order->status === 'paid')
-<p>Payment confirmed. Your learning entitlement is active.</p>
+@elseif(in_array($order->status, ['paid', 'partially_refunded', 'refunded', 'disputed'], true))
+<p>Payment status: {{ ucfirst(str_replace('_', ' ', $order->status)) }}. Refunds or disputes may suspend access.</p>
+<a class="btn btn-quiet" href="{{ route('checkout.orders.invoice', $order) }}">View payment invoice</a>
 @else
 <p>This order cannot be paid here. Browse courses to request a new quote, if applicable.</p>
 @endif

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\Users\MemberController;
 use App\Http\Controllers\Admin\Commerce\OrderController;
+use App\Http\Controllers\Admin\Commerce\AccountingController;
 use App\Http\Controllers\Admin\Users\RoleController;
 use App\Http\Controllers\Admin\Users\InstructorApplicationController;
 use App\Http\Controllers\Admin\Courses\CategoryController;
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::post('/roles/{role}/members', [RoleController::class, 'assign'])->name('roles.members');
         Route::get('/instructor-applications', [InstructorApplicationController::class, 'index'])->name('instructor-applications.index');
         Route::patch('/instructor-applications/{application}', [InstructorApplicationController::class, 'review'])->name('instructor-applications.review');
+        Route::get('/commerce/accounting', [AccountingController::class, 'index'])->name('commerce.accounting.index');
         Route::get('/commerce/orders', [OrderController::class, 'index'])->name('commerce.orders.index');
         Route::get('/reports/learning', [LearningReportController::class, 'index'])->name('reports.learning');
 
