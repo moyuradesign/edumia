@@ -34,11 +34,13 @@ STRIPE_WEBHOOK_SECRET=whsec_your_signing_secret
 - Bootcamp Checkout initiation reserves a seat against concurrent pending sessions. If a late paid notification arrives after the last seat is taken, fulfillment fails closed and requires an operator to reconcile the payment and possibly refund it. Never delete an unmatched paid transaction from the provider.
 - A verified expired Checkout event releases its local session state but never grants access. Expired or cancelled drafts cannot be paid through Edumia. A paid transaction cannot be cancelled by a customer through the pending-order action.
 
+For the latest accounting, refunds and Bakong implementation details, see [Commercial accounting and Bakong](commerce-accounting.md).
+
 ## Limitations and next production requirements
 
 - No production merchant credentials, live transactions, or Stripe sandbox acceptance evidence are bundled. All behavior is covered by isolated mocked gateway responses and web feature tests.
 - USD card Checkout only; no native KHQR/Bakong payment provider, currencies beyond USD, manual/offline payment verification, recurring subscriptions or multi-product cart.
-- No automated refunds, dispute/chargeback revocations, tax, coupons, credit notes, invoices, revenue ledger, commissions or instructor payouts. **Do not enable real-money use until refund/dispute handling and accounting/reconciliation are developed and accepted.**
+- Verified Stripe refund/dispute events, invoice snapshots and held instructor earnings are now implemented in source. There is **no refund initiation, tax, coupons, credit notes, external settlement reconciliation or instructor payout execution**. **Do not enable real-money use until refund/dispute handling and accounting/reconciliation are developed and accepted.**
 - Stripe Checkout is HTTPS provider-hosted. Customer-specific Stripe account activation or country eligibility must be verified separately.
 - Source checkout pages are not a replacement for a real-browser cross-device checkout and return-url verification.
 

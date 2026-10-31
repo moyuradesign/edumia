@@ -16,13 +16,14 @@ A Laravel 13 learning-management platform by **Ton Samith**.
 - [Complete development plan and module delivery criteria](docs/development-plan.md)
 - [CodeCanyon and production quality gates](docs/quality-gates.md)
 - [Secure payments: operator setup, verification and limitations](docs/payment-gateway.md)
+- [Accounting, verified adjustments and Cambodia Bakong integration](docs/commerce-accounting.md)
 
 ## Currently implemented foundation
 
 - Server-side registration and login with student as default role.
 - Administrator/instructor/student access guards and separate role-specific dashboard controllers.
 - Basic database-backed courses, sections, lessons and enrollment.
-- Opt-in Stripe-hosted Checkout and **server-verified** paid entitlements for courses, ebooks and bootcamps, disabled until operator configuration and acceptance. No real-money payment, refund or chargeback readiness is claimed.
+- Opt-in Stripe-hosted Checkout and **server-verified** paid entitlements for courses, ebooks and bootcamps, disabled until operator configuration and acceptance. Verified refund/dispute bookkeeping, held earnings, payment invoices and a read-only Bakong verifier exist. No real-money or payout readiness is claimed.
 - Basic quiz submission, grading, progress and certificate records.
 - Dedicated role/status management with validated requests, transactions and audit events.
 - Reusable `edumia:health` command for safe installation and runtime diagnostics.
