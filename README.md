@@ -6,7 +6,7 @@ A Laravel 13 learning-management platform by **Ton Samith**.
 
 - Repository: https://github.com/moyuradesign/edumia
 - Production baseline: https://edumia.tonsamith.com (preserved during rebuild)
-- Development branch: `main` (single trunk until release candidate)
+- Development trunk: `main` (no routine feature branches)
 - Runtime: PHP 8.3–8.5, Laravel 13, MySQL 8, Blade and Vite
 - Brand UI: orange primary, blue secondary; light/dark; English + seven URL language variants
 
@@ -19,9 +19,11 @@ A Laravel 13 learning-management platform by **Ton Samith**.
 ## Currently implemented foundation
 
 - Server-side registration and login with student as default role.
-- Administrator/instructor/student access guards and role-specific dashboards.
+- Administrator/instructor/student access guards and separate role-specific dashboard controllers.
 - Basic database-backed courses, sections, lessons and enrollment.
 - Basic quiz submission, grading, progress and certificate records.
+- Dedicated role/status management with validated requests, transactions and audit events.
+- Reusable `edumia:health` command for safe installation and runtime diagnostics.
 - Eight locale URL patterns with English fallback.
 - Standalone removable installer that has passed isolated MySQL migration and first-admin acceptance.
 - 96 original schema migrations plus a new audit-event migration, including many areas **not yet implemented in product controllers or UI**.
@@ -36,14 +38,14 @@ Example developer setup in an **isolated** working directory:
 
 ```bash
 composer install
-npm install
+npm ci
 npm run build
 php artisan test
 ```
 
 These commands require a correctly configured local or QA `.env` and PHP database driver. The production installation must never be used as a development testing database. The new asset-integrity tests require a Vite build before running the feature suite.
 
-The build currently does not yet have committed Composer and npm lockfiles; obtaining and committing verified lockfiles is a mandatory foundation milestone. Do not assume the example setup is yet a reproducible production build.
+The repository now tracks `composer.lock` and `package-lock.json`. Use `composer install` and `npm ci` for reproducible builds. GitHub Actions runs source, syntax, routing, Vite and feature tests against PHP 8.3 and PHP 8.5. These automated checks do not replace complete commercial acceptance.
 
 ## Source conventions
 
