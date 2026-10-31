@@ -23,6 +23,7 @@
         <nav class="primary-nav" aria-label="Primary navigation">
             <a href="{{ \App\Helpers\Localization::url($locale) }}" class="{{ $currentPath === '' ? 'active' : '' }}">Home</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'courses') }}" class="{{ str_starts_with($currentPath, 'courses') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_courses', $locale) }}</a>
+            <a href="{{ \App\Helpers\Localization::url($locale, 'blog') }}" class="{{ str_starts_with($currentPath, 'blog') ? 'active' : '' }}">Blog</a>
         </nav>
         <div class="header-actions">
             <label class="sr-only" for="language-select">{{ \App\Helpers\Localization::label('language', $locale) }}</label>

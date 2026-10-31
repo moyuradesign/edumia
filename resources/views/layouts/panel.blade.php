@@ -6,7 +6,7 @@
 </head><body class="panel-page"><header class="panel-header"><div class="container panel-top">
 <a class="brand" href="{{ route('home') }}"><span class="brand-mark">e</span> edumia<span class="brand-dot">.</span></a>
 <nav class="panel-nav"><a href="{{ route('dashboard') }}">Dashboard</a><a href="{{ route('courses.index') }}">Explore</a><a href="{{ route('password.edit') }}">Security</a>
-@if(auth()->user()->isAdmin())<a href="{{ route('admin.categories.index') }}">Categories</a><a href="{{ route('admin.media.index') }}">Media Library</a><a href="{{ route('admin.settings.edit') }}">Settings</a>@endif
+@if(auth()->user()->isAdmin())<a href="{{ route('admin.categories.index') }}">Categories</a><a href="{{ route('admin.media.index') }}">Media Library</a><a href="{{ route('admin.blogs.index') }}">Blog</a><a href="{{ route('admin.settings.edit') }}">Settings</a>@endif
 @if(auth()->user()->canTeach())<a href="{{ route('instructor.courses.create') }}">Create course</a>@endif</nav>
 <div class="panel-profile"><span>{{ auth()->user()->name }} · {{ ucfirst(auth()->user()->role) }}</span>
 <button class="theme-toggle" type="button" aria-label="Toggle color theme"><span class="theme-icon">◐</span></button>

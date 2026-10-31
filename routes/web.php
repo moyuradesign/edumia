@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Frontend\CourseController;
+use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,8 @@ Route::get('/en', fn () => redirect()->route('home'));
 
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::prefix('{locale}')
     ->where(['locale' => 'zh|fr|de|ja|km|ko|vi'])
@@ -19,6 +22,8 @@ Route::prefix('{locale}')
         Route::get('/', [HomeController::class, 'index'])->name('localized.home');
         Route::get('/courses', [CourseController::class, 'index'])->name('localized.courses.index');
         Route::get('/courses/{slug}', [CourseController::class, 'localizedShow'])->name('localized.courses.show');
+        Route::get('/blog', [BlogController::class, 'index'])->name('localized.blog.index');
+        Route::get('/blog/{slug}', [BlogController::class, 'localizedShow'])->name('localized.blog.show');
     });
 
 Route::get('/certificates/verify/{token}', [CertificateController::class, 'verify'])

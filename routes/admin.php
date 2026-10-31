@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\Users\MemberController;
 use App\Http\Controllers\Admin\Courses\CategoryController;
 use App\Http\Controllers\Admin\Content\MediaController;
+use App\Http\Controllers\Admin\Content\BlogController;
 use App\Http\Controllers\Admin\System\GeneralSettingsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Instructor\CourseManagementController;
@@ -24,6 +25,13 @@ Route::middleware(['auth', 'active', 'role:admin'])
 
         Route::get('/settings/general', [GeneralSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('settings.update');
+
+        Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
+        Route::get('/blogs/create', [BlogController::class, 'create'])->name('blogs.create');
+        Route::post('/blogs', [BlogController::class, 'store'])->name('blogs.store');
+        Route::get('/blogs/{blog}/edit', [BlogController::class, 'edit'])->name('blogs.edit');
+        Route::put('/blogs/{blog}', [BlogController::class, 'update'])->name('blogs.update');
+        Route::delete('/blogs/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy');
 
         Route::get('/media', [MediaController::class, 'index'])->name('media.index');
         Route::post('/media', [MediaController::class, 'store'])->name('media.store');
