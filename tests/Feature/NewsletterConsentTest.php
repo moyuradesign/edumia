@@ -30,7 +30,7 @@ final class NewsletterConsentTest extends TestCase
         $this->assertSame('reader@example.test', $subscriber->email);
         $this->assertFalse($subscriber->isSubscribed());
         Mail::assertSent(NewsletterConfirmation::class, 1);
-        $mail = Mail::assertSent(NewsletterConfirmation::class)->first();
+        $mail = Mail::sent(NewsletterConfirmation::class)->first();
         $this->get($mail->confirmationUrl)->assertRedirect(route('home'));
         $this->assertTrue($subscriber->fresh()->isSubscribed());
 
@@ -46,7 +46,7 @@ final class NewsletterConsentTest extends TestCase
         $this->post('/newsletter/subscribe', [
             'email' => 'learner@example.test', 'consent' => 1,
         ])->assertRedirect();
-        $mail = Mail::assertSent(NewsletterConfirmation::class)->first();
+        $mail = Mail::sent(NewsletterConfirmation::class)->first();
         $this->get($mail->confirmationUrl)->assertRedirect();
         $subscriber = NewsletterSubscriber::firstOrFail();
         $this->assertTrue($subscriber->fresh()->isSubscribed());
