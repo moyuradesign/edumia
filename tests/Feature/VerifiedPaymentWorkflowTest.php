@@ -54,7 +54,7 @@ final class VerifiedPaymentWorkflowTest extends TestCase
         ]);
     }
 
-    private function session(Order $order, array $overrides = []): array
+    private function stripeSession(Order $order, array $overrides = []): array
     {
         return array_replace([
             'id' => 'cs_test_123456789abcdef',
@@ -125,7 +125,7 @@ final class VerifiedPaymentWorkflowTest extends TestCase
     {
         [$student, $course, $order] = $this->pendingOrder();
         $this->enableStripe();
-        $this->fakeGateway($this->session($order));
+        $this->fakeGateway($this->stripeSession($order));
         $this->start($order);
 
         $this->get('/checkout/orders/'.$order->id.'?payment=return')->assertOk();
@@ -150,13 +150,13 @@ final class VerifiedPaymentWorkflowTest extends TestCase
     {
         [$student, $course, $order] = $this->pendingOrder();
         $this->enableStripe();
-        $this->fakeGateway($this->session($order, ['amount_total' => 2500]));
+        $this->fakeGateway($this->stripeSession($order, ['amount_total' => 2500]));
         $this->start($order);
 
         $this->webhook($this->event(), false)->assertStatus(400);
         $this->assertDatabaseCount('enrollments', 0);
 
-        $this->fakeGateway($this->session($order, ['amount_total' => 100]));
+        $this->fakeGateway($this->stripeSession($order, ['amount_total' => 100]));
         $this->webhook($this->event())->assertStatus(422);
         $this->assertSame('awaiting_payment', $order->fresh()->status);
         $this->assertDatabaseCount('payment_histories', 0);
@@ -167,11 +167,11 @@ final class VerifiedPaymentWorkflowTest extends TestCase
     {
         [$student, $course, $order] = $this->pendingOrder();
         $this->enableStripe();
-        $this->fakeGateway($this->session($order));
+        $this->fakeGateway($this->stripeSession($order));
         $this->start($order);
         $this->patch('/checkout/orders/'.$order->id.'/cancel')->assertStatus(409);
 
-        $this->fakeGateway($this->session($order, ['payment_status' => 'unpaid']));
+        $this->fakeGateway($this->stripeSession($order, ['payment_status' => 'unpaid']));
         $this->webhook($this->event())->assertStatus(422);
         $this->assertDatabaseCount('enrollments', 0);
         $this->assertDatabaseCount('payment_histories', 0);
