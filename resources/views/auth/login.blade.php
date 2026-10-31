@@ -23,5 +23,5 @@
              stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
     </button>
 </form>
-<p class="auth-switch">New to {{ $siteName }}? <a href="{{ route('register') }}">Create an account</a></p>
+<p class="auth-switch">New here? <a href="{{ route('register') }}">Create an account</a></p>
 @endsection
