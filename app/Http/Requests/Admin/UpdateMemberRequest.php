@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\AccountStatus;
+use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,8 +19,8 @@ final class UpdateMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'role' => ['required', Rule::in(['student', 'instructor', 'admin'])],
-            'status' => ['required', Rule::in(['active', 'suspended'])],
+            'role' => ['required', Rule::in(UserRole::values())],
+            'status' => ['required', Rule::in(AccountStatus::values())],
         ];
     }
 }
