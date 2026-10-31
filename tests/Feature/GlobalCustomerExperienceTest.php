@@ -163,4 +163,73 @@ final class GlobalCustomerExperienceTest extends TestCase
             ->assertSee('<html lang="fr"', false)
             ->assertSee('International Course');
     }
+
+    public function test_accessible_public_and_member_navigation_use_existing_assets(): void
+    {
+        $this->get('/fr/ebooks')->assertOk()
+            ->assertSee('aria-controls="primary-navigation"', false)
+            ->assertSee('id="primary-navigation"', false)
+            ->assertSee('aria-expanded="false"', false)
+            ->assertSee('Ouvrir le menu')
+            ->assertSee('Fermer le menu');
+
+        $member = $this->account('student');
+        $this->actingAs($member)->get('/dashboard')->assertOk()
+            ->assertSee('aria-controls="panel-navigation"', false)
+            ->assertSee('id="panel-navigation"', false)
+            ->assertSee('Open dashboard menu');
+
+        $javascript = (string) file_get_contents(resource_path('js/frontend/modules/language.js'));
+        $this->assertStringContainsString("event.key === 'Escape'", $javascript);
+        $this->assertStringContainsString("button.focus()", $javascript);
+        $this->assertStringContainsString("setOpen(false)", $javascript);
+        $this->assertStringContainsString("js-navigation", $javascript);
+    }
+
+    public function test_regional_money_formatting_never_converts_the_currency(): void
+    {
+        $this->assertSame('USD 1.234,50', \App\Helpers\Localization::money('1234.50', 'USD', 'de'));
+        $this->assertSame('EUR 1'."\u{202F}".'234,50',
+            \App\Helpers\Localization::money('1234.50', 'EUR', 'fr'));
+        $this->assertSame('USD 1,234.50', \App\Helpers\Localization::money('1234.50', 'USD', 'en'));
+        $this->assertSame('KHR 125,000', \App\Helpers\Localization::money('125000.00', 'KHR', 'km'));
+        $this->assertSame('USD 125.00', \App\Helpers\Localization::money('125.00', 'USD', 'km'));
+        $this->assertSame('KHR 125,000.50', \App\Helpers\Localization::money('125000.50', 'KHR', 'en'));
+    }
+
+    public function test_site_timezone_only_changes_display_not_original_instant(): void
+    {
+        $instant = \Carbon\CarbonImmutable::parse('2026-10-31 22:00:00', 'UTC');
+        $admin = $this->account('admin');
+        $this->actingAs($admin)->put('/admin/settings/general', [
+            'site_name' => 'World Academy',
+            'default_locale' => 'en',
+            'site_timezone' => 'Asia/Tokyo',
+            'allow_registration' => '1',
+        ])->assertRedirect();
+
+        $formatted = \App\Helpers\Localization::date($instant, 'en', true);
+        $this->assertStringContainsString('1 Nov 2026', $formatted);
+        $this->assertStringContainsString('07:00', $formatted);
+        $this->assertSame('2026-10-31 22:00:00', $instant->format('Y-m-d H:i:s'));
+
+        $this->put('/admin/settings/general', [
+            'site_name' => 'Invalid Academy',
+            'site_timezone' => '../../etc/passwd',
+        ])->assertSessionHasErrors('site_timezone');
+        $this->assertDatabaseMissing('settings', ['key' => 'site_name', 'value' => 'Invalid Academy']);
+        $this->assertDatabaseHas('settings', ['key' => 'site_timezone', 'value' => 'Asia/Tokyo']);
+    }
+
+    public function test_translated_public_controls_and_currency_labels_are_rendered(): void
+    {
+        $this->get('/de/contact')->assertOk()
+            ->assertSee('Nachricht senden')
+            ->assertSee('Vollständiger Name');
+        $this->get('/km/ebooks')->assertOk()->assertSee('សៀវភៅ និងមគ្គុទ្ទេសក៍');
+        $this->get('/km/contact')->assertOk()->assertSee('ផ្ញើសារ');
+        $this->get('/ja/bootcamps')->assertOk()->assertSee('集中講座');
+        $this->get('/fr/courses')->assertOk()->assertSee('Rechercher des cours');
+    }
+
 }
