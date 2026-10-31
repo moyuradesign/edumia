@@ -217,7 +217,7 @@ final class CommerceAccountingWorkflowTest extends TestCase
             'name' => 'Admin', 'email' => 'admin@edumia.test', 'password' => 'Password#12345',
         ]);
         $admin->forceFill(['role' => 'admin', 'status' => 'active'])->save();
-        DB::table('payment_histories')->where('reference', $order->gateway_payment_reference)->delete();
+        DB::table('payment_histories')->where('reference', $order->fresh()->gateway_payment_reference)->delete();
 
         // Throttling is exercised separately; don't share an IP limit with
         // earlier test cases when asserting role authorization.
