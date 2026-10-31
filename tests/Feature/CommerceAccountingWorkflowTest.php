@@ -126,7 +126,8 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $this->actingAs($teacher)->get('/instructor/earnings')
             ->assertOk()->assertSee('My earnings')->assertSee('20.00');
         $this->actingAs($student)->get('/instructor/earnings')->assertForbidden();
-        $this->actingAs($admin)->post('/admin/commerce/accounting/reconcile')->assertRedirect();
+        $this->actingAs($admin)->post('/admin/commerce/accounting/reconcile')
+            ->assertRedirect(route('admin.commerce.accounting.index'));
         $this->assertDatabaseCount('commerce_reconciliation_issues', 0);
 
     }
