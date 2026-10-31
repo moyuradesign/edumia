@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function (): void {
@@ -23,6 +24,9 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    Route::get('/account/preferences', [ProfileController::class, 'edit'])->name('account.preferences.edit');
+    Route::put('/account/preferences', [ProfileController::class, 'update'])->middleware('throttle:8,1')->name('account.preferences.update');
 
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('/account/password', [PasswordController::class, 'update'])->middleware('throttle:5,1')->name('password.update');

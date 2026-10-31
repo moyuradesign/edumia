@@ -33,7 +33,7 @@ final class RegisteredUserController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'locale' => 'en',
+            'locale' => $data['locale'] ?? $settings->general()['default_locale'],
         ]);
 
         event(new Registered($user));

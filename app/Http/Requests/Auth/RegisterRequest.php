@@ -18,6 +18,7 @@ final class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:150'],
+            'locale' => ['sometimes', 'required', \Illuminate\Validation\Rule::in(array_keys(\App\Helpers\Localization::LANGUAGES))],
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
             'password' => [
                 'required',

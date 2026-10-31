@@ -1,11 +1,12 @@
+@php($siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'])
 <!doctype html>
 <html lang="{{ $locale ?? 'en' }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
-    <meta name="description" content="Edumia — a modern learning management system by Ton Samith.">
-    <title>@yield('title', 'Edumia — Learning Management System')</title>
+    <meta name="description" content="{{ $siteName }} — Learning Management System">
+    <title>@yield('title', $siteName.' — Learning Management System')</title>
     <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')==='dark'?'dark':'light'}catch(e){}</script>
     @vite(['resources/css/frontend/app.css', 'resources/js/frontend/app.js'])
 </head>
@@ -19,7 +20,7 @@
 <a class="skip-link" href="#content">Skip to content</a>
 <header class="site-header">
     <div class="container header-inner">
-        <a class="brand" href="{{ \App\Helpers\Localization::url($locale) }}" aria-label="Edumia home"><span class="brand-mark">e</span><span>edumia<span class="brand-dot">.</span></span></a>
+        <a class="brand" href="{{ \App\Helpers\Localization::url($locale) }}" aria-label="{{ $siteName }} home"><span class="brand-mark">e</span><span>{{ $siteName }}<span class="brand-dot">.</span></span></a>
         <nav class="primary-nav" aria-label="Primary navigation">
             <a href="{{ \App\Helpers\Localization::url($locale) }}" class="{{ $currentPath === '' ? 'active' : '' }}">{{ \App\Helpers\Localization::label('home', $locale) }}</a>
             <a href="{{ \App\Helpers\Localization::url($locale, 'courses') }}" class="{{ str_starts_with($currentPath, 'courses') ? 'active' : '' }}">{{ \App\Helpers\Localization::label('nav_courses', $locale) }}</a>
@@ -36,7 +37,7 @@
                     <option value="{{ \App\Helpers\Localization::url($code, $currentPath).(request()->only(['q', 'page']) ? '?'.http_build_query(request()->only(['q', 'page'])) : '') }}" @selected($locale === $code)>{{ $name }}</option>
                 @endforeach
             </select>
-            @auth <a class="btn btn-quiet" href="{{ route('dashboard') }}">{{ \App\Helpers\Localization::label('dashboard', $locale) }}</a> @else <a class="btn btn-quiet" href="{{ route('login') }}">{{ \App\Helpers\Localization::label('sign_in', $locale) }}</a><a class="btn btn-primary" href="{{ route('register') }}">{{ \App\Helpers\Localization::label('join', $locale) }}</a> @endauth
+            @auth <a class="btn btn-quiet" href="{{ route('dashboard') }}">{{ \App\Helpers\Localization::label('dashboard', $locale) }}</a> @else <a class="btn btn-quiet" href="{{ route('login', ['locale' => $locale]) }}">{{ \App\Helpers\Localization::label('sign_in', $locale) }}</a><a class="btn btn-primary" href="{{ route('register', ['locale' => $locale]) }}">{{ \App\Helpers\Localization::label('join', $locale) }}</a> @endauth
             <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span class="theme-icon">◐</span><span class="theme-label">{{ \App\Helpers\Localization::label('dark', $locale) }}</span></button>
         </div>
     </div>
@@ -52,6 +53,6 @@
 I agree to receive Edumia email updates and understand I can unsubscribe at any time.</label>
 <button class="btn btn-secondary" type="submit">Subscribe</button>
 </form></div></section>
-<footer class="site-footer"><div class="container footer-inner"><div><strong>edumia.</strong><span> — Learning Management System</span></div><div>© {{ date('Y') }} <a href="https://tonsamith.com" rel="author noopener">Ton Samith</a>. {{ \App\Helpers\Localization::label('rights', $locale) }}</div></div></footer>
+<footer class="site-footer"><div class="container footer-inner"><div><strong>{{ $siteName }}</strong><span> — Learning Management System</span></div><div>© {{ date('Y') }} {{ $siteName }}. {{ \App\Helpers\Localization::label('rights', $locale) }}</div></div></footer>
 </body>
 </html>
