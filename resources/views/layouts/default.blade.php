@@ -7,7 +7,7 @@
     <meta name="description" content="Edumia — a modern learning management system by Ton Samith.">
     <title>@yield('title', 'Edumia — Learning Management System')</title>
     <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')==='dark'?'dark':'light'}catch(e){}</script>
-    <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}"><script defer src="{{ asset('build/assets/app.js') }}"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
 @php

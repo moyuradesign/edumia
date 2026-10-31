@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title','Dashboard') · Edumia</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')||'light'}catch(e){}</script>
-<link rel="stylesheet" href="{{ asset('build/assets/app.css') }}"><script src="{{ asset('build/assets/app.js') }}" defer></script>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 </head><body class="panel-page"><header class="panel-header"><div class="container panel-top">
 <a class="brand" href="{{ route('home') }}"><span class="brand-mark">e</span> edumia<span class="brand-dot">.</span></a>
 <nav class="panel-nav"><a href="{{ route('dashboard') }}">Dashboard</a><a href="{{ route('courses.index') }}">Explore</a><a href="{{ route('password.edit') }}">Security</a>

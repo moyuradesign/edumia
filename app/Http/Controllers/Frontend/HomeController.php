@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\frontend;
+namespace App\Http\Controllers\Frontend;
 use App\Helpers\Common_helper as Text;
 use App\Models\Course;
 use Illuminate\Http\Request;
