@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Student;
 
 use App\Models\Order;
+use App\Models\Bootcamp;
+use App\Models\BootcampPurchase;
 use App\Services\Commerce\StripeCheckoutGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +30,24 @@ final class PaymentController extends Controller
                     && is_string($order->gateway_checkout_url)
                     && $gateway->checkoutUrlSafe($order->gateway_checkout_url), 409);
                 return $order->gateway_checkout_url;
+            }
+
+            // Paid bootcamp seats are reserved by active, server-created
+            // Checkout sessions, not by a visitor clicking a listing.
+            $item = $order->items()->firstOrFail();
+            if ($item->bootcamp_id !== null) {
+                $bootcamp = Bootcamp::query()->lockForUpdate()->findOrFail($item->bootcamp_id);
+                $confirmed = BootcampPurchase::query()
+                    ->where('bootcamp_id', $bootcamp->getKey())
+                    ->where('status', 'completed')->count();
+                $reserved = Order::query()
+                    ->where('status', 'awaiting_payment')
+                    ->where('expires_at', '>', now())
+                    ->whereHas('items', fn ($q) => $q->where('bootcamp_id', $bootcamp->getKey()))
+                    ->count();
+                abort_unless($bootcamp->capacity === null
+                    || $confirmed + $reserved < $bootcamp->capacity, 409,
+                    'All seats are currently reserved. Try another cohort.');
             }
 
             $session = $gateway->createSession($order);
