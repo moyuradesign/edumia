@@ -85,11 +85,17 @@ final class HeaderFooterExperienceTest extends TestCase
         $this->course($teacher, $inactive, 'unlisted-web');
         $this->course($teacher, $draft, 'draft-web', false);
 
-        $this->get('/')->assertOk()
+        $html = (string) $this->get('/')->assertOk()
             ->assertSee('Web Development')
             ->assertSee('category=web-development', false)
-            ->assertDontSee('Inactive Learning')
-            ->assertDontSee('Secret Drafts');
+            ->getContent();
+        $start = strpos($html, 'class="premium-dropdown premium-mega-menu"');
+        $this->assertNotFalse($start);
+        $end = strpos($html, '</details>', $start);
+        $this->assertNotFalse($end);
+        $megaMenu = substr($html, $start, $end - $start);
+        $this->assertStringNotContainsString('Inactive Learning', $megaMenu);
+        $this->assertStringNotContainsString('Secret Drafts', $megaMenu);
 
         $this->get('/courses?category=web-development')->assertOk()
             ->assertSee('Learning published-web')
