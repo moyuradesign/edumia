@@ -173,6 +173,56 @@ async function browse(scenario) {
     verify(await page.locator('html').getAttribute('data-theme') === 'dark', 'Theme toggle failed');
     await page.reload({ waitUntil: 'networkidle' });
     verify(await page.locator('html').getAttribute('data-theme') === 'dark', 'Theme choice not retained');
+
+    // Authentication is intentionally a centered standalone card, not a modal dialog.
+    // Real browser checks validate focus/filled floating labels and SVG controls.
+    await navigate(page, '/login');
+    verify(await page.locator('.auth-card').isVisible(), 'Centered sign-in card unavailable');
+    verify(await page.locator('header, footer').count() === 0, 'Auth page must have no header or footer');
+    verify(await page.locator('.auth-field-icon').count() >= 2, 'SVG field icons missing');
+    verify(await page.locator('.auth-page .auth-logo').isVisible(), 'Brand inside auth card missing');
+
+    const emailLabel = page.locator('label[for="auth-email"]');
+    const emailInput = page.locator('#auth-email');
+    const labelTop = () => emailLabel.evaluate(el => Number.parseFloat(window.getComputedStyle(el).top));
+    const restingPosition = await labelTop();
+    await emailInput.focus();
+    await page.waitForTimeout(240);
+    const focusedPosition = await labelTop();
+    verify(focusedPosition < restingPosition - 7, 'Floating email label did not rise on focus');
+    await emailInput.fill('example@example.test');
+    await page.locator('#auth-heading').click();
+    await page.waitForTimeout(240);
+    verify((await labelTop()) < restingPosition - 7, 'Floating label did not stay up when populated');
+
+    const password = page.locator('#auth-password');
+    const show = page.locator('button[data-password-toggle][aria-controls="auth-password"]');
+    verify(await password.getAttribute('type') === 'password', 'Password initially visible');
+    await show.click();
+    verify(await password.getAttribute('type') === 'text', 'Password show control failed');
+    verify(await show.getAttribute('aria-pressed') === 'true', 'Show password state not announced');
+    await show.click();
+    verify(await password.getAttribute('type') === 'password', 'Password hide control failed');
+
+    const authOverflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    verify(authOverflow <= 2, 'Auth layout has horizontal overflow (' + authOverflow + 'px)');
+    await emailInput.clear();
+    await page.screenshot({ path: path.join(evidence, 'auth-' + scenario.name + '.png') });
+
+    await navigate(page, '/register');
+    verify(await page.locator('input[name="name"]').count() === 1, 'Registration name field missing');
+    verify(await page.locator('select[name="locale"]').count() === 1, 'Registration locale select missing');
+    verify(await page.locator('.auth-field-icon').count() >= 5, 'Registration SVG icons missing');
+    verify(await page.locator('header, footer').count() === 0, 'Registration has unwanted header/footer');
+    await navigate(page, '/forgot-password');
+    verify(await page.locator('form input[name="email"]').count() === 1, 'Recovery email field missing');
+    await navigate(page, '/reset-password/qa-token?email=example%40example.test');
+    verify(await page.locator('input[type="hidden"][name="token"]').inputValue() === 'qa-token',
+      'Reset token not preserved in form');
+    verify(await page.locator('input[name="password_confirmation"]').count() === 1,
+      'Password confirmation field missing');
+
     verify(errors.length === 0, 'Browser console or asset errors: ' + errors.join(' | '));
 
     console.log('EDUMIA_BROWSER=' + scenario.name + ' PASS');

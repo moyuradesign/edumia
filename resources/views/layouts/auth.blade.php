@@ -1,8 +1,10 @@
 @php
     $siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'];
+    $requestedLocale = request()->query('locale');
+    $authLocale = \App\Helpers\Localization::resolve(is_string($requestedLocale) ? $requestedLocale : null);
 @endphp
 <!doctype html>
-<html lang="{{ \App\Helpers\Localization::resolve(request()->query('locale')) }}" data-theme="light">
+<html lang="{{ $authLocale }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
