@@ -253,4 +253,26 @@ final class VerifiedPaymentWorkflowTest extends TestCase
         $this->assertDatabaseCount('payment_histories', 1);
     }
 
+    public function test_verified_expiration_releases_checkout_without_issuing_entitlement(): void
+    {
+        [$student, $course, $order] = $this->pendingOrder();
+        $this->enableStripe();
+        $this->fakeGateway($this->stripeSession($order), $this->stripeSession($order, [
+            'status' => 'expired', 'payment_status' => 'unpaid',
+        ]));
+        $this->start($order);
+        $event = $this->event('evt_test_expired12345');
+        $event['type'] = 'checkout.session.expired';
+        $this->webhook($event)->assertOk();
+        $this->webhook($event)->assertOk();
+
+        $this->assertSame('expired', $order->fresh()->status);
+        $this->assertNull($order->fresh()->gateway_checkout_url);
+        $this->assertDatabaseCount('payment_webhook_events', 1);
+        $this->assertDatabaseCount('payment_histories', 0);
+        $this->assertDatabaseCount('enrollments', 0);
+        $this->post('/checkout/courses/'.$course->id)->assertRedirect();
+        $this->assertDatabaseCount('orders', 2);
+    }
+
 }

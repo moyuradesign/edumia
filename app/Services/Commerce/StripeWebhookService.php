@@ -22,7 +22,7 @@ final class StripeWebhookService
             && is_string($event['type'] ?? null), 400);
 
         $type = $event['type'];
-        if (! in_array($type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true)) {
+        if (! in_array($type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'checkout.session.expired'], true)) {
             return;
         }
 
@@ -45,6 +45,11 @@ final class StripeWebhookService
         // Retrieve authenticated state from Stripe rather than trusting even
         // a signed event payload for totals, status or entitlement identity.
         $session = $gateway->retrieveSession($id);
+        if ($type === 'checkout.session.expired') {
+            $fulfillment->expire($order, $session, $event['id'], $gateway);
+            return;
+        }
+
         $fulfillment->fulfill($order, $session, $event['id'], $type, $gateway);
     }
 }

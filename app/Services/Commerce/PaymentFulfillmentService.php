@@ -122,6 +122,36 @@ final class PaymentFulfillmentService
         }, 3);
     }
 
+    public function expire(Order $selected, array $session, string $eventId, StripeCheckoutGateway $gateway): void
+    {
+        DB::transaction(function () use ($selected, $session, $eventId, $gateway): void {
+            $order = Order::query()->lockForUpdate()->findOrFail($selected->getKey());
+            if (DB::table('payment_webhook_events')->where('gateway', 'stripe')
+                ->where('event_id', $eventId)->exists()) {
+                return;
+            }
+
+            abort_unless($order->payment_gateway === 'stripe'
+                && $order->gateway_session_id === ($session['id'] ?? null)
+                && ($session['client_reference_id'] ?? null) === $order->reference
+                && ($session['metadata']['order_reference'] ?? null) === $order->reference
+                && ($session['status'] ?? null) === 'expired'
+                && ($session['payment_status'] ?? null) !== 'paid'
+                && ($session['currency'] ?? null) === strtolower($order->currency_code)
+                && ($session['amount_total'] ?? null) === $gateway->cents($order->total)
+                && ($session['livemode'] ?? null) === (config('payments.stripe.mode') === 'live'),
+                422, 'Expired checkout does not match the order.');
+
+            if ($order->status === 'awaiting_payment') {
+                $order->forceFill([
+                    'status' => 'expired',
+                    'gateway_checkout_url' => null,
+                ])->save();
+            }
+            $this->recordEvent($order, $eventId, 'checkout.session.expired');
+        }, 3);
+    }
+
     private function recordEvent(Order $order, string $eventId, string $eventType): void
     {
         DB::table('payment_webhook_events')->insert([
