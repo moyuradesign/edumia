@@ -1,4 +1,6 @@
-@php($siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'])
+@php
+    $siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'];
+@endphp
 <!doctype html>
 <html lang="{{ $locale ?? 'en' }}" data-theme="light">
 <head>

@@ -1,4 +1,6 @@
-@php($siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'])
+@php
+    $siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'];
+@endphp
 <!doctype html>
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>@yield('title') · {{ $siteName }}</title><script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')||'light'}catch(e){}</script>
