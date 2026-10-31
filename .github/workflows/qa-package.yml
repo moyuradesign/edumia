@@ -67,6 +67,22 @@ jobs:
             phpunit.xml vite.config.js .env.example README.md QA_BUILD.txt
           tar -tzf dist/edumia-integrated-qa.tar.gz > /tmp/edumia-qa-archive-contents.txt
           grep -Fxq 'public/build/manifest.json' /tmp/edumia-qa-archive-contents.txt
+          for required in \
+            app/Models/Assignment.php \
+            app/Models/SubmittedAssignment.php \
+            app/Services/Learning/AssignmentService.php \
+            app/Services/Learning/CourseFeedbackService.php \
+            app/Http/Controllers/Instructor/AssignmentController.php \
+            app/Http/Controllers/Student/AssignmentController.php \
+            resources/views/instructor/assignments/gradebook.blade.php \
+            resources/views/student/assignments/show.blade.php \
+            resources/views/student/saved-courses.blade.php \
+            tests/Feature/AssignmentWorkflowTest.php \
+            tests/Feature/CourseFeedbackTest.php \
+            docs/module-status.md; do
+            grep -Fxq "$required" /tmp/edumia-qa-archive-contents.txt
+          done
+          echo 'EDUMIA_QA_FEATURES=ASSIGNMENTS_GRADEBOOK_SAVED_COURSES_REVIEWS'
           sha256sum dist/edumia-integrated-qa.tar.gz
           test ! -e .env
           echo 'EDUMIA_INTEGRATED_QA_PACKAGE=READY'
