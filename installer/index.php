@@ -291,7 +291,7 @@ h2{font-size:19px;margin:0 0 15px}ul{margin:0;padding:0;list-style:none;display:
 <h2 style="margin-top:25px">4. Administrator account</h2>
 <div class="grid"><?php field('admin_name','Administrator full name');field('admin_email','Administrator email','email');field('admin_password','Strong administrator password','password');field('admin_password_confirmation','Confirm administrator password','password'); ?></div>
 <h2 style="margin-top:25px">5. Deployment authorization</h2>
-<div class="grid"><?php field('authorization','Token from installer/authorize.txt','password'); ?></div>
+<div class="grid"><?php field('authorization','Purchase Code','password'); ?></div>
 <div class="buttons"><label style="display:flex;align-items:start;gap:10px;font-weight:500"><input type="checkbox" name="accept" value="yes" required style="width:auto;margin-top:5px">I am authorized to install Edumia in a new database. I understand this creates configuration and executes Laravel migrations.</label><button class="button" type="submit" <?=$ready?'':'disabled'?>>Install Edumia</button></div>
 </form><p class="foot">© <?=date('Y')?> <a href="https://tonsamith.com" rel="noopener noreferrer">Ton Samith</a>. Remove this installer folder after installation.</p>
 </main></body></html>
