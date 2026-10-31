@@ -16,7 +16,9 @@ Updated: 2026-10-31. This is a **source-development snapshot**, not a statement 
 |---|---|---|---|
 | Account authentication | `app/Http/Controllers/Auth/`, `app/Http/Requests/Auth/` | `resources/views/auth/`, `routes/auth.php` | Basic registration/login/password routes covered; email delivery and real-browser testing remain |
 | Role-specific dashboards | `app/Http/Controllers/{Admin,Instructor,Student}/DashboardController.php` | `resources/views/dashboard/` | Basic dashboards covered |
-| Course/lesson/quiz/certificates | `app/Http/Controllers/{Instructor,Student}/`, `app/Services/CourseCompletionService.php` | `routes/{instructor,student}.php` | Basic free-course and grading flows covered; advanced editor/gradebook features missing |
+| Course/lesson/quiz/certificates | `app/Http/Controllers/{Instructor,Student}/`, `app/Services/CourseCompletionService.php` | `routes/{instructor,student}.php` | Free enrollment, lesson progress, quiz grading and certificates covered; advanced exams, transcript and progress analytics still missing |
+| Written assignments + gradebook | `app/Http/Controllers/{Instructor,Student}/AssignmentController.php`, `app/Services/Learning/AssignmentService.php` | `resources/views/{instructor,student}/assignments/` | Instructor authoring, learner submission, deadline, grading, feedback, ownership and certificate prerequisite regression tests |
+| Saved courses + course reviews | `app/Http/Controllers/Student/{CourseWishlistController,CourseReviewController}.php`, `app/Services/Learning/CourseFeedbackService.php` | `resources/views/student/saved-courses.blade.php`, `resources/views/admin/courses/reviews/`, public course details | Saved-course privacy; enrolled reviews; pending/approved/rejected moderation; approved-only public display |
 | Member governance | `app/Http/Controllers/Admin/Users/MemberController.php`, `app/Services/Identity/` | `routes/admin.php`, administrator dashboard | Role/status changes audited; granular role-permission management missing |
 | Course categories | `app/Http/Controllers/Admin/Courses/CategoryController.php`, `app/Services/Learning/CategoryManagementService.php` | `resources/views/admin/courses/categories/` | CRUD, hierarchy cycle prevention and authorization tests |
 | General settings | `app/Http/Controllers/Admin/System/GeneralSettingsController.php`, `app/Services/System/SettingsRepository.php` | `resources/views/admin/system/settings/` | General settings and registration enable/disable tested |
@@ -41,6 +43,8 @@ app/
       Frontend/
       Instructor/
       Student/Support/
+      Student/AssignmentController.php
+      Student/{CourseWishlistController,CourseReviewController}.php
     Requests/{Admin,Auth,Frontend,Student}/
     Middleware/
   Models/
@@ -60,6 +64,9 @@ resources/
   views/frontend/default/
   views/instructor/
   views/student/support/tickets/
+  views/student/assignments/
+  views/instructor/assignments/
+  views/admin/courses/reviews/
 
 routes/{web,auth,admin,instructor,student,console}.php
 tests/Feature/{Admin,...}/
@@ -70,7 +77,7 @@ No empty PHP files are created merely to make the tree look large.
 
 ## Outstanding full-platform modules
 
-Database tables for orders and payments, coupon/redemption logic, payment providers/webhooks, payouts/refunds, ebooks, bootcamps, tutor bookings, live classes, comprehensive grading, assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.
+Database tables for orders and payments, coupon/redemption logic, payment providers/webhooks, payouts/refunds, ebooks, bootcamps, tutor bookings, live classes, advanced grading, file attachments for assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.
 
 ## Integrated QA on a disposable environment
 
@@ -79,7 +86,7 @@ Database tables for orders and payments, coupon/redemption logic, payment provid
 3. Create an isolated `.env` from `.env.example`, set the QA database, run `php artisan key:generate`.
 4. Run `php artisan migrate --force` **only on the newly prepared QA database**.
 5. Run `php scripts/verify-source-structure.php` and `php artisan test --fail-on-warning`.
-6. Run `php artisan route:list`, then verify page styling, login, each role dashboard, categories, settings, media, blog, contact and support tickets in a real browser.
+6. Run `php artisan route:list`, then verify page styling, login, each role dashboard, categories, settings, media, blog, contact support tickets, written assignments, grading, wishlists and review moderation in a real browser.
 7. Confirm file paths in `public/build/manifest.json` actually return HTTP 200 and correct CSS/JS MIME types. Tests alone do not demonstrate that a browser served those files.
 8. Run `php artisan edumia:health --json`. Installer-removal checks will only pass on a finalized deployment, not on a source checkout containing a removable installer.
 
