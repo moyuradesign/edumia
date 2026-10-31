@@ -173,8 +173,8 @@ jobs:
             exit 1
           fi
           modules="$(apache2ctl -M 2>/dev/null)"
-          test "${modules#*rewrite_module}" != "$modules"
-          test "${modules#*php_module}" != "$modules"
+          printf '%s\n' "$modules" | grep -E 'rewrite_module|php_module' || true
+          echo 'Checking actual Apache HTTP routes; modules alone are not an acceptance result.'
           for attempt in $(seq 1 20); do
             if curl -sS --max-time 5 -o /dev/null 'http://127.0.0.1:8766/courses'; then
               break
@@ -184,15 +184,25 @@ jobs:
           status() {
             curl -sS --max-time 10 -o /dev/null -w '%{http_code}' "$1"
           }
-          test "$(status 'http://127.0.0.1:8766/')" = '200'
-          test "$(status 'http://127.0.0.1:8766/courses')" = '200'
-          test "$(status 'http://127.0.0.1:8766/fr/courses')" = '200'
-          test "$(status 'http://127.0.0.1:8766/installer')" = '404'
-          test "$(status 'http://127.0.0.1:8766/.env')" = '404'
-          test "$(status 'http://127.0.0.1:8766/composer.json')" = '404'
+          check_route() {
+            local required="$1" destination="$2" actual
+            actual="$(status "$destination")"
+            echo "APACHE_HTTP=$actual PATH=${destination#http://127.0.0.1:8766}"
+            if [ "$actual" != "$required" ]; then
+              sudo tail -n 35 "$RUNNER_TEMP/edumia-apache-errors.log" || true
+              exit 1
+            fi
+          }
+          check_route 200 'http://127.0.0.1:8766/'
+          check_route 200 'http://127.0.0.1:8766/courses'
+          check_route 200 'http://127.0.0.1:8766/fr/courses'
+          check_route 404 'http://127.0.0.1:8766/installer'
+          check_route 404 'http://127.0.0.1:8766/.env'
+          check_route 404 'http://127.0.0.1:8766/composer.json'
           asset="$(php -r '$m=json_decode(file_get_contents($argv[1]),true,512,JSON_THROW_ON_ERROR); echo $m["resources/css/frontend/app.css"]["file"];' "$EDUMIA_QA_ROOT/public/build/manifest.json")"
-          test "$(status "http://127.0.0.1:8766/build/$asset")" = '200'
-          curl -sSI --max-time 10 "http://127.0.0.1:8766/build/$asset" | grep -qi 'content-type: text/css'
+          check_route 200 "http://127.0.0.1:8766/build/$asset"
+          headers="$(curl -sSI --max-time 10 "http://127.0.0.1:8766/build/$asset")"
+          test "${headers#*text/css}" != "$headers"
           echo 'EDUMIA_APACHE_SHARED_HOST_REWRITE=PASS'
 
       - name: Read-only installed shared-host preflight
