@@ -19,6 +19,9 @@ final class CommerceAccountingWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    private int $refundedMinor = 0;
+    private bool $simulateDispute = false;
+
     private function setupPurchase(): array
     {
         $teacher = User::create(['name' => 'Teacher', 'email' => 'teacher@edumia.test', 'password' => 'Password#12345']);
@@ -66,7 +69,23 @@ final class CommerceAccountingWorkflowTest extends TestCase
     private function sale(Order $order): void
     {
         $session = $this->checkout($order);
-        Http::fake(fn () => Http::response($session, 200));
+        Http::fake(function (HttpRequest $request) use ($session) {
+            if (str_contains($request->url(), '/v1/disputes/')) {
+                return Http::response([
+                    'id' => 'dp_accounting12345', 'charge' => 'ch_accounting12345',
+                    'currency' => 'usd', 'amount' => 2500, 'status' => 'needs_response',
+                ]);
+            }
+            if (str_contains($request->url(), '/v1/charges/')) {
+                return Http::response([
+                    'id' => 'ch_accounting12345', 'payment_intent' => 'pi_accounting123456',
+                    'currency' => 'usd', 'amount' => 2500,
+                    'amount_refunded' => $this->refundedMinor,
+                    'paid' => true, 'livemode' => false,
+                ]);
+            }
+            return Http::response($session, 200);
+        });
         $this->post('/checkout/orders/'.$order->id.'/pay')->assertRedirect();
         $this->signed([
             'id' => 'evt_accounting_sale123456',
@@ -111,15 +130,7 @@ final class CommerceAccountingWorkflowTest extends TestCase
         [$student, $teacher, $course, $order] = $this->setupPurchase();
         $this->sale($order);
 
-        $refundedMinor = 1000;
-        Http::fake(function (HttpRequest $request) use (&$refundedMinor) {
-            $this->assertStringContainsString('/v1/charges/ch_accounting12345', $request->url());
-            return Http::response([
-                'id' => 'ch_accounting12345', 'payment_intent' => 'pi_accounting123456',
-                'currency' => 'usd', 'amount' => 2500, 'amount_refunded' => $refundedMinor,
-                'paid' => true, 'livemode' => false,
-            ]);
-        });
+        $this->refundedMinor = 1000;
         $event = [
             'id' => 'evt_accounting_refund_one', 'type' => 'charge.refunded',
             'data' => ['object' => ['id' => 'ch_accounting12345']],
@@ -134,7 +145,7 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $this->assertSame('active', Enrollment::firstOrFail()->status);
         $this->assertSame(2, DB::table('instructor_earning_entries')->count());
 
-        $refundedMinor = 2500;
+        $this->refundedMinor = 2500;
         $event['id'] = 'evt_accounting_refund_two';
         $this->signed($event)->assertOk();
         $this->assertSame('refunded', $order->fresh()->status);
@@ -153,18 +164,6 @@ final class CommerceAccountingWorkflowTest extends TestCase
     {
         [$student, $teacher, $course, $order] = $this->setupPurchase();
         $this->sale($order);
-        Http::fake(function (HttpRequest $request) {
-            if (str_contains($request->url(), '/v1/disputes/')) {
-                return Http::response([
-                    'id' => 'dp_accounting12345', 'charge' => 'ch_accounting12345',
-                    'currency' => 'usd', 'amount' => 2500, 'status' => 'needs_response',
-                ]);
-            }
-            return Http::response([
-                'id' => 'ch_accounting12345', 'payment_intent' => 'pi_accounting123456',
-                'currency' => 'usd', 'amount' => 2500, 'paid' => true, 'livemode' => false,
-            ]);
-        });
         $event = [
             'id' => 'evt_accounting_dispute', 'type' => 'charge.dispute.created',
             'data' => ['object' => ['id' => 'dp_accounting12345']],
