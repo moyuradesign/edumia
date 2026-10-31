@@ -39,10 +39,10 @@ final class HealthCheckCommand extends Command
 
         $manifestPath = public_path('build/manifest.json');
         $assets = [
-            'resources/css/app.css',
-            'resources/css/admin.css',
-            'resources/js/app.js',
-            'resources/js/admin.js',
+            'resources/css/frontend/app.css',
+            'resources/css/admin/app.css',
+            'resources/js/frontend/app.js',
+            'resources/js/admin/app.js',
         ];
 
         $checks['frontend_assets'] = false;
