@@ -10,6 +10,12 @@ on:
       - 'resources/css/frontend/app.css'
       - 'resources/css/admin/app.css'
       - 'resources/js/frontend/modules/language.js'
+      - 'resources/views/auth/**'
+      - 'resources/views/layouts/auth.blade.php'
+      - 'resources/views/components/auth-field.blade.php'
+      - 'resources/js/admin/app.js'
+      - 'resources/js/admin/modules/auth.js'
+      - 'tests/Feature/AuthExperienceTest.php'
   workflow_dispatch:
 
 permissions:
