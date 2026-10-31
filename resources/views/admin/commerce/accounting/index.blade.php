@@ -3,6 +3,8 @@
 @section('content')
 <div class="panel-heading"><div><span class="section-kicker">FINANCE & RECONCILIATION</span><h1>Commerce accounting</h1>
 <p>Read-only internal reconciliation. No automatic payout, refund initiation, or currency conversion is enabled.</p></div></div>
+<form method="post" action="{{ route('admin.commerce.accounting.reconcile') }}">@csrf
+<button class="btn btn-primary" type="submit">Scan local financial records</button></form>
 <section class="panel-card"><h2>Review exceptions</h2><div class="report-grid">
 @foreach($issues as $key => $count)<div class="builder-section"><p>{{ ucwords(str_replace('_',' ',$key)) }}</p><h2>{{ $count }}</h2></div>@endforeach
 </div><p>These checks compare local records only; provider settlement and bank statements require a separate reconciliation process.</p></section>

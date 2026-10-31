@@ -5,12 +5,29 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\Commerce;
 
 use App\Models\Order;
+use App\Models\AuditEvent;
+use App\Services\Commerce\CommerceReconciliationService;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 final class AccountingController extends Controller
 {
+    public function reconcile(Request $request, CommerceReconciliationService $service): RedirectResponse
+    {
+        $counts = $service->scan(true);
+        AuditEvent::query()->create([
+            'actor_id' => $request->user()->getKey(),
+            'subject_type' => Order::class, 'subject_id' => 0,
+            'action' => 'commerce.reconciliation_scanned',
+            'new_values' => $counts,
+        ]);
+        return to_route('admin.commerce.accounting.index')
+            ->with('success', 'Local reconciliation completed. Check open exceptions below.');
+    }
+
     public function index(): View
     {
         $paid = Order::query()->whereNotNull('paid_at');
