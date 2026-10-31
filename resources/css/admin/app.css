@@ -1019,3 +1019,25 @@ progress {
 .admin-course-index-widget .admin-table td { font-size: 12px; }
 .admin-course-index-widget .admin-table td strong { display: block; font-weight: 780; }
 .admin-course-index-widget .admin-table td small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+
+
+/* Member directory: compact responsive account governance within the admin shell. */
+.admin-member-directory { display: grid; gap: 22px; }
+.admin-member-directory-widget .admin-table { min-width: 930px; }
+.admin-member-directory-widget .admin-table td,
+.admin-member-directory-widget .admin-table th { font-size: 12px; }
+.admin-member-directory-widget .admin-member-cell { min-width: 215px; align-items: flex-start; }
+.admin-member-directory-widget .admin-member-cell small {
+  display: block; font-size: 11px; font-weight: 450; color: var(--muted);
+  margin-top: 4px; overflow-wrap: anywhere;
+}
+.admin-member-directory-widget .admin-member-edit { flex-wrap: nowrap; }
+.admin-member-directory-widget .admin-member-edit select { min-width: 107px; }
+.admin-member-filters > div { flex: 1 1 160px; min-width: 0; }
+.admin-member-filters > div:first-child { flex: 2 1 235px; }
+.admin-member-directory-widget .admin-empty { padding: 18px; }
+@media (max-width: 700px) {
+  .admin-member-filters { align-items: stretch; }
+  .admin-member-filters > div, .admin-member-filters > div:first-child { flex: 1 1 100%; }
+  .admin-member-filters > button { width: 100%; }
+}

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\Users\MemberController;
+use App\Http\Controllers\Admin\Users\MemberDirectoryController;
 use App\Http\Controllers\Admin\Commerce\OrderController;
 use App\Http\Controllers\Admin\Commerce\AccountingController;
 use App\Http\Controllers\Admin\Commerce\RefundRequestController;
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'active', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function (): void {
+        Route::get('/users', [MemberDirectoryController::class, 'index'])->name('users.index');
         Route::put('/users/{user}', MemberController::class)->name('users.update');
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');

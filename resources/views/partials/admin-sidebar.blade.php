@@ -20,6 +20,7 @@
         [
             'label' => 'People & access',
             'items' => [
+                ['label' => 'All members', 'route' => 'admin.users.index', 'match' => 'admin.users.*', 'icon' => 'users'],
                 ['label' => 'Instructor applications', 'route' => 'admin.instructor-applications.index', 'match' => 'admin.instructor-applications.*', 'icon' => 'users'],
                 ['label' => 'Staff roles', 'route' => 'admin.roles.index', 'match' => 'admin.roles.*', 'icon' => 'shield'],
             ],
