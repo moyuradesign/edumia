@@ -65,6 +65,6 @@ A CodeCanyon submission must not be based only on source code appearance, route 
 
 ## Enforcement
 
-Track each requirement in an acceptance report with pass/fail, evidence, test command and reviewer. A failed mandatory requirement blocks the release candidate. The development branch may contain incomplete modules, but `main` must not advertise them as complete.
+Track each requirement in an acceptance report with pass/fail, evidence, test command and reviewer. A failed mandatory requirement blocks the release candidate. The `main` development trunk may contain incomplete modules, but the installed public website and commercial packaging must not advertise unfinished modules as complete.
 
 CodeCanyon acceptance is decided by Envato reviewers, not by this checklist. References: https://help.author.envato.com/hc/en-us/articles/360000536823-Common-Rejection-Factors-for-Code-Items and https://help.author.envato.com/hc/en-us/articles/45774519899673-Quality-and-Technical-Requirements .
