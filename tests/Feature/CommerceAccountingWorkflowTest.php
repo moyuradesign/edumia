@@ -123,6 +123,12 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $admin->forceFill(['role' => 'admin', 'status' => 'active'])->save();
         $this->actingAs($admin)->get('/admin/commerce/accounting')
             ->assertOk()->assertSee('Held instructor earnings')->assertSee('EDM-');
+        $this->actingAs($teacher)->get('/instructor/earnings')
+            ->assertOk()->assertSee('My earnings')->assertSee('20.00');
+        $this->actingAs($student)->get('/instructor/earnings')->assertForbidden();
+        $this->actingAs($admin)->post('/admin/commerce/accounting/reconcile')->assertRedirect();
+        $this->assertDatabaseCount('commerce_reconciliation_issues', 0);
+
     }
 
     public function test_verified_partial_then_full_refund_adjusts_earnings_and_revokes_course_access(): void
@@ -202,4 +208,24 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseCount('enrollments', 0);
     }
+    public function test_reconciliation_flags_missing_payment_history_without_modifying_order(): void
+    {
+        [$student, $teacher, $course, $order] = $this->setupPurchase();
+        $this->sale($order);
+        $admin = User::create([
+            'name' => 'Admin', 'email' => 'admin@edumia.test', 'password' => 'Password#12345',
+        ]);
+        $admin->forceFill(['role' => 'admin', 'status' => 'active'])->save();
+        DB::table('payment_histories')->where('reference', $order->gateway_payment_reference)->delete();
+
+        $this->actingAs($student)->post('/admin/commerce/accounting/reconcile')->assertForbidden();
+        $this->actingAs($admin)->post('/admin/commerce/accounting/reconcile')->assertRedirect();
+        $this->assertDatabaseHas('commerce_reconciliation_issues', [
+            'issue_key' => 'order:'.$order->id.':paid_missing_payment_record',
+            'status' => 'open',
+        ]);
+        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertDatabaseCount('instructor_payout_records', 0);
+    }
+
 }
