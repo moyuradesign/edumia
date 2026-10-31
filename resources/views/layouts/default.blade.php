@@ -1,5 +1,6 @@
 @php
-    $siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'];
+    $publicSettings = app(\App\Services\System\SettingsRepository::class)->general();
+    $siteName = $publicSettings['site_name'];
 @endphp
 <!doctype html>
 <html lang="{{ $locale ?? 'en' }}" data-theme="light">
@@ -61,6 +62,8 @@
 {{ \App\Helpers\Localization::label('newsletter_consent', $locale) }}</label>
 <button class="btn btn-secondary" type="submit">{{ \App\Helpers\Localization::label('newsletter_subscribe', $locale) }}</button>
 </form></div></section>
-<footer class="site-footer"><div class="container footer-inner"><div><strong>{{ $siteName }}</strong><span> — Learning Management System</span></div><div>© {{ date('Y') }} {{ $siteName }}. {{ \App\Helpers\Localization::label('rights', $locale) }}</div></div></footer>
+<footer class="site-footer"><div class="container footer-inner"><div><strong>{{ $siteName }}</strong><span> — Learning Management System</span></div><div>© {{ date('Y') }} {{ $siteName }}. {{ \App\Helpers\Localization::label('rights', $locale) }}
+@if($publicSettings['support_email'] !== '')<a href="mailto:{{ $publicSettings['support_email'] }}">{{ $publicSettings['support_email'] }}</a>@endif
+</div></div></footer>
 </body>
 </html>

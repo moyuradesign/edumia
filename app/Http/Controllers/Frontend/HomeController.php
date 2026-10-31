@@ -17,6 +17,7 @@ class HomeController extends Controller
         App::setLocale($locale);
 
         return view('frontend.default.home.index', ['locale' => $locale, 'languages' => Text::LANGUAGES,
+            'siteSettings' => app(\App\Services\System\SettingsRepository::class)->general(),
             'courses' => Course::published()->with('category')->withCount('lessons')->latest('published_at')->limit(6)->get()]);
     }
 }

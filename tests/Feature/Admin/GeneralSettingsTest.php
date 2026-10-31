@@ -45,6 +45,30 @@ final class GeneralSettingsTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'new@edumia.test']);
     }
 
+    public function test_site_notice_and_contact_information_are_visible_and_escaped(): void
+    {
+        $admin = $this->account('admin', 'admin@example.test');
+        $this->actingAs($admin)->put('/admin/settings/general', [
+            'site_name' => 'Global Skills Center',
+            'default_locale' => 'en',
+            'site_timezone' => 'Europe/London',
+            'support_email' => 'help@example.test',
+            'homepage_notice' => '<script>alert("danger")</script> Welcome worldwide',
+            'allow_registration' => '1',
+        ])->assertRedirect(route('admin.settings.edit'));
+
+        auth()->logout();
+        $this->get('/')->assertOk()
+            ->assertSee('Global Skills Center')
+            ->assertSee('Welcome worldwide')
+            ->assertDontSee('<script>alert("danger")</script>', false)
+            ->assertSee('mailto:help@example.test', false);
+
+        $this->assertDatabaseHas('settings', ['key' => 'site_timezone', 'value' => 'Europe/London']);
+        $this->assertDatabaseHas('settings', ['key' => 'homepage_notice',
+            'value' => '<script>alert("danger")</script> Welcome worldwide']);
+    }
+
     public function test_student_cannot_change_general_settings(): void
     {
         $student = $this->account('student', 'student@edumia.test');
