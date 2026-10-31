@@ -61,6 +61,6 @@ class QuizAttemptController extends Controller
     {
         abort_unless($quiz->is_published && $quiz->course->status === 'published', 404);
 
-        return Enrollment::where('course_id', $quiz->course_id)->where('user_id',$request->user()->id)->firstOrFail();
+        return Enrollment::where('course_id', $quiz->course_id)->where('user_id',$request->user()->id)->whereIn('status', ['active', 'completed'])->firstOrFail();
     }
 }

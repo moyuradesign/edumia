@@ -63,6 +63,7 @@ final class PaymentFulfillmentService
                     Enrollment::query()->create([
                         'course_id' => $item->course_id, 'user_id' => $user->getKey(),
                         'enrolled_at' => now(), 'progress_percent' => 0, 'status' => 'active',
+                        'payment_order_id' => $order->getKey(),
                     ]);
                 } else {
                     abort_unless(in_array($existing->status, ['active', 'completed'], true), 409,
@@ -112,6 +113,7 @@ final class PaymentFulfillmentService
                 'metadata' => json_encode(['order_id' => $order->getKey(), 'gateway' => 'stripe'], JSON_THROW_ON_ERROR),
                 'created_at' => now(), 'updated_at' => now(),
             ]);
+            app(CommerceAccountingService::class)->recordPaid($order);
             $this->recordEvent($order, $eventId, $eventType);
             AuditEvent::query()->create([
                 'actor_id' => null, 'subject_type' => Order::class,

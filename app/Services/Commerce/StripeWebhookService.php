@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\DB;
 final class StripeWebhookService
 {
     public function handle(string $payload, ?string $signature, StripeCheckoutGateway $gateway,
-        StripeSignatureVerifier $verifier, PaymentFulfillmentService $fulfillment): void
+        StripeSignatureVerifier $verifier, PaymentFulfillmentService $fulfillment,
+        StripeAdjustmentService $adjustments, CommerceAccountingService $accounting): void
     {
         $gateway->assertConfigured();
         abort_unless($verifier->valid($payload, $signature,
@@ -22,6 +23,11 @@ final class StripeWebhookService
             && is_string($event['type'] ?? null), 400);
 
         $type = $event['type'];
+        if (in_array($type, ['charge.refunded', 'charge.dispute.created'], true)) {
+            $adjustments->handle($event, $gateway, $accounting);
+            return;
+        }
+
         if (! in_array($type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'checkout.session.expired'], true)) {
             return;
         }

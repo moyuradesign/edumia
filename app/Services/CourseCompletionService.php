@@ -16,6 +16,9 @@ class CourseCompletionService
     {
         DB::transaction(function () use ($enrollment) {
             $enrollment = Enrollment::query()->whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            if (! in_array($enrollment->status, ['active', 'completed'], true)) {
+                return;
+            }
             $course = $enrollment->course;
             $lessons = $course->lessons()->where('is_published', true)->whereHas('section', fn ($q) => $q->where('is_published', true));
             $total = $lessons->count();

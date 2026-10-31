@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Webhooks;
 
 use App\Services\Commerce\PaymentFulfillmentService;
+use App\Services\Commerce\StripeAdjustmentService;
+use App\Services\Commerce\CommerceAccountingService;
 use App\Services\Commerce\StripeCheckoutGateway;
 use App\Services\Commerce\StripeSignatureVerifier;
 use App\Services\Commerce\StripeWebhookService;
@@ -19,10 +21,12 @@ final class StripeWebhookController extends Controller
         StripeCheckoutGateway $gateway,
         StripeSignatureVerifier $verifier,
         StripeWebhookService $webhooks,
-        PaymentFulfillmentService $fulfillment
+        PaymentFulfillmentService $fulfillment,
+        StripeAdjustmentService $adjustments,
+        CommerceAccountingService $accounting
     ): JsonResponse {
         $webhooks->handle($request->getContent(), $request->header('Stripe-Signature'),
-            $gateway, $verifier, $fulfillment);
+            $gateway, $verifier, $fulfillment, $adjustments, $accounting);
 
         return response()->json(['received' => true]);
     }

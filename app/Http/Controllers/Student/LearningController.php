@@ -16,7 +16,7 @@ class LearningController extends Controller
 {
     public function course(Request $request, Course $course)
     {
-        $enrollment = Enrollment::where('course_id', $course->id)->where('user_id', $request->user()->id)->firstOrFail();
+        $enrollment = Enrollment::where('course_id', $course->id)->where('user_id', $request->user()->id)->whereIn('status', ['active', 'completed'])->firstOrFail();
         $sections = $course->sections()->where('is_published', true)->with(['lessons' => fn ($q) => $q->where('is_published', true)])->get();
         $completed = LessonProgress::where('user_id', $request->user()->id)->whereIn('lesson_id', $course->lessons()->select('id'))->pluck('lesson_id')->all();
         $quizzes = $course->quizzes()->where('is_published', true)->withCount('questions')->get();
