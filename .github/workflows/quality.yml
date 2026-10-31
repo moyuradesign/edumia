@@ -27,12 +27,17 @@ jobs:
           extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, pdo_mysql, xml, tokenizer
           coverage: none
 
-      - name: Validate Laravel project and PHP source
+      - name: Verify source structure
         run: |
           php -v
           php scripts/verify-source-structure.php
+
+      - name: Check PHP syntax
+        run: |
           find app bootstrap config routes tests scripts database/migrations -type f -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
-          composer validate --no-check-publish
+
+      - name: Validate Composer manifest
+        run: composer validate --no-check-publish
 
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
