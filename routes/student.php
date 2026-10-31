@@ -6,6 +6,8 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Student\EnrollmentController;
 use App\Http\Controllers\Student\AssignmentController;
+use App\Http\Controllers\Student\CourseWishlistController;
+use App\Http\Controllers\Student\CourseReviewController;
 use App\Http\Controllers\Student\LearningController;
 use App\Http\Controllers\Student\QuizAttemptController;
 use App\Http\Controllers\Student\Support\TicketController;
@@ -20,6 +22,12 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     // All roles share this entrypoint; DashboardController chooses the workspace.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/saved-courses', [CourseWishlistController::class, 'index'])->name('saved-courses.index');
+    Route::post('/saved-courses/{course}', [CourseWishlistController::class, 'store'])->name('saved-courses.store');
+    Route::delete('/saved-courses/{course}', [CourseWishlistController::class, 'destroy'])->name('saved-courses.destroy');
+    Route::post('/courses/{course}/reviews', [CourseReviewController::class, 'store'])
+        ->middleware('throttle:5,1')->name('course-reviews.store');
 
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->middleware('throttle:12,1')->name('enrollments.store');
 

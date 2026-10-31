@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Helpers\Localization as Text;
 use App\Models\Course;
+use App\Models\Review;
+use App\Models\Enrollment;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\App;
@@ -40,6 +43,28 @@ class CourseController extends Controller
         $course = Course::published()->where('slug', $slug)->with(['instructor', 'category', 'sections' => fn ($q) => $q->where('is_published', true),
             'sections.lessons' => fn ($q) => $q->where('is_published', true)])->withCount('lessons')->firstOrFail();
 
-        return view('frontend.default.course.course_details', ['locale' => $locale, 'languages' => Text::LANGUAGES, 'course' => $course]);
+        $userId = auth()->id();
+        $reviews = Review::query()->approved()
+            ->where('course_id', $course->getKey())->with('author')->latest()->limit(20)->get();
+        $existingReview = $userId
+            ? Review::query()->where('course_id', $course->getKey())->where('user_id', $userId)->first()
+            : null;
+        $enrolled = $userId
+            ? Enrollment::query()->where('user_id', $userId)->where('course_id', $course->getKey())
+                ->where('status', 'active')->exists()
+            : false;
+        $saved = $userId
+            ? Wishlist::query()->where('user_id', $userId)->where('course_id', $course->getKey())->exists()
+            : false;
+
+        return view('frontend.default.course.course_details', [
+            'locale' => $locale,
+            'languages' => Text::LANGUAGES,
+            'course' => $course,
+            'reviews' => $reviews,
+            'existingReview' => $existingReview,
+            'enrolled' => $enrolled,
+            'saved' => $saved,
+        ]);
     }
 }

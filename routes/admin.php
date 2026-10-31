@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\Users\MemberController;
 use App\Http\Controllers\Admin\Courses\CategoryController;
+use App\Http\Controllers\Admin\Courses\ReviewModerationController;
 use App\Http\Controllers\Admin\Content\MediaController;
 use App\Http\Controllers\Admin\Content\BlogController;
 use App\Http\Controllers\Admin\Support\ContactController;
@@ -18,6 +19,9 @@ Route::middleware(['auth', 'active', 'role:admin'])
     ->name('admin.')
     ->group(function (): void {
         Route::put('/users/{user}', MemberController::class)->name('users.update');
+        Route::get('/reviews', [ReviewModerationController::class, 'index'])->name('reviews.index');
+        Route::patch('/reviews/{review}', [ReviewModerationController::class, 'update'])->name('reviews.update');
+
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
         Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
