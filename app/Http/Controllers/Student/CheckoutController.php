@@ -8,6 +8,7 @@ use App\Models\Bootcamp;
 use App\Models\Course;
 use App\Models\Ebook;
 use App\Models\Order;
+use App\Models\CommerceRefundRequest;
 use App\Services\Commerce\CourseCheckoutService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,8 @@ final class CheckoutController extends Controller
     {
         abort_unless((int) $order->user_id === (int) $request->user()->getKey(), 404);
 
-        return view('student.checkout.show', ['order' => $order->load('items')]);
+        return view('student.checkout.show', ['order' => $order->load('items'),
+            'refundReview' => CommerceRefundRequest::query()->where('order_id', $order->getKey())->first()]);
     }
 
     public function cancel(Request $request, Order $order, CourseCheckoutService $checkout): RedirectResponse

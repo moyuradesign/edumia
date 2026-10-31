@@ -8,6 +8,7 @@ use App\Http\Controllers\Student\EnrollmentController;
 use App\Http\Controllers\Student\CheckoutController;
 use App\Http\Controllers\Student\PaymentController;
 use App\Http\Controllers\Student\InvoiceController;
+use App\Http\Controllers\Student\RefundRequestController;
 use App\Http\Controllers\Student\InstructorApplicationController;
 use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\CourseWishlistController;
@@ -49,6 +50,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/courses/{course}/reviews', [CourseReviewController::class, 'store'])
         ->middleware('throttle:5,1')->name('course-reviews.store');
 
+    Route::post('/checkout/orders/{order}/refund-requests', [RefundRequestController::class, 'store'])->middleware('throttle:3,1')->name('checkout.refunds.store');
     Route::get('/checkout/orders/{order}/invoice', [InvoiceController::class, 'show'])->name('checkout.orders.invoice');
     Route::get('/checkout/orders', [CheckoutController::class, 'index'])->name('checkout.orders.index');
     Route::post('/checkout/ebooks/{ebook}', [CheckoutController::class, 'ebook'])->middleware('throttle:6,1')->name('checkout.ebooks.store');

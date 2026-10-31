@@ -33,5 +33,16 @@
 @else
 <p>This order cannot be paid here. Browse courses to request a new quote, if applicable.</p>
 @endif
+@if(in_array($order->status, ['paid', 'partially_refunded', 'refunded', 'disputed'], true))
+<div class="builder-section"><h2>Refund support</h2>
+@if($refundReview)<p>Request status: <strong>{{ ucfirst($refundReview->status) }}</strong></p>
+@if($refundReview->review_note)<p>Staff response: {{ $refundReview->review_note }}</p>@endif
+@elseif(in_array($order->status, ['paid', 'partially_refunded'], true))
+<p>Request a refund review. Submitting a request does not automatically issue a refund.</p>
+<form class="stack-form" method="post" action="{{ route('checkout.refunds.store', $order) }}">@csrf
+<label>Reason<textarea name="reason" required minlength="12" maxlength="2000" rows="4">{{ old('reason') }}</textarea></label>
+<button class="btn btn-secondary" type="submit">Request refund review</button>
+</form>@endif
+</div>@endif
 </section>
 @endsection
