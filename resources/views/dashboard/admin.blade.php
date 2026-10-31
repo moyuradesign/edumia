@@ -19,7 +19,7 @@
             <span class="admin-stat-top"><span>Members</span><span class="admin-stat-icon admin-stat-icon--blue" aria-hidden="true">♙</span></span>
             <strong>{{ number_format($users) }}</strong><small>{{ number_format($instructors) }} instructors</small>
         </a>
-        <a class="admin-stat" href="{{ route('admin.reviews.index') }}">
+        <a class="admin-stat" href="{{ route('admin.courses.index') }}">
             <span class="admin-stat-top"><span>Published courses</span><span class="admin-stat-icon admin-stat-icon--orange" aria-hidden="true">▣</span></span>
             <strong>{{ number_format($publishedCourses) }}</strong><small>{{ number_format($courses) }} total courses</small>
         </a>
@@ -57,7 +57,7 @@
                 <div><span class="admin-widget-kicker">WORK QUEUE</span><h2 id="admin-attention-title">Needs attention</h2><p>Open management queues</p></div>
             </div>
             <div class="admin-queue-links">
-                <a href="#admin-pending"><span class="admin-queue-icon">▣</span><span>Course approvals</span><strong>{{ $pendingCoursesCount }}</strong></a>
+                <a href="{{ route('admin.courses.index', ['status' => 'pending']) }}"><span class="admin-queue-icon">▣</span><span>Course approvals</span><strong>{{ $pendingCoursesCount }}</strong></a>
                 <a href="{{ route('admin.reviews.index') }}"><span class="admin-queue-icon">☆</span><span>Course reviews</span><strong>{{ $pendingReviewsCount }}</strong></a>
                 <a href="{{ route('admin.instructor-applications.index') }}"><span class="admin-queue-icon">♙</span><span>Instructor applications</span><strong>{{ $pendingApplicationsCount }}</strong></a>
                 <a href="{{ route('admin.commerce.refunds.index') }}"><span class="admin-queue-icon">↩</span><span>Refund requests</span><strong>{{ $pendingRefundsCount }}</strong></a>
@@ -80,7 +80,7 @@
 
     <div class="admin-data-grid">
         <section class="admin-widget" id="admin-pending" aria-labelledby="admin-pending-title">
-            <div class="admin-widget-heading"><div><span class="admin-widget-kicker">COURSE MANAGEMENT</span><h2 id="admin-pending-title">Course approval queue</h2></div><a href="{{ route('admin.reviews.index') }}">Moderate reviews ↗</a></div>
+            <div class="admin-widget-heading"><div><span class="admin-widget-kicker">COURSE MANAGEMENT</span><h2 id="admin-pending-title">Course approval queue</h2></div><a href="{{ route('admin.courses.index', ['status' => 'pending']) }}">All pending courses ↗</a></div>
             @if($pending->isEmpty())
                 <div class="admin-empty"><span aria-hidden="true">✓</span><strong>You're all caught up</strong><p>No courses awaiting publication review.</p></div>
             @else
@@ -159,7 +159,7 @@
         @if($memberSearch === '')<p class="admin-widget-footnote">Showing the 10 most recently registered members. Search to find other accounts.</p>@endif
     </section>
     <section class="admin-widget admin-recent-courses" aria-labelledby="admin-recent-courses-title">
-        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">LEARNING</span><h2 id="admin-recent-courses-title">Recent courses</h2></div><a href="{{ route('courses.index') }}">Browse catalogue ↗</a></div>
+        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">LEARNING</span><h2 id="admin-recent-courses-title">Recent courses</h2></div><a href="{{ route('admin.courses.index') }}">Manage courses ↗</a></div>
         <div class="table-scroll"><table class="admin-table">
             <thead><tr><th>Course</th><th>Instructor</th><th>Status</th><th>Action</th></tr></thead>
             <tbody>@forelse($recentCourses as $course)

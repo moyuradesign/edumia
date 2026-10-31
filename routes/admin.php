@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Commerce\RefundRequestController;
 use App\Http\Controllers\Admin\Users\RoleController;
 use App\Http\Controllers\Admin\Users\InstructorApplicationController;
 use App\Http\Controllers\Admin\Courses\CategoryController;
+use App\Http\Controllers\Admin\Courses\CourseController;
 use App\Http\Controllers\Admin\Courses\BootcampPublicationController;
 use App\Http\Controllers\Admin\Reports\LearningReportController;
 use App\Http\Controllers\Admin\Courses\ReviewModerationController;
@@ -87,6 +88,7 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::get('/media/{media}/download', [MediaController::class, 'download'])->name('media.download');
         Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
+        Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
         Route::post('/courses/{course}/publish', [CourseManagementController::class, 'publish'])->name('courses.publish');
         Route::post('/courses/{course}/unpublish', [CourseManagementController::class, 'unpublish'])->name('courses.unpublish');
         Route::post('/certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])->name('certificates.revoke');

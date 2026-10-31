@@ -1000,3 +1000,22 @@ progress {
 @media (prefers-reduced-motion: reduce) {
   .admin-workspace *, .admin-workspace *::before, .admin-workspace *::after { transition: none !important; }
 }
+
+
+/* Course workspace: real filtering and existing protected edit/publication flows. */
+.admin-course-management { display: grid; gap: 22px; }
+.admin-course-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 21px; }
+.admin-course-filters > div:first-child { flex: 2 1 230px; }
+.admin-course-filters > div:nth-child(2) { flex: 1 1 150px; }
+.admin-course-filters input, .admin-course-filters select {
+  width: 100%; min-width: 0; min-height: 42px; padding: 9px 12px;
+  border: 1px solid var(--border); border-radius: 11px;
+  background: var(--surface-alt); color: var(--ink); font-size: 12px;
+}
+.admin-course-filters .admin-action-primary { cursor: pointer; }
+.admin-course-actions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.admin-course-pagination { margin-top: 21px; }
+.admin-course-index-widget .admin-table th { font-size: 10px; }
+.admin-course-index-widget .admin-table td { font-size: 12px; }
+.admin-course-index-widget .admin-table td strong { display: block; font-weight: 780; }
+.admin-course-index-widget .admin-table td small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }

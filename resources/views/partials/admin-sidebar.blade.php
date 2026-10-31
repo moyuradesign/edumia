@@ -10,6 +10,7 @@
         [
             'label' => 'Learning management',
             'items' => [
+                ['label' => 'All courses', 'route' => 'admin.courses.index', 'match' => 'admin.courses.*', 'icon' => 'book'],
                 ['label' => 'Course reviews', 'route' => 'admin.reviews.index', 'match' => 'admin.reviews.*', 'icon' => 'star'],
                 ['label' => 'Categories', 'route' => 'admin.categories.index', 'match' => 'admin.categories.*', 'icon' => 'grid'],
                 ['label' => 'Ebook approvals', 'route' => 'admin.ebooks.index', 'match' => 'admin.ebooks.*', 'icon' => 'book'],
