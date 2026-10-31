@@ -1,9 +1,6 @@
 name: Format Edumia foundation
 
 on:
-  push:
-    paths:
-      - '.github/workflows/format-foundation.yml'
   workflow_dispatch:
 
 permissions:
