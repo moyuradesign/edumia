@@ -86,6 +86,25 @@ async function install() {
     verify(await page.getByRole('heading', { name: 'General settings' }).isVisible(),
       'Initial administrator cannot access general settings');
 
+    // All admin modules retain their routes in the premium shell.
+    await navigate(page, '/dashboard');
+    verify(await page.locator('[data-admin-shell]').isVisible(), 'Admin shell was not rendered');
+    verify(await page.locator('.admin-stats .admin-stat').count() === 4, 'Real admin summary tiles missing');
+    verify(await page.locator('.admin-queue-links a').count() === 6, 'Operational queue links missing');
+    verify(await page.locator('.admin-chart-column').count() === 7, 'Seven-day activity chart missing');
+    verify(await page.locator('[data-admin-nav-link]').count() >= 15, 'Grouped admin navigation incomplete');
+    verify(await page.locator('#admin-main').isVisible(), 'Admin content landmark missing');
+    await page.locator('[data-admin-profile] summary').click();
+    verify(await page.locator('[data-admin-profile]').getAttribute('open') !== null,
+      'Administrator profile dropdown failed to open');
+    await page.keyboard.press('Escape');
+    verify(await page.locator('[data-admin-profile]').getAttribute('open') === null,
+      'Escape did not close administrator dropdown');
+    await page.locator('[data-admin-search]').fill('accounting');
+    verify(await page.locator('[data-admin-nav-link]:not([hidden])').count() === 1,
+      'Admin module search did not filter links');
+    await page.locator('[data-admin-search]').fill('');
+
     await page.setViewportSize({ width: 390, height: 844 });
     const menu = page.locator('.panel-header .menu-toggle');
     verify(await menu.isVisible(), 'Mobile dashboard menu is not displayed');

@@ -6,7 +6,23 @@
 <meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title','Dashboard') · {{ $siteName }}</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')||'light'}catch(e){}</script>
 @vite(['resources/css/frontend/app.css', 'resources/css/admin/app.css', 'resources/js/frontend/app.js', 'resources/js/admin/app.js'])
-</head><body class="panel-page"><header class="panel-header"><div class="container panel-top">
+</head>@if(auth()->user()->isAdmin())
+<body class="panel-page admin-workspace">
+<a class="skip-link" href="#admin-main">Skip to main content</a>
+<div class="admin-shell" data-admin-shell>
+    @include('partials.admin-sidebar')
+    <div class="admin-frame">
+        @include('partials.admin-topbar')
+        <main class="admin-main" id="admin-main">
+            @if(session('success'))<div class="flash" role="status">{{ session('success') }}</div>@endif
+            @if($errors->any())<div class="flash error" role="alert"><strong>Please review:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+            @yield('content')
+        </main>
+        <footer class="admin-footer"><span>{{ $siteName }} · Administration</span><span>© {{ date('Y') }}</span></footer>
+    </div>
+</div>
+@else
+<body class="panel-page"><header class="panel-header"><div class="container panel-top">
 <a class="brand" href="{{ route('home') }}"><span class="brand-mark">e</span> {{ $siteName }}<span class="brand-dot">.</span></a>
 <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="panel-navigation"
     aria-label="Open dashboard menu" data-open-label="Open dashboard menu" data-close-label="Close dashboard menu">
@@ -21,4 +37,5 @@
 <form action="{{ route('logout') }}" method="post">@csrf<button class="btn btn-quiet" type="submit">Log out</button></form></div></div></header>
 <main class="container panel-main">@if(session('success'))<div class="flash" role="status">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="flash error" role="alert"><strong>Please review:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-@yield('content')</main><footer class="container panel-foot">{{ $siteName }} · © {{ date('Y') }}</footer></body></html>
+@yield('content')</main><footer class="container panel-foot">{{ $siteName }} · © {{ date('Y') }}</footer>@endif
+</body></html>
