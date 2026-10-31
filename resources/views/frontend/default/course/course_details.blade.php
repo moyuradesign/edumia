@@ -1,7 +1,7 @@
 @extends('layouts.default')
 @section('title',$course->title.' — Edumia')
 @section('content')
-<section class="detail-section"><div class="container"><a class="back-link" href="{{ \App\Helpers\Common_helper::url($locale,'courses') }}">← Back to courses</a>
+<section class="detail-section"><div class="container"><a class="back-link" href="{{ \App\Helpers\Localization::url($locale,'courses') }}">← Back to courses</a>
 <div class="detail-grid"><div><span class="section-kicker">{{ $course->category?->name??'Learning' }}</span><h1>{{ $course->title }}</h1><p class="detail-lead">{{ $course->summary }}</p>
 <div class="detail-stats"><span>{{ $course->lessons_count }} lessons</span><span>{{ ucfirst($course->level) }}</span><span>{{ $course->isFree()?'Free':('$'.$course->price) }}</span></div>
 <p>{{ $course->description }}</p><div class="curriculum"><h2>Course curriculum</h2>
