@@ -65,7 +65,8 @@ jobs:
             app artisan bootstrap config database docs installer public resources routes scripts \
             storage tests vendor composer.json composer.lock package.json package-lock.json \
             phpunit.xml vite.config.js .env.example README.md QA_BUILD.txt
-          tar -tzf dist/edumia-integrated-qa.tar.gz | grep -q '^public/build/manifest.json$'
+          tar -tzf dist/edumia-integrated-qa.tar.gz > /tmp/edumia-qa-archive-contents.txt
+          grep -Fxq 'public/build/manifest.json' /tmp/edumia-qa-archive-contents.txt
           sha256sum dist/edumia-integrated-qa.tar.gz
           test ! -e .env
           echo 'EDUMIA_INTEGRATED_QA_PACKAGE=READY'
