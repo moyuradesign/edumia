@@ -9,10 +9,10 @@ use PHPUnit\Framework\TestCase;
 final class AssetManifestTest extends TestCase
 {
     private const ENTRYPOINTS = [
-        'resources/css/app.css',
-        'resources/css/admin.css',
-        'resources/js/app.js',
-        'resources/js/admin.js',
+        'resources/css/frontend/app.css',
+        'resources/css/admin/app.css',
+        'resources/js/frontend/app.js',
+        'resources/js/admin/app.js',
     ];
 
     private const LAYOUTS = [
@@ -31,8 +31,8 @@ final class AssetManifestTest extends TestCase
             self::assertStringContainsString('@vite(', $source, $layout);
             self::assertStringNotContainsString("asset('build/assets/", $source, $layout);
             if (str_contains($layout, 'auth.blade.php') || str_contains($layout, 'panel.blade.php')) {
-                self::assertStringContainsString('resources/css/admin.css', $source);
-                self::assertStringContainsString('resources/js/admin.js', $source);
+                self::assertStringContainsString('resources/css/admin/app.css', $source);
+                self::assertStringContainsString('resources/js/admin/app.js', $source);
             }
         }
     }
