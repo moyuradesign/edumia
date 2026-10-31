@@ -208,7 +208,7 @@ jobs:
       - name: Read-only installed shared-host preflight
         run: |
           set -Eeuo pipefail
-          php scripts/shared-host-preflight.php --root="$EDUMIA_QA_ROOT" --document-root="$EDUMIA_QA_ROOT/public" --json > "$RUNNER_TEMP/edumia-preflight-installed.json"
+          sudo -u www-data php "$EDUMIA_QA_ROOT/scripts/shared-host-preflight.php" --root="$EDUMIA_QA_ROOT" --document-root="$EDUMIA_QA_ROOT/public" --json > "$RUNNER_TEMP/edumia-preflight-installed.json"
           php -r '$r=json_decode(file_get_contents($argv[1]),true,512,JSON_THROW_ON_ERROR); if ($r["failed"] !== 0) exit(1); echo "EDUMIA_SHARED_HOST_PREFLIGHT_INSTALLED=PASS\n";' "$RUNNER_TEMP/edumia-preflight-installed.json"
 
       - name: Save public-page browser evidence
