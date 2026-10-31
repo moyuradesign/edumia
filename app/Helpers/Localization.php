@@ -47,6 +47,51 @@ final class Localization
         return self::MESSAGES[$locale][$key] ?? self::MESSAGES['en'][$key] ?? $key;
     }
 
+
+    /**
+     * Display-only formatting. Never convert amounts, round settled money,
+     * or change the currency code of a product or payment.
+     */
+    public static function money(string|int $amount, string $currency, string $locale = 'en'): string
+    {
+        $raw = (string) $amount;
+        if (! preg_match('/^(0|[1-9]\d{0,12})(?:\.(\d{1,2}))?$/D', $raw, $parts)) {
+            return trim(strtoupper($currency).' '.$raw);
+        }
+
+        $currency = strtoupper($currency);
+        $locale = self::language($locale);
+        $decimal = in_array($locale, ['fr', 'de', 'vi'], true) ? ',' : '.';
+        $group = $locale === 'fr' ? "\u{202F}"
+            : (in_array($locale, ['de', 'vi'], true) ? '.' : ',');
+        $whole = number_format((int) $parts[1], 0, '.', $group);
+        $fraction = str_pad((string) ($parts[2] ?? ''), 2, '0');
+        $showFraction = $currency !== 'KHR' || $fraction !== '00';
+
+        return $currency.' '.$whole.($showFraction ? $decimal.$fraction : '');
+    }
+
+    /**
+     * Show an instant in the owner's configured IANA timezone.
+     * Persisted dates and gateway timestamps remain unchanged.
+     */
+    public static function date(?\DateTimeInterface $date, string $locale = 'en', bool $withTime = false): string
+    {
+        if ($date === null) {
+            return '';
+        }
+
+        $zone = (string) (app(\App\Services\System\SettingsRepository::class)
+            ->general()['site_timezone'] ?? 'UTC');
+        if (! in_array($zone, \DateTimeZone::listIdentifiers(), true) && $zone !== 'UTC') {
+            $zone = 'UTC';
+        }
+
+        return \Carbon\CarbonImmutable::instance($date)
+            ->setTimezone($zone)->locale(self::language($locale))
+            ->translatedFormat($withTime ? 'j M Y, H:i T' : 'j M Y');
+    }
+
     public static function url(string $locale, string $path = ''): string
     {
         $locale = self::language($locale);

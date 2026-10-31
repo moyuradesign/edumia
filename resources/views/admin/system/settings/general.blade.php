@@ -14,6 +14,17 @@
             </select>
         </label>
         <p class="subtle">Visitors can switch among the eight languages. Untranslated course content remains in its original language.</p>
+        <label>Display timezone (IANA)
+            <input name="site_timezone" list="edumia-timezone-suggestions" maxlength="80"
+                value="{{ old('site_timezone', $settings['site_timezone']) }}" required
+                placeholder="UTC">
+        </label>
+        <datalist id="edumia-timezone-suggestions">
+            @foreach (['UTC', 'Asia/Phnom_Penh', 'Asia/Bangkok', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Kolkata', 'Europe/London', 'Europe/Paris', 'America/New_York', 'America/Los_Angeles', 'Australia/Sydney'] as $zone)
+                <option value="{{ $zone }}"></option>
+            @endforeach
+        </datalist>
+        <p class="subtle">Use an IANA timezone such as Europe/Paris. Displayed dates use this setting; stored times and payment timestamps are never changed. Prices always retain their original currency.</p>
         <label>Support email <input name="support_email" type="email" maxlength="190" value="{{ old('support_email', $settings['support_email']) }}"></label>
         <label>Homepage notice <textarea name="homepage_notice" rows="3" maxlength="500">{{ old('homepage_notice', $settings['homepage_notice']) }}</textarea></label>
         <label class="checkline"><input type="checkbox" name="allow_registration" value="1" @checked(old('allow_registration', $settings['allow_registration']) == '1')> Allow new student registrations</label>
