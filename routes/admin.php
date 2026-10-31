@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Users\MemberController;
 use App\Http\Controllers\Admin\Courses\CategoryController;
 use App\Http\Controllers\Admin\Content\MediaController;
 use App\Http\Controllers\Admin\Content\BlogController;
+use App\Http\Controllers\Admin\Support\ContactController;
 use App\Http\Controllers\Admin\System\GeneralSettingsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Instructor\CourseManagementController;
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'active', 'role:admin'])
 
         Route::get('/settings/general', [GeneralSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('settings.update');
+
+        Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
+        Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('contacts.show');
+        Route::patch('/contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update');
 
         Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
         Route::get('/blogs/create', [BlogController::class, 'create'])->name('blogs.create');
