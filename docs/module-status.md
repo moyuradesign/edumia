@@ -10,6 +10,8 @@ Updated: 2026-10-31. This is a **source-development snapshot**, not a statement 
 - Customer release is blocked until all advertised modules are functionally complete.
 - All source files use clean descriptive names without version suffixes. Vite may hash generated build filenames.
 
+For a complete, explicit list of missing and partially implemented features, see [Feature completion audit](feature-completion-audit.md).
+
 ## Integrated code modules
 
 | Domain | Controller / service source | Views and routes | Current acceptance |
@@ -25,6 +27,9 @@ Updated: 2026-10-31. This is a **source-development snapshot**, not a statement 
 | Private media library | `app/Http/Controllers/Admin/Content/MediaController.php`, `app/Services/Content/MediaStorageService.php` | `resources/views/admin/content/media/` | Upload, download, deletion and role restrictions tested; advanced image derivatives and media assignment not yet implemented |
 | Blog publishing | `app/Http/Controllers/{Admin/Content,Frontend}/BlogController.php`, `app/Services/Content/BlogPublishingService.php` | `resources/views/{admin/content/blog,frontend/default/blog}/` | Draft/published lifecycle, localized public pages and HTML escaping tested |
 | Public contact and admin inbox | `app/Http/Controllers/{Frontend,Admin/Support}/ContactController.php`, `app/Services/Support/ContactManagementService.php` | `resources/views/{frontend/default/contact,admin/support/contacts}/` | Submission, validation, status review and isolation tested; reply email not implemented |
+| Instructor applications | `app/Http/Controllers/{Student,Admin/Users}/InstructorApplicationController.php`, `app/Services/Identity/InstructorApplicationService.php` | Learner application and admin review screens | Transactional approval/rejection with role safeguards and audit events; external credential verification still missing |
+| Free PDF ebook library | `app/Http/Controllers/{Instructor,Admin/Content,Frontend,Student}/Ebook*.php`, `app/Services/Content/EbookLibraryService.php` | Author, moderator, public catalogue and private learner library | Free PDF distribution and ownership/paid denial tested; paid sales remain blocked |
+| Live class scheduling | `app/Http/Controllers/{Instructor,Student}/LiveClassController.php`, `app/Services/Learning/LiveClassService.php` | Course scheduling and private enrolled-learner timetable | External HTTPS meeting URLs, scheduling and access controls; conferencing API integration pending |
 | Support tickets | `app/Http/Controllers/{Student/Support,Admin/Support}/TicketController.php`, `app/Services/Support/TicketService.php` | `resources/views/{student/support/tickets,admin/support/tickets}/` | Learner ownership, ticket reply, private internal notes and status tests added; verify latest CI before acceptance |
 | Runtime diagnostics | `app/Console/Commands/HealthCheckCommand.php` | `php artisan edumia:health --json` | Safe configuration, DB, asset and installer-status checks |
 | Asset build governance | `resources/css/{frontend,admin}/app.css`, `resources/js/{frontend,admin}/app.js` | Vite manifest, modular JS, CI | Exactly two first-party CSS source files and two JS entrypoints; production artifact paths are resolved via `@vite` |
@@ -77,7 +82,7 @@ No empty PHP files are created merely to make the tree look large.
 
 ## Outstanding full-platform modules
 
-Database tables for orders and payments, coupon/redemption logic, payment providers/webhooks, payouts/refunds, ebooks, bootcamps, tutor bookings, live classes, advanced grading, file attachments for assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.
+Database tables for orders and payments, coupon/redemption logic, payment providers/webhooks, payouts/refunds, paid ebooks, bootcamps, tutor bookings, live conferencing integrations, advanced grading, file attachments for assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.
 
 ## Integrated QA on a disposable environment
 
