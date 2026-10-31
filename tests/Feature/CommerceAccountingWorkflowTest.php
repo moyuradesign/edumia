@@ -218,6 +218,9 @@ final class CommerceAccountingWorkflowTest extends TestCase
         $admin->forceFill(['role' => 'admin', 'status' => 'active'])->save();
         DB::table('payment_histories')->where('reference', $order->gateway_payment_reference)->delete();
 
+        // Throttling is exercised separately; don't share an IP limit with
+        // earlier test cases when asserting role authorization.
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
         $this->actingAs($student)->post('/admin/commerce/accounting/reconcile')->assertForbidden();
         $this->actingAs($admin)->post('/admin/commerce/accounting/reconcile')->assertRedirect();
         $this->assertDatabaseHas('commerce_reconciliation_issues', [
