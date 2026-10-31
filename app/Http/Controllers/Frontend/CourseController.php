@@ -14,9 +14,9 @@ use Illuminate\View\View;
 
 class CourseController extends Controller
 {
-    public function index(Request $request, string $locale = 'en'): View
+    public function index(Request $request, ?string $locale = null): View
     {
-        $locale = Text::language($locale);
+        $locale = Text::resolve($locale);
         App::setLocale($locale);
         $query = substr(trim((string) $request->query('q', '')), 0, 100);
         $courses = Course::published()->with('category')->withCount('lessons')

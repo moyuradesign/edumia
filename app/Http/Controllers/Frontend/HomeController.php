@@ -11,9 +11,9 @@ use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index(Request $request, string $locale = 'en'): View
+    public function index(Request $request, ?string $locale = null): View
     {
-        $locale = Text::language($locale);
+        $locale = Text::resolve($locale);
         App::setLocale($locale);
 
         return view('frontend.default.home.index', ['locale' => $locale, 'languages' => Text::LANGUAGES,

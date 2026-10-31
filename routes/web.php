@@ -49,6 +49,16 @@ Route::prefix('{locale}')
         Route::get('/courses/{slug}', [CourseController::class, 'localizedShow'])->name('localized.courses.show');
         Route::get('/blog', [BlogController::class, 'index'])->name('localized.blog.index');
         Route::get('/blog/{slug}', [BlogController::class, 'localizedShow'])->name('localized.blog.show');
+        Route::get('/ebooks', [EbookController::class, 'index'])->name('localized.ebooks.index');
+        Route::get('/ebooks/{slug}', [EbookController::class, 'localizedShow'])->name('localized.ebooks.show');
+        Route::get('/bootcamps', [BootcampController::class, 'index'])->name('localized.bootcamps.index');
+        Route::get('/bootcamps/{slug}', [BootcampController::class, 'localizedShow'])->name('localized.bootcamps.show');
+        Route::get('/help', [KnowledgeBaseController::class, 'index'])->name('localized.help.index');
+        Route::get('/help/{slug}', [KnowledgeBaseController::class, 'localizedShow'])->name('localized.help.show');
+        Route::get('/help/{slug}/{topicSlug}', [KnowledgeBaseController::class, 'localizedTopic'])->name('localized.help.topic');
+        Route::get('/contact', [ContactController::class, 'create'])->name('localized.contact.create');
+        Route::post('/contact', [ContactController::class, 'store'])
+            ->middleware('throttle:3,1')->name('localized.contact.store');
     });
 
 Route::get('/certificates/verify/{token}', [CertificateController::class, 'verify'])

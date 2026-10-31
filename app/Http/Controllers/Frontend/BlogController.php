@@ -13,9 +13,9 @@ use Illuminate\View\View;
 
 final class BlogController extends Controller
 {
-    public function index(Request $request, string $locale = 'en'): View
+    public function index(Request $request, ?string $locale = null): View
     {
-        $locale = Localization::language($locale);
+        $locale = Localization::resolve($locale);
         App::setLocale($locale);
 
         return view('frontend.default.blog.index', [

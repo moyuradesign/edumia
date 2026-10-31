@@ -14,6 +14,7 @@ final class SettingsRepository
     private const DEFAULTS = [
         'site_name' => 'Edumia',
         'support_email' => '',
+        'default_locale' => 'en',
         'allow_registration' => '1',
         'homepage_notice' => '',
     ];
@@ -38,6 +39,7 @@ final class SettingsRepository
         $values = [
             'site_name' => trim($data['site_name']),
             'support_email' => trim($data['support_email'] ?? ''),
+            'default_locale' => (string) ($data['default_locale'] ?? $this->general()['default_locale']),
             'allow_registration' => ($data['allow_registration'] ?? false) ? '1' : '0',
             'homepage_notice' => trim($data['homepage_notice'] ?? ''),
         ];
