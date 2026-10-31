@@ -1,0 +1,77 @@
+name: Edumia quality checks
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Laravel 13 / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.5']
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, pdo_mysql, xml, tokenizer
+          coverage: none
+
+      - name: Validate Laravel project and PHP source
+        run: |
+          php -v
+          php scripts/verify-source-structure.php
+          find app bootstrap config routes tests scripts database/migrations -type f -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+          composer validate --no-check-publish
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install and build assets
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Verify Laravel routes
+        run: php artisan route:list
+
+      - name: Run feature and architecture tests
+        run: php artisan test
+
+      - name: Verify compiled asset entrypoints
+        run: |
+          php -r '
+          $manifest = json_decode(file_get_contents("public/build/manifest.json"), true, 512, JSON_THROW_ON_ERROR);
+          foreach (["resources/css/app.css", "resources/css/admin.css", "resources/js/app.js", "resources/js/admin.js"] as $source) {
+              if (!isset($manifest[$source]["file"]) || !is_file("public/build/".$manifest[$source]["file"])) {
+                  fwrite(STDERR, "Missing built asset for ".$source.PHP_EOL);
+                  exit(1);
+              }
+          }
+          echo "EDUMIA_ASSETS=PASS\n";
+          '
+
+      - name: Confirm secrets and build outputs are not tracked
+        run: |
+          if git ls-files | grep -E '(^\.env$|^installer/authorize\.txt$|^public/build/)'; then
+            echo 'Source contains prohibited runtime files'
+            exit 1
+          fi
+
+# Milestone: commit tested composer.lock and package-lock.json,
+# then replace composer/npm dependency resolution with frozen installs.
