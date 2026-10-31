@@ -10,7 +10,9 @@ final class AssetManifestTest extends TestCase
 {
     private const ENTRYPOINTS = [
         'resources/css/app.css',
+        'resources/css/admin.css',
         'resources/js/app.js',
+        'resources/js/admin.js',
     ];
 
     private const LAYOUTS = [
@@ -28,6 +30,10 @@ final class AssetManifestTest extends TestCase
             self::assertIsString($source, $layout);
             self::assertStringContainsString('@vite(', $source, $layout);
             self::assertStringNotContainsString("asset('build/assets/", $source, $layout);
+            if (str_contains($layout, 'auth.blade.php') || str_contains($layout, 'panel.blade.php')) {
+                self::assertStringContainsString('resources/css/admin.css', $source);
+                self::assertStringContainsString('resources/js/admin.js', $source);
+            }
         }
     }
 
