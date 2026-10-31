@@ -94,7 +94,7 @@ final class BootcampService
         DB::transaction(function () use ($admin, $bootcamp, $published): void {
             $bootcamp = Bootcamp::query()->lockForUpdate()->findOrFail($bootcamp->getKey());
             if ($published) {
-                if (! $bootcamp->isFree()) {
+                if (! $bootcamp->isFree() && ! app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured()) {
                     throw ValidationException::withMessages([
                         'bootcamp' => 'Paid bootcamps require verified checkout, which is not configured.',
                     ]);

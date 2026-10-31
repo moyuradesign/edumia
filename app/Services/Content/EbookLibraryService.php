@@ -84,7 +84,7 @@ final class EbookLibraryService
         DB::transaction(function () use ($admin, $ebook, $published): void {
             $ebook = Ebook::query()->lockForUpdate()->findOrFail($ebook->getKey());
             if ($published) {
-                if (! $ebook->isFree()) {
+                if (! $ebook->isFree() && ! app(\App\Services\Commerce\StripeCheckoutGateway::class)->configured()) {
                     throw ValidationException::withMessages([
                         'ebook' => 'Paid ebooks require verified checkout, which is not implemented.',
                     ]);

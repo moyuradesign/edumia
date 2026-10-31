@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Commerce;
 
 use App\Models\AuditEvent;
+use App\Models\Bootcamp;
+use App\Models\BootcampPurchase;
 use App\Models\Course;
+use App\Models\Ebook;
+use App\Models\EbookPurchase;
 use App\Models\Enrollment;
 use App\Models\Order;
 use App\Models\User;
@@ -14,42 +18,69 @@ use Illuminate\Support\Str;
 
 final class CourseCheckoutService
 {
+    public function prepare(User $actor, Course $course): Order
+    {
+        return $this->prepareProduct($actor, $course);
+    }
+
+    public function prepareEbook(User $actor, Ebook $ebook): Order
+    {
+        return $this->prepareProduct($actor, $ebook);
+    }
+
+    public function prepareBootcamp(User $actor, Bootcamp $bootcamp): Order
+    {
+        return $this->prepareProduct($actor, $bootcamp);
+    }
+
     /**
-     * Create a price-locked draft order. This does NOT initiate,
-     * verify or record payment and MUST NOT create an enrollment.
+     * Each immutable order holds exactly one product snapshot.
+     * Only the verified gateway fulfillment service can issue an entitlement.
      */
-    public function prepare(User $actor, Course $selected): Order
+    private function prepareProduct(User $actor, Course|Ebook|Bootcamp $product): Order
     {
         abort_unless($actor->isActive(), 403);
 
-        return DB::transaction(function () use ($actor, $selected): Order {
-            // Serialize concurrent requests by the same purchaser, including
-            // requests for the first order (before any order row exists).
+        return DB::transaction(function () use ($actor, $product): Order {
             $customer = User::query()->lockForUpdate()->findOrFail($actor->getKey());
             abort_unless($customer->isActive(), 403);
+            $product = $product->newQuery()->lockForUpdate()->findOrFail($product->getKey());
 
-            $course = Course::query()->lockForUpdate()->findOrFail($selected->getKey());
-            abort_unless($course->status === 'published'
-                && $course->visibility === 'public'
-                && $course->published_at !== null, 404);
-            abort_if($course->isFree(), 422, 'Free courses use the regular enrollment flow.');
+            if ($product instanceof Course) {
+                abort_unless($product->status === 'published' && $product->visibility === 'public'
+                    && $product->published_at !== null, 404);
+                abort_if(Enrollment::query()->where('user_id', $customer->getKey())
+                    ->where('course_id', $product->getKey())->whereIn('status', ['active', 'completed'])
+                    ->exists(), 409, 'Already enrolled.');
+                $key = 'course_id';
+            } elseif ($product instanceof Ebook) {
+                abort_unless($product->status === 'published'
+                    && $product->published_at?->isPast(), 404);
+                abort_if(EbookPurchase::query()->where('user_id', $customer->getKey())
+                    ->where('ebook_id', $product->getKey())->where('status', 'completed')
+                    ->exists(), 409, 'Already in your library.');
+                $key = 'ebook_id';
+            } else {
+                abort_unless($product->status === 'published', 404);
+                abort_if(BootcampPurchase::query()->where('user_id', $customer->getKey())
+                    ->where('bootcamp_id', $product->getKey())->where('status', 'completed')
+                    ->exists(), 409, 'Already enrolled in this cohort.');
+                $key = 'bootcamp_id';
+            }
 
-            abort_if(Enrollment::query()->where('user_id', $customer->getKey())
-                ->where('course_id', $course->getKey())
-                ->whereIn('status', ['active', 'completed'])->exists(), 409, 'Already enrolled.');
+            abort_if($product->isFree(), 422, 'Free items use the regular enrollment or library flow.');
+            $price = (string) $product->price;
+            $currency = $product instanceof Course
+                ? strtoupper((string) $product->currency_code) : 'USD';
 
-            // Eloquent's decimal cast returns a two-decimal string. Avoid
-            // floating-point arithmetic or client-submitted price data.
-            $price = (string) $course->price;
-            $currency = strtoupper((string) $course->currency_code);
             abort_unless(preg_match('/^\d{1,10}\.\d{2}$/D', $price) === 1
-                && $price !== '0.00'
-                && preg_match('/^[A-Z]{3}$/D', $currency) === 1, 422, 'Invalid course price or currency.');
+                && $price !== '0.00' && preg_match('/^[A-Z]{3}$/D', $currency) === 1,
+                422, 'Invalid product price or currency.');
 
             $existing = Order::query()
                 ->where('user_id', $customer->getKey())
                 ->whereIn('status', ['pending', 'awaiting_payment'])
-                ->whereHas('items', fn ($query) => $query->where('course_id', $course->getKey()))
+                ->whereHas('items', fn ($query) => $query->where($key, $product->getKey()))
                 ->lockForUpdate()->get();
 
             foreach ($existing as $order) {
@@ -57,11 +88,9 @@ final class CourseCheckoutService
                     return $order;
                 }
                 if ($order->expires_at?->isFuture()
-                    && $order->currency_code === $currency
-                    && $order->total === $price) {
+                    && $order->currency_code === $currency && $order->total === $price) {
                     return $order;
                 }
-
                 $order->update(['status' => 'expired']);
             }
 
@@ -72,27 +101,21 @@ final class CourseCheckoutService
                 'currency_code' => $currency,
                 'subtotal' => $price,
                 'total' => $price,
-                'expires_at' => now()->addMinutes(30),
+                'expires_at' => now()->addHour(),
             ]);
-
             $order->items()->create([
-                'course_id' => $course->getKey(),
-                'title' => $course->title,
+                $key => $product->getKey(),
+                'title' => $product->title,
                 'quantity' => 1,
                 'unit_price' => $price,
                 'line_total' => $price,
             ]);
-
             AuditEvent::query()->create([
                 'actor_id' => $customer->getKey(),
                 'subject_type' => Order::class,
                 'subject_id' => $order->getKey(),
                 'action' => 'commerce.order_prepared',
-                'new_values' => [
-                    'status' => 'pending',
-                    'currency_code' => $currency,
-                    'total' => $price,
-                ],
+                'new_values' => ['status' => 'pending', 'currency_code' => $currency, 'total' => $price],
             ]);
 
             return $order;
@@ -107,9 +130,7 @@ final class CourseCheckoutService
             $order = Order::query()->lockForUpdate()->findOrFail($selected->getKey());
             abort_unless((int) $order->user_id === (int) $actor->getKey(), 404);
             abort_unless($order->status === 'pending', 409, 'Only pending orders can be cancelled.');
-
             $order->update(['status' => 'cancelled']);
-
             AuditEvent::query()->create([
                 'actor_id' => $actor->getKey(),
                 'subject_type' => Order::class,

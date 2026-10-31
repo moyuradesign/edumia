@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class OrderItem extends Model
 {
-    protected $fillable = ['course_id', 'title', 'quantity', 'unit_price', 'line_total'];
+    protected $fillable = ['course_id', 'ebook_id', 'bootcamp_id', 'title', 'quantity', 'unit_price', 'line_total'];
 
     protected function casts(): array
     {
@@ -24,5 +24,15 @@ final class OrderItem extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function ebook(): BelongsTo
+    {
+        return $this->belongsTo(Ebook::class);
+    }
+
+    public function bootcamp(): BelongsTo
+    {
+        return $this->belongsTo(Bootcamp::class);
     }
 }

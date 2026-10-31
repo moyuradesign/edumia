@@ -12,7 +12,9 @@
 @if($ebook->isFree())
 <form action="{{ route('ebooks.claim', $ebook) }}" method="post">@csrf
 <button class="btn btn-primary" type="submit">Add free ebook to my library</button></form>
-@else<p>Paid checkout has not been enabled. This ebook cannot be purchased yet.</p>@endif
+@else
+<form method="post" action="{{ route('checkout.ebooks.store', $ebook) }}">@csrf
+<button class="btn btn-primary" type="submit">Review ebook order</button></form>@endif
 @else<p><a href="{{ route('login') }}">Sign in</a> to add a free ebook to your library.</p>@endif
 </article></div></section>
 @endsection

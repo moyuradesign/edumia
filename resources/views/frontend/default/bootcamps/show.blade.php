@@ -19,7 +19,9 @@
 @if($bootcamp->isFree())
 <form method="post" action="{{ route('bootcamps.enroll', $bootcamp) }}">@csrf
 <button class="btn btn-primary" type="submit">Enroll in free cohort</button></form>
-@else<p>Paid checkout is not yet enabled for bootcamps.</p>@endif
+@else
+<form method="post" action="{{ route('checkout.bootcamps.store', $bootcamp) }}">@csrf
+<button class="btn btn-primary" type="submit">Review bootcamp order</button></form>@endif
 @else<a href="{{ route('login') }}">Sign in to enroll</a>@endif
 </article></div></section>
 @endsection

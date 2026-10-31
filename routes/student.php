@@ -49,6 +49,8 @@ Route::middleware(['auth', 'active'])->group(function (): void {
         ->middleware('throttle:5,1')->name('course-reviews.store');
 
     Route::get('/checkout/orders', [CheckoutController::class, 'index'])->name('checkout.orders.index');
+    Route::post('/checkout/ebooks/{ebook}', [CheckoutController::class, 'ebook'])->middleware('throttle:6,1')->name('checkout.ebooks.store');
+    Route::post('/checkout/bootcamps/{bootcamp}', [CheckoutController::class, 'bootcamp'])->middleware('throttle:6,1')->name('checkout.bootcamps.store');
     Route::post('/checkout/courses/{course}', [CheckoutController::class, 'store'])->middleware('throttle:6,1')->name('checkout.orders.store');
     Route::post('/checkout/orders/{order}/pay', [PaymentController::class, 'start'])->middleware('throttle:5,1')->name('checkout.orders.pay');
     Route::get('/checkout/orders/{order}', [CheckoutController::class, 'show'])->name('checkout.orders.show');
