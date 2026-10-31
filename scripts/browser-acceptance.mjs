@@ -203,6 +203,20 @@ async function browse(scenario) {
     verify(await menuCategories.getAttribute('open') !== null, 'Categories mega menu did not open');
     verify(await page.locator('.premium-mega-menu a[href$="/bootcamps"]').count() >= 1,
       'Mega menu is missing learning links');
+    if (mobile) {
+      await menuCategories.locator('summary').click();
+      if (!(await page.locator('#primary-navigation').isVisible())) {
+        await page.locator('.site-header .menu-toggle').click();
+      }
+    }
+    const menuBefore = await page.evaluate(() => ({
+      categories: document.querySelector('[data-header-details="categories"]')?.open,
+      profile: document.querySelector('[data-header-details="profile"]')?.open,
+      navOpen: document.querySelector('#primary-navigation')?.classList.contains('is-open'),
+      profileInNav: document.querySelector('#primary-navigation')?.contains(document.querySelector('[data-header-details="profile"]')),
+      width: window.innerWidth
+    }));
+    console.log('EDUMIA_HEADER_MENU_BEFORE=' + JSON.stringify(menuBefore));
     await menuProfile.locator('summary').click();
     const detailsState = await page.evaluate(() => ({
       categories: document.querySelector('[data-header-details="categories"]')?.open,
