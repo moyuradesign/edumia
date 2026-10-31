@@ -32,7 +32,7 @@ A schema table does not mean the corresponding marketplace, payment, bootcamp, t
 
 ## Current rebuild: asset contract
 
-Three Blade layouts use Laravel `@vite(['resources/css/app.css', 'resources/js/app.js'])` instead of fixed output filenames. Production bundles are hashed by Vite. `public/build/` is generated and excluded from source control; it must be regenerated for each release.
+Three Blade layouts use Laravel `@vite(['resources/css/frontend/app.css', 'resources/js/frontend/app.js'])` instead of fixed output filenames. Production bundles are hashed by Vite. `public/build/` is generated and excluded from source control; it must be regenerated for each release.
 
 Example developer setup in an **isolated** working directory:
 
