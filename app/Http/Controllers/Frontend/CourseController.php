@@ -1,6 +1,6 @@
 <?php
 namespace App\Http\Controllers\Frontend;
-use App\Helpers\Common_helper as Text;
+use App\Helpers\Localization as Text;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
