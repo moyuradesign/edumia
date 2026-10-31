@@ -35,7 +35,7 @@ foreach ($app as $file) {
 
     $expectedNamespace = str_replace('/', '\\', dirname($path));
     $expectedNamespace = preg_replace('/^app(?=\\\\|$)/', 'App', $expectedNamespace);
-    if (! preg_match('/\bnamespace\s+([\\A-Za-z0-9_]+)\s*;/', $source, $m)) {
+    if (! preg_match('/\\bnamespace\\s+([^;]+)\\s*;/', $source, $m)) {
         $errors[] = $path.': missing namespace declaration';
     } elseif ($m[1] !== $expectedNamespace) {
         $errors[] = $path.': namespace '.$m[1].' should be '.$expectedNamespace;
