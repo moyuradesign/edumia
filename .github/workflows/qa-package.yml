@@ -24,7 +24,7 @@ permissions:
 jobs:
   qa-package:
     name: Build and test development snapshot
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     services:
       mysql:
