@@ -13,7 +13,7 @@ Edumia is being rebuilt as an original, commercially distributable Laravel 13 le
 
 ## Audit of the current repository (2026-10-31)
 
-The existing repository contains approximately 96 schema migrations and only 11 application models with 14 controllers. Implemented controller workflows cover basic registration/login, user roles, a course workflow, student enrollment, lessons, quizzes and certificates. Database tables for other product areas **do not constitute implemented modules**. The platform is not yet CodeCanyon-ready.
+The initial repository contained approximately 96 schema migrations, but far fewer implemented models/controllers than advertised feature areas; the rebuild is adding modules with actual controllers, requests and tests. Implemented controller workflows cover basic registration/login, user roles, a course workflow, student enrollment, lessons, quizzes and certificates. Database tables for other product areas **do not constitute implemented modules**. The platform is not yet CodeCanyon-ready.
 
 Observed structural and product risks:
 
@@ -23,7 +23,7 @@ Observed structural and product risks:
 4. Role enforcement uses a single `role` field; the schema includes permissions but granular role/permission administration is not delivered.
 5. Existing domain controllers combine HTTP validation, state transitions and persistence. Introduce Form Requests, policies, transactional application services and domain events.
 6. Documentation is stale and even contradicts the deployed authentication and first-admin installer capabilities. Documentation must be generated/reviewed alongside features.
-7. Composer/npm dependency lockfiles are absent from source control. Each approved distributable build must pin, audit and retain resolved dependencies.
+7. This was a deficiency in the initial repository: Composer/npm lockfiles were absent. Both are now committed; every distributable build must use and audit the pinned dependencies.
 8. Installer is a standalone removable directory. It has passed fresh-database QA, but licensing and purchase-code verification are **not** implemented; its current field is an authorization secret, not an Envato purchase code.
 9. No release pipeline yet proves clean installation, upgrades, assets, authorizations, email, background jobs, content safety, refunds or cross-role isolation on a complete platform.
 
