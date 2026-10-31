@@ -10,7 +10,7 @@
 <label>Summary<textarea name="summary" rows="3" maxlength="2000">{{ old('summary',$course->summary) }}</textarea></label>
 <label>Description<textarea name="description" rows="5" maxlength="20000">{{ old('description',$course->description) }}</textarea></label>
 <div class="form-two"><label>Category<select name="category_id"><option value="">Uncategorized</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected(old('category_id',$course->category_id)==$category->id)>{{ $category->name }}</option>@endforeach</select></label>
-<label>Teaching language<select name="language_code">@foreach(\App\Helpers\Common_helper::LANGUAGES as $code=>$name)<option value="{{ $code }}" @selected(old('language_code',$course->language_code??'en')===$code)>{{ $name }}</option>@endforeach</select></label></div>
+<label>Teaching language<select name="language_code">@foreach(\App\Helpers\Localization::LANGUAGES as $code=>$name)<option value="{{ $code }}" @selected(old('language_code',$course->language_code??'en')===$code)>{{ $name }}</option>@endforeach</select></label></div>
 <p class="subtle">Edumia currently supports free enrollments only. Paid checkout is not enabled.</p>
 <button class="btn btn-primary">{{ $course->exists?'Save changes':'Create course draft' }}</button></form>
 @if($course->exists)<p class="subtle">Status: <strong>{{ ucfirst($course->status) }}</strong> · Public slug: {{ $course->slug }}</p>
