@@ -28,7 +28,7 @@ class CourseController extends Controller
 
     public function show(Request $request, string $slug): View
     {
-        return $this->renderShow($slug, 'en');
+        return $this->renderShow($slug, Text::resolve());
     }
 
     public function localizedShow(Request $request, string $locale, string $slug): View

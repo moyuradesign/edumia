@@ -27,7 +27,7 @@ final class BlogController extends Controller
 
     public function show(Request $request, string $slug): View
     {
-        return $this->render($slug, 'en');
+        return $this->render($slug, Localization::resolve());
     }
 
     public function localizedShow(Request $request, string $locale, string $slug): View
