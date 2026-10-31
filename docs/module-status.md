@@ -36,6 +36,7 @@ For a complete, explicit list of missing and partially implemented features, see
 | Delegated role governance | `app/Services/Identity/RoleManagementService.php`, `app/Http/Middleware/EnsurePermission.php` | `resources/views/admin/users/roles/` | Limited whitelisted Help Center delegation; not yet a complete platform-wide permissions framework |
 | Bootcamp cohorts (free) | `app/Services/Learning/BootcampService.php` | `resources/views/{instructor/bootcamps,admin/courses/bootcamps,student/bootcamps}/` | Cohorts, modules, sessions, free enrollment with capacity; paid and attendance incomplete |
 | Learning reports | `app/Http/Controllers/{Admin/Reports,Instructor}/` | `resources/views/{admin/reports,instructor/reports}/` | Read-only enrollment/completion analytics; advanced/financial reports incomplete |
+| Course checkout foundations | `app/Services/Commerce/CourseCheckoutService.php`, `app/Models/{Order,OrderItem}.php` | Learner order review/history/cancel; admin read-only order list | Transactional price snapshots, 30-minute quote lifetime, ownership, repeat-request deduplication and audit events. **Unpaid orders never grant access; payment integration is not implemented.** |
 | Support tickets | `app/Http/Controllers/{Student/Support,Admin/Support}/TicketController.php`, `app/Services/Support/TicketService.php` | `resources/views/{student/support/tickets,admin/support/tickets}/` | Learner ownership, ticket reply, private internal notes and status tests added; verify latest CI before acceptance |
 | Runtime diagnostics | `app/Console/Commands/HealthCheckCommand.php` | `php artisan edumia:health --json` | Safe configuration, DB, asset and installer-status checks |
 | Asset build governance | `resources/css/{frontend,admin}/app.css`, `resources/js/{frontend,admin}/app.js` | Vite manifest, modular JS, CI | Exactly two first-party CSS source files and two JS entrypoints; production artifact paths are resolved via `@vite` |
@@ -88,7 +89,7 @@ No empty PHP files are created merely to make the tree look large.
 
 ## Outstanding full-platform modules
 
-Database tables for orders and payments, coupon/redemption logic, payment providers/webhooks, payouts/refunds, paid ebooks, bootcamps, tutor bookings, live conferencing integrations, advanced grading, file attachments for assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.
+Order preparation and read-only ledger are implemented, but gateway transactions, coupon/redemption logic, payment providers/webhooks, payouts/refunds, paid ebooks, bootcamps, tutor bookings, live conferencing integrations, advanced grading, file attachments for assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.
 
 ## Integrated QA on a disposable environment
 

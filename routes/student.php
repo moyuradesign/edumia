@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Student\EnrollmentController;
+use App\Http\Controllers\Student\CheckoutController;
 use App\Http\Controllers\Student\InstructorApplicationController;
 use App\Http\Controllers\Student\AssignmentController;
 use App\Http\Controllers\Student\CourseWishlistController;
@@ -45,6 +46,11 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::delete('/saved-courses/{course}', [CourseWishlistController::class, 'destroy'])->name('saved-courses.destroy');
     Route::post('/courses/{course}/reviews', [CourseReviewController::class, 'store'])
         ->middleware('throttle:5,1')->name('course-reviews.store');
+
+    Route::get('/checkout/orders', [CheckoutController::class, 'index'])->name('checkout.orders.index');
+    Route::post('/checkout/courses/{course}', [CheckoutController::class, 'store'])->middleware('throttle:6,1')->name('checkout.orders.store');
+    Route::get('/checkout/orders/{order}', [CheckoutController::class, 'show'])->name('checkout.orders.show');
+    Route::patch('/checkout/orders/{order}/cancel', [CheckoutController::class, 'cancel'])->middleware('throttle:6,1')->name('checkout.orders.cancel');
 
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->middleware('throttle:12,1')->name('enrollments.store');
 

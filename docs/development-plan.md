@@ -102,7 +102,7 @@ The 96 existing migrations describe potential entities, not 96 finished features
 | Basic authentication | Controllers and tests exist | Email/reset delivery, real browser/security acceptance, consistent architecture |
 | Core courses | Basic controllers, models and migrations | Full editor, moderation lifecycle, media, revisions, authorization and UX |
 | Quizzes/certificates | Basic services and tests | Question banks, grading policy, anti-abuse, PDF/output and operational audits |
-| Financial flows | Schema only | Services, UI, providers, webhooks, invoices, refunds, payouts and tests |
+| Financial flows | Paid-course pending-order creation, immutable price snapshot, expiry/cancel and read-only order history/administrator ledger with tests | Payment provider adapters, verified webhooks, confirmed entitlements, settlement, coupons/tax, invoices, refunds, payouts and test evidence. No checkout payment or enrollment activation yet |
 | Instructor marketplace | Schema only for tutoring/bootcamps/ebooks | All workflows and interfaces |
 | Admin modules | Basic dashboard and user role update | Full settings, media, CMS, users, analytics, finance and support |
 | Localization | Eight-language helper labels and URL patterns | Translation manager, full coverage, date/number formatting, content localization |

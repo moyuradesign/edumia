@@ -11,7 +11,11 @@
 @if(auth()->check())
 @if(auth()->user()->enrollments()->where('course_id',$course->id)->exists())<a class="btn btn-primary btn-block" href="{{ route('learning.course',$course) }}">Continue learning</a>
 @elseif($course->isFree())<form action="{{ route('enrollments.store',$course) }}" method="post">@csrf<button class="btn btn-primary btn-block">Enroll for free</button></form>
-@else<p>Enrollment unavailable until secure checkout is enabled.</p>@endif
+@else
+<p>Secure payments are not yet available. You may prepare a price quote without paying or receiving access.</p>
+<form action="{{ route('checkout.orders.store', $course) }}" method="post">@csrf
+<button type="submit" class="btn btn-primary btn-block">Review pending order</button></form>
+@endif
 @else<a class="btn btn-primary btn-block" href="{{ route('login') }}">Sign in to enroll</a>@endif
 @auth
 @if($saved)
