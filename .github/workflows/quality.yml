@@ -39,6 +39,11 @@ jobs:
       - name: Validate Composer manifest
         run: composer validate --no-check-publish
 
+      - name: Ensure lockfiles are committed
+        run: |
+          test -s composer.lock
+          test -s package-lock.json
+
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
 
@@ -49,7 +54,7 @@ jobs:
 
       - name: Install and build assets
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build
 
       - name: Verify Laravel routes
@@ -78,5 +83,4 @@ jobs:
             exit 1
           fi
 
-# Milestone: commit tested composer.lock and package-lock.json,
-# then replace composer/npm dependency resolution with frozen installs.
+# All builds use the versioned Composer and npm lockfiles.
