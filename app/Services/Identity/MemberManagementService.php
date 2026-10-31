@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Identity;
 
+use App\Enums\AccountStatus;
+use App\Enums\UserRole;
 use App\Models\AuditEvent;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -19,8 +21,8 @@ final class MemberManagementService
             // Lock active administrators in a consistent order so concurrent
             // role changes cannot remove the last active administrator.
             $activeAdministrators = User::query()
-                ->where('role', 'admin')
-                ->where('status', 'active')
+                ->where('role', UserRole::Administrator->value)
+                ->where('status', AccountStatus::Active->value)
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->pluck('id');
@@ -29,7 +31,7 @@ final class MemberManagementService
             $before = $member->only(['role', 'status']);
 
             if ($member->isAdmin()
-                && ($attributes['role'] !== 'admin' || $attributes['status'] !== 'active')) {
+                && ($attributes['role'] !== UserRole::Administrator->value || $attributes['status'] !== AccountStatus::Active->value)) {
                 abort_if(
                     $activeAdministrators->count() < 2,
                     422,
