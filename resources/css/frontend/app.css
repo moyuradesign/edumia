@@ -1934,15 +1934,21 @@ body:has(.site-error-page) > main#content {
   box-shadow: none;
 }
 .site-error-icon {
-  display: grid;
-  place-items: center;
-  width: 68px;
-  height: 68px;
-  margin: 0 auto 17px;
-  color: var(--accent);
+  display: block;
+  width: min(100%, 420px);
+  height: auto;
+  margin: 0 auto clamp(14px, 2.5vh, 22px);
+  color: var(--ink);
   background: transparent;
+  line-height: 0;
 }
-.site-error-icon svg { width: 48px; height: 48px; }
+.site-error-artwork {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 420 / 188;
+  overflow: visible;
+}
 .site-error-kicker {
   margin: 0;
   font-size: 12px;

@@ -145,6 +145,8 @@ final class WorkspaceAudienceAndGlobalErrorTest extends TestCase
             ->assertSee('404 · Not found')
             ->assertSee('class="site-error-page"', false)
             ->assertSee('class="site-error-content"', false)
+            ->assertSee('class="site-error-artwork"', false)
+            ->assertSee('viewBox="0 0 420 188"', false)
             ->assertDontSee('site-error-card')
             ->assertSee('data-premium-header', false)
             ->assertSee('class="site-footer premium-footer"', false)
