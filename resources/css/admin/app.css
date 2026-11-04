@@ -1333,3 +1333,20 @@ progress {
   .member-course-symbol { flex-basis: 44px; width: 44px; height: 44px; }
   .member-filter-form input, .member-filter-form select, .member-filter-form button { flex: 1 1 100%; width: 100%; }
 }
+
+
+/* Role-specific member directories; uses existing premium admin design tokens. */
+.member-shortcuts { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.member-workspace .member-record-summary { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.member-workspace .member-record-list { display: grid; gap: 12px; }
+.member-workspace .member-record-list .admin-widget { margin: 0; }
+.member-workspace .member-person { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.member-workspace .member-person-avatar { display: grid; place-items: center; flex: 0 0 36px;
+  height: 36px; border-radius: 11px; background: var(--soft); color: var(--accent);
+  font-weight: 800; font-size: 13px; }
+.member-workspace .member-person strong { display: block; overflow-wrap: anywhere; }
+.member-workspace .member-person small { display: block; color: var(--muted); }
+.member-workspace .member-record-list .admin-table { min-width: 650px; }
+@media (max-width: 1200px) { .member-shortcuts { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+@media (max-width: 850px) { .member-shortcuts { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 420px) { .member-shortcuts { grid-template-columns: repeat(2,minmax(0,1fr)); } }

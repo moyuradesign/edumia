@@ -1,48 +1,29 @@
-<!doctype html>
-<html lang="en" data-theme="light">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Page not found · Edumia</title>
-    <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')==='dark'?'dark':'light'}catch(e){}</script>
-    <style>
-        :root{color-scheme:light;--bg:#f5f7fc;--surface:#fff;--ink:#1c2540;--muted:#63708a;--line:#e1e7f1;--accent:#c74410;--blue:#224db5}
-        :root[data-theme=dark]{color-scheme:dark;--bg:#0e1626;--surface:#161f30;--ink:#f4f7ff;--muted:#a5b4cc;--line:#303c51;--accent:#ff9c60;--blue:#9dbaff}
-        *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-        a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
-        .wrap{min-height:100vh;display:flex;flex-direction:column;max-width:1160px;margin:auto;padding:26px clamp(20px,5vw,58px)}
-        .brand{display:inline-flex;align-items:center;gap:11px;width:max-content;font-weight:800;font-size:22px}
-        .brand-mark{display:grid;place-items:center;background:linear-gradient(145deg,#fa873b,#c74710);width:43px;height:43px;border-radius:13px;color:#fff}
-        main{display:grid;place-items:center;flex:1;padding:45px 0}
-        .card{width:min(100%,720px);padding:clamp(30px,6vw,70px);background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:0 22px 70px #101d3b12;text-align:center}
-        .symbol{display:grid;place-items:center;width:82px;height:82px;margin:0 auto 22px;background:#fff0e6;color:#c74710;border-radius:24px}
-        [data-theme=dark] .symbol{background:#432b20;color:#ffba8f}
-        .eyebrow{color:var(--accent);font-size:12px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}
-        h1{margin:12px 0;font-size:clamp(36px,6vw,58px);line-height:1.14;letter-spacing:-.05em}
-        p{margin:0 auto 30px;color:var(--muted);max-width:430px}
-        .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
-        .action{padding:13px 21px;border-radius:12px;font-size:14px;font-weight:800;border:1px solid var(--line)}
-        .action-primary{background:#c74410;color:#fff;border-color:#c74410}
-        .action:hover{transform:translateY(-1px)}
-        footer{text-align:center;color:var(--muted);font-size:13px;padding:12px 0}
-    </style>
-</head>
-<body>
-<div class="wrap">
-    <header><a class="brand" href="{{ url('/') }}" aria-label="Edumia homepage">
-        <span class="brand-mark" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 14 20 6l15 8-15 8L5 14Z"/><path d="M11 19v10c6 4 12 4 18 0V19"/><path d="M35 14v12"/></svg></span> Edumia</a></header>
-    <main id="content"><section class="card" aria-labelledby="missing-heading">
-        <div class="symbol" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9h19l7 7v24H12z"/><path d="M31 9v8h7M20 27h12M20 33h8"/><circle cx="13" cy="12" r="7" fill="currentColor" stroke="none"/></svg></div>
-        <span class="eyebrow">404 · Not found</span>
-        <h1 id="missing-heading">Page not found</h1>
-        <p>The page you're looking for doesn't exist or has moved.</p>
-        <div class="actions">
-            <a class="action action-primary" href="{{ url('/') }}">Go to homepage</a>
-            <a class="action" href="{{ url('/courses') }}">Browse courses</a>
-            @auth<a class="action" href="{{ url('/dashboard') }}">My dashboard</a>@endauth
+@extends('layouts.default')
+@section('title', 'Page not found · Edumia')
+@section('robots', 'noindex, follow')
+@section('content')
+<section class="site-error-page" aria-labelledby="page-not-found-title">
+    <div class="container">
+        <div class="site-error-card">
+            <span class="site-error-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 7h19l7 7v27H12z"/>
+                    <path d="M31 7v8h7M19 26h12M19 33h9"/>
+                    <circle cx="13" cy="12" r="5" fill="currentColor" stroke="none"/>
+                </svg>
+            </span>
+            <p class="site-error-kicker">404 · PAGE NOT FOUND</p>
+            <h1 id="page-not-found-title">Page not found</h1>
+            <p class="site-error-description">The page you're looking for doesn't exist or has moved.</p>
+            <div class="site-error-actions">
+                <a class="site-error-action site-error-action--primary" href="{{ route('home') }}">Go to homepage</a>
+                <a class="site-error-action" href="{{ route('courses.index') }}">Browse courses</a>
+                @auth
+                    <a class="site-error-action" href="{{ route('dashboard') }}">My dashboard</a>
+                @endauth
+            </div>
         </div>
-    </section></main>
-    <footer>Edumia · © {{ date('Y') }}</footer>
-</div>
-</body></html>
+    </div>
+</section>
+@endsection

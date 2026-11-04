@@ -13,7 +13,7 @@
     </div>
     <div class="admin-stats" aria-label="Instructor overview">
         <a class="admin-stat" href="{{ route('instructor.courses.index') }}"><span class="admin-stat-top"><span>My courses</span><span class="admin-stat-icon admin-stat-icon--blue" aria-hidden="true">▣</span></span><strong>{{ $courses->count() }}</strong><small>All course drafts and publications</small></a>
-        <a class="admin-stat" href="{{ route('instructor.reports.index') }}"><span class="admin-stat-top"><span>Course enrollments</span><span class="admin-stat-icon admin-stat-icon--mint" aria-hidden="true">◎</span></span><strong>{{ number_format($enrollments) }}</strong><small>Enrollment records</small></a>
+        <a class="admin-stat" href="{{ route('instructor.students.index') }}"><span class="admin-stat-top"><span>Course enrollments</span><span class="admin-stat-icon admin-stat-icon--mint" aria-hidden="true">◎</span></span><strong>{{ number_format($enrollments) }}</strong><small>Enrollment records</small></a>
         <a class="admin-stat" href="{{ route('instructor.courses.index', ['status' => 'published']) }}"><span class="admin-stat-top"><span>Published courses</span><span class="admin-stat-icon admin-stat-icon--orange" aria-hidden="true">✓</span></span><strong>{{ $courses->where('status', 'published')->count() }}</strong><small>Available in the catalog</small></a>
         <a class="admin-stat" href="{{ route('instructor.courses.index', ['status' => 'draft']) }}"><span class="admin-stat-top"><span>Draft courses</span><span class="admin-stat-icon admin-stat-icon--violet" aria-hidden="true">✎</span></span><strong>{{ $courses->where('status', 'draft')->count() }}</strong><small>Not yet submitted for review</small></a>
     </div>
@@ -25,6 +25,8 @@
         <a href="{{ route('instructor.bootcamps.index') }}"><span aria-hidden="true">▦</span><strong>Bootcamps</strong><small>Programs & sessions</small></a>
         <a href="{{ route('instructor.reports.index') }}"><span aria-hidden="true">▥</span><strong>Reports</strong><small>Student activity</small></a>
         <a href="{{ route('instructor.earnings.index') }}"><span aria-hidden="true">◈</span><strong>Earnings</strong><small>Verified entries only</small></a>
+        <a href="{{ route('instructor.students.index') }}"><span aria-hidden="true">◎</span><strong>My students</strong><small>Course enrollments</small></a>
+        <a href="{{ route('account.preferences.edit') }}"><span aria-hidden="true">⚙</span><strong>My profile</strong><small>Teaching preferences</small></a>
     </div>
     <section class="admin-widget" aria-labelledby="instructor-course-title">
         <div class="admin-widget-heading"><div><span class="admin-widget-kicker">COURSE MANAGEMENT</span><h2 id="instructor-course-title">Your courses</h2><p>Review and edit your most recent courses.</p></div><a href="{{ route('instructor.courses.index') }}">View all courses ↗</a></div>

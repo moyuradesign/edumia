@@ -1,12 +1,28 @@
 @php
     $siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'];
+
+    // The route selects the workspace, not the logged-in user's highest privilege.
+    // Keep the existing administrator dashboard and its navigation unchanged.
+    $adminWorkspace = auth()->user()->isAdmin()
+        && (request()->routeIs('dashboard') || request()->routeIs('admin.*'));
+
+    $explicitStudentWorkspace = request()->routeIs(
+        'account.home', 'account.courses', 'account.certificates'
+    );
+    $memberAudience = request()->routeIs('instructor.*')
+        ? 'instructor'
+        : ($explicitStudentWorkspace
+            ? 'student'
+            : (auth()->user()->canTeach() && !auth()->user()->isAdmin()
+                ? 'instructor'
+                : 'student'));
 @endphp
 <!doctype html>
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title','Dashboard') · {{ $siteName }}</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')||'light'}catch(e){}</script>
 @vite(['resources/css/frontend/app.css', 'resources/css/admin/app.css', 'resources/js/frontend/app.js', 'resources/js/admin/app.js'])
-</head>@if(auth()->user()->isAdmin())
+</head>@if($adminWorkspace)
 <body class="panel-page admin-workspace">
 <a class="skip-link" href="#admin-main">Skip to main content</a>
 <div class="admin-shell" data-admin-shell>
@@ -33,7 +49,7 @@
             @if($errors->any())<div class="flash error" role="alert"><strong>Please review:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
             @yield('content')
         </main>
-        <footer class="admin-footer"><span>{{ $siteName }} · {{ auth()->user()->canTeach() ? 'Instructor workspace' : 'Student workspace' }}</span><span>© {{ date('Y') }}</span></footer>
+        <footer class="admin-footer"><span>{{ $siteName }} · {{ $memberAudience === 'instructor' ? 'Instructor workspace' : 'Student workspace' }}</span><span>© {{ date('Y') }}</span></footer>
     </div>
 </div>
 @endif

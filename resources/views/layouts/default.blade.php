@@ -8,6 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
+    @hasSection('robots')<meta name="robots" content="@yield('robots')">@endif
     <meta name="description" content="{{ $siteName }} — Learning Management System">
     <title>@yield('title', $siteName.' — Learning Management System')</title>
     <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')==='dark'?'dark':'light'}catch(e){}</script>

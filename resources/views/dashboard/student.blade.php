@@ -27,7 +27,7 @@
             <span class="admin-stat-top"><span>Passed quizzes</span><span class="admin-stat-icon admin-stat-icon--orange" aria-hidden="true">◉</span></span>
             <strong>{{ number_format($passed) }}</strong><small>Recorded passed attempts</small>
         </div>
-        <a class="admin-stat" href="#member-certificates">
+        <a class="admin-stat" href="{{ route('account.certificates') }}">
             <span class="admin-stat-top"><span>Certificates</span><span class="admin-stat-icon admin-stat-icon--violet" aria-hidden="true">✧</span></span>
             <strong>{{ number_format($certificates->count()) }}</strong><small>Available to view</small>
         </a>
@@ -40,6 +40,8 @@
         <a href="{{ route('bootcamps.my') }}"><span aria-hidden="true">▦</span><strong>Bootcamps</strong><small>Joined programs</small></a>
         <a href="{{ route('saved-courses.index') }}"><span aria-hidden="true">☆</span><strong>Saved courses</strong><small>Your wishlist</small></a>
         <a href="{{ route('checkout.orders.index') }}"><span aria-hidden="true">▤</span><strong>My orders</strong><small>Purchase history</small></a>
+        <a href="{{ route('account.certificates') }}"><span aria-hidden="true">✧</span><strong>Certificates</strong><small>Your achievements</small></a>
+        <a href="{{ route('account.preferences.edit') }}"><span aria-hidden="true">⚙</span><strong>My profile</strong><small>Account preferences</small></a>
         <a href="{{ route('support.tickets.index') }}"><span aria-hidden="true">✉</span><strong>Support</strong><small>Your support tickets</small></a>
     </div>
 
@@ -73,7 +75,7 @@
     </section>
 
     <section class="admin-widget" id="member-certificates" aria-labelledby="member-certificates-title">
-        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">ACHIEVEMENTS</span><h2 id="member-certificates-title">Certificates</h2><p>Certificates issued for completed learning.</p></div></div>
+        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">ACHIEVEMENTS</span><h2 id="member-certificates-title">Certificates</h2><p>Certificates issued for completed learning.</p></div><a href="{{ route('account.certificates') }}">View all certificates ↗</a></div>
         @if($certificates->isEmpty())
             <div class="admin-empty"><span aria-hidden="true">✧</span><strong>No certificates yet</strong><p>Your certificates will appear here when they are awarded.</p></div>
         @else
