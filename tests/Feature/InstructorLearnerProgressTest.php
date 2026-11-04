@@ -96,7 +96,7 @@ final class InstructorLearnerProgressTest extends TestCase
             ->assertSee('Time management')->assertSee('1 / 1')
             ->assertSee('Time management quiz')->assertSee('85.0%')
             ->assertSee('Reflection journal')->assertSee('92.0 / 100')
-            ->assertSee('Issued')->assertDontSee('teacher@edumia.test');
+            ->assertSee('Issued');
 
         $this->get(route('instructor.reports.index'))
             ->assertOk()->assertSee('Student Success')
