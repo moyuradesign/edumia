@@ -1,28 +1,91 @@
 @extends('layouts.panel')
 @section('title', 'Commerce accounting')
 @section('content')
-<div class="panel-heading"><div><span class="section-kicker">FINANCE & RECONCILIATION</span><h1>Commerce accounting</h1>
-<p>Read-only internal reconciliation. No automatic payout, refund initiation, or currency conversion is enabled.</p></div></div>
-<form method="post" action="{{ route('admin.commerce.accounting.reconcile') }}">@csrf
-<button class="btn btn-primary" type="submit">Scan local financial records</button></form>
-<section class="panel-card"><h2>Review exceptions</h2><div class="report-grid">
-@foreach($issues as $key => $count)<div class="builder-section"><p>{{ ucwords(str_replace('_',' ',$key)) }}</p><h2>{{ $count }}</h2></div>@endforeach
-</div><p>These checks compare local records only; provider settlement and bank statements require a separate reconciliation process.</p></section>
-<section class="panel-card"><h2>Invoice records</h2><div class="table-scroll"><table>
-<thead><tr><th>Number</th><th>Customer</th><th>Gross</th><th>Refunded</th><th>Status</th></tr></thead>
-<tbody>@forelse($invoices as $invoice)<tr><td>{{ $invoice->number }}</td><td>{{ $invoice->customer_email }}</td>
-<td>{{ \App\Helpers\Localization::minorMoney((int) ($invoice->total_minor), $invoice->currency_code, \App\Helpers\Localization::resolve()) }}</td>
-<td>{{ \App\Helpers\Localization::minorMoney((int) ($invoice->refunded_minor), $invoice->currency_code, \App\Helpers\Localization::resolve()) }}</td><td>{{ $invoice->status }}</td></tr>
-@empty<tr><td colspan="5">No verified paid orders yet.</td></tr>@endforelse</tbody></table></div>{{ $invoices->links() }}</section>
-<section class="panel-card"><h2>Held instructor earnings</h2><div class="table-scroll"><table>
-<thead><tr><th>Instructor ID</th><th>Currency</th><th>Net held</th></tr></thead>
-<tbody>@forelse($earnings as $earning)<tr><td>{{ $earning->instructor_id }}</td>
-<td>{{ $earning->currency_code }}</td><td>{{ \App\Helpers\Localization::minorMoney((int) ($earning->net_held_minor), $earning->currency_code, \App\Helpers\Localization::resolve()) }}</td></tr>
-@empty<tr><td colspan="3">No earnings recorded.</td></tr>@endforelse</tbody></table></div>
-<p>Balances are held accounting entries only. They are not available for withdrawal or transfer.</p></section>
-<section class="panel-card"><h2>Payout record ledger</h2><div class="table-scroll"><table>
-<thead><tr><th>Instructor</th><th>Amount</th><th>Status</th></tr></thead>
-<tbody>@forelse($payouts as $payout)<tr><td>{{ $payout->instructor_id }}</td>
-<td>{{ \App\Helpers\Localization::minorMoney((int) ($payout->amount_minor), $payout->currency_code, \App\Helpers\Localization::resolve()) }}</td><td>{{ $payout->status }}</td></tr>
-@empty<tr><td colspan="3">No payout records. Disbursements are disabled.</td></tr>@endforelse</tbody></table></div></section>
+<section class="admin-accounting-workspace" aria-labelledby="admin-accounting-heading">
+    <div class="admin-welcome">
+        <div>
+            <span class="admin-eyebrow">FINANCE & RECONCILIATION</span>
+            <h1 id="admin-accounting-heading">Commerce accounting</h1>
+            <p>Inspect verified orders, local reconciliation exceptions, and held instructor earnings.</p>
+        </div>
+        <div class="admin-welcome-actions">
+            <a class="admin-action-secondary" href="{{ route('admin.commerce.orders.index') }}">All orders</a>
+            <a class="admin-action-secondary" href="{{ route('admin.commerce.refunds.index') }}">Refund reviews</a>
+            <form method="post" action="{{ route('admin.commerce.accounting.reconcile') }}">
+                @csrf <button class="admin-action-primary" type="submit">Scan local records</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="admin-accounting-notice" role="note">
+        <strong>Reconciliation scope</strong>
+        <p>This is a read-only view of internal financial records. The scan compares local records only; external provider settlement and bank statements require independent verification. No automatic payouts, refund initiation, or currency conversion are enabled.</p>
+    </div>
+
+    <section class="admin-widget" aria-labelledby="admin-accounting-exceptions">
+        <div class="admin-widget-heading">
+            <div><span class="admin-widget-kicker">INTEGRITY MONITORING</span><h2 id="admin-accounting-exceptions">Review exceptions</h2>
+                <p>Record consistency checks and dispute history.</p></div>
+        </div>
+        @php
+            $issueLabels = [
+                'paid_missing_invoice' => 'Verified orders missing invoices',
+                'paid_missing_payment_record' => 'Missing payment history',
+                'paid_missing_earning_entry' => 'Missing earning entries',
+                'open_disputes' => 'Dispute records',
+            ];
+        @endphp
+        <div class="admin-accounting-issues">
+            @foreach($issues as $key => $count)
+                <div class="admin-accounting-issue">
+                    <span>{{ $issueLabels[$key] ?? ucwords(str_replace('_', ' ', $key)) }}</span>
+                    <strong>{{ number_format($count) }}</strong>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
+    <section class="admin-widget" aria-labelledby="admin-accounting-invoices">
+        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">VERIFIED SALES</span>
+            <h2 id="admin-accounting-invoices">Invoice records</h2><p>Original invoice currencies and documented refunds.</p></div></div>
+        <div class="table-scroll"><table class="admin-table admin-accounting-table">
+            <thead><tr><th scope="col">Invoice</th><th scope="col">Customer</th><th scope="col">Gross</th><th scope="col">Refunded</th><th scope="col">Status</th></tr></thead>
+            <tbody>@forelse($invoices as $invoice)
+                <tr>
+                    <td><strong>{{ $invoice->number }}</strong></td><td>{{ $invoice->customer_email }}</td>
+                    <td>{{ \App\Helpers\Localization::minorMoney((int) $invoice->total_minor, $invoice->currency_code, \App\Helpers\Localization::resolve()) }}</td>
+                    <td>{{ \App\Helpers\Localization::minorMoney((int) $invoice->refunded_minor, $invoice->currency_code, \App\Helpers\Localization::resolve()) }}</td>
+                    <td><span class="admin-status admin-status--{{ $invoice->status === 'paid' ? 'success' : 'neutral' }}">{{ ucfirst(str_replace('_', ' ', $invoice->status)) }}</span></td>
+                </tr>
+            @empty<tr><td colspan="5"><div class="admin-empty"><strong>No verified invoices</strong><p>Invoices appear once orders are verified.</p></div></td></tr>@endforelse</tbody>
+        </table></div>
+        <div class="admin-course-pagination">{{ $invoices->onEachSide(1)->links() }}</div>
+    </section>
+
+    <div class="admin-data-grid admin-accounting-ledgers">
+        <section class="admin-widget" aria-labelledby="admin-accounting-earnings">
+            <div class="admin-widget-heading"><div><span class="admin-widget-kicker">INSTRUCTOR LEDGER</span><h2 id="admin-accounting-earnings">Held instructor earnings</h2></div></div>
+            <div class="table-scroll"><table class="admin-table">
+                <thead><tr><th scope="col">Instructor ID</th><th scope="col">Currency</th><th scope="col">Net held</th></tr></thead>
+                <tbody>@forelse($earnings as $earning)
+                    <tr><td>{{ $earning->instructor_id }}</td><td>{{ $earning->currency_code }}</td>
+                        <td><strong>{{ \App\Helpers\Localization::minorMoney((int) $earning->net_held_minor, $earning->currency_code, \App\Helpers\Localization::resolve()) }}</strong></td></tr>
+                @empty<tr><td colspan="3"><div class="admin-empty"><strong>No earnings recorded</strong></div></td></tr>@endforelse</tbody>
+            </table></div>
+            <p class="admin-widget-footnote">These balances are held accounting entries, not available withdrawal funds.</p>
+        </section>
+        <section class="admin-widget" aria-labelledby="admin-accounting-payouts">
+            <div class="admin-widget-heading"><div><span class="admin-widget-kicker">PAYOUT AUDIT</span><h2 id="admin-accounting-payouts">Payout record ledger</h2></div></div>
+            <div class="table-scroll"><table class="admin-table">
+                <thead><tr><th scope="col">Instructor</th><th scope="col">Amount</th><th scope="col">Status</th></tr></thead>
+                <tbody>@forelse($payouts as $payout)
+                    <tr><td>{{ $payout->instructor_id }}</td>
+                        <td>{{ \App\Helpers\Localization::minorMoney((int) $payout->amount_minor, $payout->currency_code, \App\Helpers\Localization::resolve()) }}</td>
+                        <td><span class="admin-status">{{ ucfirst(str_replace('_', ' ', $payout->status)) }}</span></td></tr>
+                @empty<tr><td colspan="3"><div class="admin-empty"><strong>No payout records</strong><p>Disbursements are disabled.</p></div></td></tr>@endforelse</tbody>
+            </table></div>
+            <p class="admin-widget-footnote">Payout records are for reconciliation only. No transfers are initiated here.</p>
+        </section>
+    </div>
+</section>
 @endsection

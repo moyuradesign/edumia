@@ -149,4 +149,19 @@ final class AdminDashboardExperienceTest extends TestCase
         $this->actingAs($buyer)->get('/admin/commerce/orders')->assertForbidden();
     }
 
+
+    public function test_accounting_workspace_exposes_read_only_finance_sections(): void
+    {
+        $admin = $this->member('admin', 'Owner', 'owner@example.test');
+        $this->actingAs($admin)->get('/admin/commerce/accounting')->assertOk()
+            ->assertSee('Commerce accounting')
+            ->assertSee('Review exceptions')
+            ->assertSee('Dispute records')
+            ->assertSee('Invoice records')
+            ->assertSee('Held instructor earnings')
+            ->assertSee('Payout record ledger')
+            ->assertSee('Scan local records')
+            ->assertSee('No automatic payouts');
+    }
+
 }

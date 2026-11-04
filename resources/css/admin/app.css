@@ -1077,3 +1077,29 @@ progress {
   .admin-ticket-filters > div:first-child, .admin-ticket-filters > div:nth-child(2) { flex: 1 1 100%; }
   .admin-ticket-filters > button { width: 100%; }
 }
+
+/* Commerce accounting: read-only, currency-safe financial monitoring. */
+.admin-accounting-workspace { display: grid; gap: 22px; }
+.admin-accounting-workspace .admin-welcome-actions form { display: inline-flex; margin: 0; }
+.admin-accounting-workspace .admin-welcome-actions button { cursor: pointer; }
+.admin-accounting-notice { padding: 17px 20px; border: 1px solid color-mix(in srgb, var(--secondary) 30%, var(--border)); border-radius: 14px; background: color-mix(in srgb, var(--secondary) 5%, var(--surface)); }
+.admin-accounting-notice strong { color: var(--ink); font-size: 13px; }
+.admin-accounting-notice p { max-width: 92ch; margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.admin-accounting-issues { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 13px; }
+.admin-accounting-issue { display: grid; gap: 15px; min-width: 0; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-alt); padding: 17px; }
+.admin-accounting-issue span { color: var(--muted); font-size: 12px; font-weight: 690; }
+.admin-accounting-issue strong { color: var(--ink); font-size: clamp(23px,2.2vw,32px); font-weight: 830; font-variant-numeric: tabular-nums; }
+.admin-accounting-table { min-width: 690px; }
+.admin-accounting-workspace .admin-table td, .admin-accounting-workspace .admin-table th { font-size: 12px; overflow-wrap: anywhere; }
+.admin-accounting-workspace .admin-table td strong { display: block; color: var(--ink); font-weight: 770; }
+.admin-accounting-ledgers { align-items: start; }
+@media (max-width: 1350px) {
+  .admin-accounting-issues { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 690px) {
+  .admin-accounting-issues { gap: 9px; }
+  .admin-accounting-issue { padding: 12px; }
+  .admin-accounting-workspace .admin-welcome-actions { width: 100%; }
+  .admin-accounting-workspace .admin-welcome-actions form { flex: 1 1 100%; }
+  .admin-accounting-workspace .admin-welcome-actions form button { width: 100%; }
+}
