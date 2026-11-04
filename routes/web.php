@@ -26,6 +26,13 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/courses/{course}', [CartController::class, 'store'])->middleware('throttle:30,1')->name('cart.items.store');
 Route::delete('/cart/courses/{course}', [CartController::class, 'destroy'])->middleware('throttle:30,1')->name('cart.items.destroy');
 
+Route::get('/team-training', [\App\Http\Controllers\Frontend\TeamTrainingController::class, 'index'])->name('teams.index');
+Route::middleware(['auth', 'active'])->group(function (): void {
+    Route::get('/my-team-training', [\App\Http\Controllers\Student\TeamTrainingController::class, 'index'])->name('team.workspaces.index');
+    Route::post('/team-training/{package}/activate', [\App\Http\Controllers\Student\TeamTrainingController::class, 'activate'])->middleware('throttle:5,1')->name('team.packages.activate');
+    Route::post('/my-team-training/{team}/invite', [\App\Http\Controllers\Student\TeamTrainingController::class, 'invite'])->middleware('throttle:10,1')->name('team.members.invite');
+    Route::patch('/my-team-training/invitations/{invitation}', [\App\Http\Controllers\Student\TeamTrainingController::class, 'respond'])->name('team.invitations.respond');
+});
 Route::get('/tutors', [\App\Http\Controllers\Frontend\TutorDirectoryController::class, 'index'])->name('tutors.index');
 Route::get('/tutors/{offering}', [\App\Http\Controllers\Frontend\TutorDirectoryController::class, 'show'])->name('tutors.show');
 Route::middleware(['auth', 'active'])->group(function (): void {

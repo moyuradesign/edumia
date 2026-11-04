@@ -46,6 +46,9 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::get('/commerce/orders', [OrderController::class, 'index'])->name('commerce.orders.index');
         Route::get('/reports/learning', [LearningReportController::class, 'index'])->name('reports.learning');
 
+        Route::get('/team-training', [\App\Http\Controllers\Admin\Courses\TeamTrainingController::class, 'index'])->name('team-training.index');
+        Route::post('/team-training', [\App\Http\Controllers\Admin\Courses\TeamTrainingController::class, 'store'])->name('team-training.store');
+        Route::patch('/team-training/{package}/status', [\App\Http\Controllers\Admin\Courses\TeamTrainingController::class, 'status'])->name('team-training.status');
         Route::get('/bootcamps', [BootcampPublicationController::class, 'index'])->name('bootcamps.index');
         Route::patch('/bootcamps/{bootcamp}/publication', [BootcampPublicationController::class, 'update'])->name('bootcamps.publication');
 
