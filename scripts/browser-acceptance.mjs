@@ -99,6 +99,17 @@ async function install() {
       await page.screenshot({ path: path.join(evidence, 'installed-' + module.slug + '-desktop.png') });
     }
 
+    // Smoke-check every existing admin management listing in the installed MySQL copy.
+    // This verifies that protected routes render; it does not certify business feature parity.
+    for (const moduleUrl of adminManagementRoutes) {
+      await navigate(page, moduleUrl);
+      verify(await page.locator('[data-admin-shell]').isVisible(),
+        'Admin workspace shell missing for ' + moduleUrl);
+      verify(await page.locator('#admin-main').isVisible(),
+        'Admin content failed to render for ' + moduleUrl);
+    }
+    console.log('EDUMIA_ADMIN_MODULE_ROUTE_SMOKE=PASS');
+
     // All admin modules retain their routes in the premium shell.
     await navigate(page, '/dashboard');
     verify(await page.locator('[data-admin-shell]').isVisible(), 'Admin shell was not rendered');
@@ -151,6 +162,24 @@ const adminModules = [
   { slug: 'roles', url: '/admin/roles', heading: 'Roles & permissions', container: '.admin-roles-workspace' },
   { slug: 'instructors', url: '/admin/instructor-applications', heading: 'Instructor management', container: '.admin-instructor-workspace' },
   { slug: 'readiness', url: '/admin/release-readiness', heading: 'Release readiness', container: '.admin-readiness-workspace' },
+];
+
+const adminManagementRoutes = [
+  '/admin/users',
+  '/admin/courses',
+  '/admin/categories',
+  '/admin/reviews',
+  '/admin/ebooks',
+  '/admin/bootcamps',
+  '/admin/commerce/orders',
+  '/admin/commerce/accounting',
+  '/admin/commerce/refund-reviews',
+  '/admin/blogs',
+  '/admin/knowledge-base',
+  '/admin/forums',
+  '/admin/tickets',
+  '/admin/contacts',
+  '/admin/reports/learning',
 ];
 
 const scenarios = [
