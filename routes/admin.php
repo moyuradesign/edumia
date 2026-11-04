@@ -44,6 +44,9 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::post('/commerce/accounting/reconcile', [AccountingController::class, 'reconcile'])->middleware('throttle:3,1')->name('commerce.accounting.reconcile');
         Route::get('/commerce/accounting', [AccountingController::class, 'index'])->name('commerce.accounting.index');
         Route::get('/commerce/orders', [OrderController::class, 'index'])->name('commerce.orders.index');
+        Route::get('/commerce/gateway-readiness', [\App\Http\Controllers\Admin\Commerce\GatewayReadinessController::class, 'index'])->name('commerce.gateway-readiness.index');
+        Route::post('/commerce/gateway-readiness/check', [\App\Http\Controllers\Admin\Commerce\GatewayReadinessController::class, 'verify'])
+            ->middleware('throttle:2,1')->name('commerce.gateway-readiness.check');
         Route::get('/reports/learning', [LearningReportController::class, 'index'])->name('reports.learning');
 
         Route::get('/team-training', [\App\Http\Controllers\Admin\Courses\TeamTrainingController::class, 'index'])->name('team-training.index');

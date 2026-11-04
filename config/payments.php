@@ -16,6 +16,8 @@ return [
         // Fail closed: a customer installation has no payment capability until
         // the operator explicitly enables the gateway and provides both secrets.
         'enabled' => (bool) env('STRIPE_ENABLED', false),
+        // Separate manual release gate; tests and API connectivity alone never enable live payments.
+        'live_approved' => (bool) env('STRIPE_LIVE_APPROVED', false),
         'mode' => env('STRIPE_MODE', 'test'),
         'secret_key' => env('STRIPE_SECRET_KEY'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
