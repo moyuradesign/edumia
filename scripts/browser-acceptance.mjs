@@ -123,7 +123,7 @@ async function install() {
       'Student workspace is showing the wrong brand or admin navigation');
     verify((await page.locator('[data-admin-shell]').count()) === 0,
       'Student workspace must not expose the admin shell');
-    verify(await page.locator('a[href="/account/certificates"]').count() >= 1,
+    verify(await page.locator('a[href$="/account/certificates"]').count() >= 1,
       'Student certificate workspace navigation missing');
     await navigate(page, '/account/certificates');
 
