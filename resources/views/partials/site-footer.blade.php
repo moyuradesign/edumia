@@ -49,7 +49,7 @@
         <nav class="premium-footer-column" aria-label="{{ \App\Helpers\Localization::label('nav_account', $locale) }}">
             <h2>{{ \App\Helpers\Localization::label('nav_account', $locale) }}</h2>
             @auth
-                <a href="{{ route('dashboard') }}">{{ \App\Helpers\Localization::label('dashboard', $locale) }}</a>
+                <a href="{{ auth()->user()->isAdmin() ? route('dashboard') : (auth()->user()->canTeach() ? route('instructor.dashboard') : route('account.home')) }}">{{ auth()->user()->isAdmin() ? 'Admin dashboard' : (auth()->user()->canTeach() ? 'Instructor workspace' : 'Student account') }}</a>
                 <a href="{{ route('account.preferences.edit') }}">{{ \App\Helpers\Localization::label('nav_my_profile', $locale) }}</a>
                 <a href="{{ route('checkout.orders.index') }}">{{ \App\Helpers\Localization::label('nav_my_orders', $locale) }}</a>
             @else

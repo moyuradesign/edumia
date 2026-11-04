@@ -6,6 +6,7 @@
     $cartIds = session('cart_course_ids', []);
     $cartCount = is_array($cartIds) ? count(array_unique(array_filter($cartIds, fn ($id) => is_int($id) && $id > 0))) : 0;
     $courseLink = \App\Helpers\Localization::url($locale, 'courses');
+    $workspaceRoute = auth()->check() ? (auth()->user()->isAdmin() ? 'dashboard' : (auth()->user()->canTeach() ? 'instructor.dashboard' : 'account.home')) : 'login';
 @endphp
 <header class="site-header premium-header" data-premium-header>
     <div class="container header-inner premium-header-layout">
@@ -117,7 +118,7 @@
                             <span class="premium-account-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                             <div><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->email }}</small></div>
                         </div>
-                        <a href="{{ route('dashboard') }}">{{ \App\Helpers\Localization::label('dashboard', $locale) }}</a>
+                        <a href="{{ route($workspaceRoute) }}">{{ auth()->user()->canTeach() && !auth()->user()->isAdmin() ? 'Instructor workspace' : (auth()->user()->isAdmin() ? 'Admin dashboard' : 'Student account') }}</a>
                         <a href="{{ route('account.preferences.edit') }}">{{ \App\Helpers\Localization::label('nav_my_profile', $locale) }}</a>
                         <a href="{{ route('checkout.orders.index') }}">{{ \App\Helpers\Localization::label('nav_my_orders', $locale) }}</a>
                         <a href="{{ route('saved-courses.index') }}">{{ \App\Helpers\Localization::label('nav_saved', $locale) }}</a>
