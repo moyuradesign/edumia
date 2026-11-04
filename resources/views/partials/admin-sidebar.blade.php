@@ -15,6 +15,7 @@
                 ['label' => 'Categories', 'route' => 'admin.categories.index', 'match' => 'admin.categories.*', 'icon' => 'grid'],
                 ['label' => 'Ebook approvals', 'route' => 'admin.ebooks.index', 'match' => 'admin.ebooks.*', 'icon' => 'book'],
                 ['label' => 'Bootcamp approvals', 'route' => 'admin.bootcamps.index', 'match' => 'admin.bootcamps.*', 'icon' => 'book'],
+                ['label' => 'Team packages', 'route' => 'admin.team-training.index', 'match' => 'admin.team-training.*', 'icon' => 'users'],
             ],
         ],
         [

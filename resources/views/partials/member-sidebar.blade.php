@@ -13,6 +13,7 @@
             ['label' => 'Manage ebooks', 'route' => 'instructor.ebooks.index', 'match' => 'instructor.ebooks.*', 'icon' => 'book'],
             ['label' => 'Manage bootcamps', 'route' => 'instructor.bootcamps.index', 'match' => 'instructor.bootcamps.*', 'icon' => 'grid'],
             ['label' => 'Tutoring studio', 'route' => 'instructor.tutors.index', 'match' => 'instructor.tutors.*', 'icon' => 'users'],
+            ['label' => 'Team training', 'route' => 'team.workspaces.index', 'match' => 'team.workspaces.*', 'icon' => 'users'],
         ]],
         ['label' => 'Account & support', 'items' => [
             ['label' => 'My earnings', 'route' => 'instructor.earnings.index', 'match' => 'instructor.earnings.*', 'icon' => 'chart'],
@@ -32,6 +33,7 @@
             ['label' => 'My ebooks', 'route' => 'ebooks.library', 'match' => 'ebooks.library', 'icon' => 'book'],
             ['label' => 'My bootcamps', 'route' => 'bootcamps.my', 'match' => 'bootcamps.my', 'icon' => 'grid'],
             ['label' => 'Tutor appointments', 'route' => 'tutor.bookings.index', 'match' => 'tutor.bookings.*', 'icon' => 'users'],
+            ['label' => 'Team training', 'route' => 'team.workspaces.index', 'match' => 'team.workspaces.*', 'icon' => 'users'],
             ['label' => 'Purchase history', 'route' => 'checkout.orders.index', 'match' => 'checkout.orders.*', 'icon' => 'cart'],
         ]],
         ['label' => 'Account & support', 'items' => [

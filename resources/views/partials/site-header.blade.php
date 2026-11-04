@@ -80,6 +80,7 @@
                             <a href="{{ \App\Helpers\Localization::url($locale, 'bootcamps') }}">{{ \App\Helpers\Localization::label('nav_bootcamps', $locale) }}</a>
                             <a href="{{ \App\Helpers\Localization::url($locale, 'ebooks') }}">{{ \App\Helpers\Localization::label('nav_ebooks', $locale) }}</a>
                             <a href="{{ route('tutors.index') }}">Find a tutor</a>
+                            <a href="{{ route('teams.index') }}">Team training</a>
                             <h3 class="premium-menu-section-break">{{ \App\Helpers\Localization::label('nav_resources', $locale) }}</h3>
                             <a href="{{ \App\Helpers\Localization::url($locale, 'blog') }}">{{ \App\Helpers\Localization::label('nav_blog', $locale) }}</a>
                             <a href="{{ \App\Helpers\Localization::url($locale, 'help') }}">{{ \App\Helpers\Localization::label('nav_help', $locale) }}</a>
