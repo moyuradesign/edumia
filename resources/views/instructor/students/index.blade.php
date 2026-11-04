@@ -27,8 +27,15 @@
                     <option value="{{ $course->getKey() }}" @selected($selectedCourse === $course->getKey())>{{ $course->title }}</option>
                 @endforeach
             </select>
+            <label class="sr-only" for="my-students-status">Enrollment status</label>
+            <select id="my-students-status" name="status">
+                <option value="">All statuses</option>
+                <option value="active" @selected($status === 'active')>Active</option>
+                <option value="completed" @selected($status === 'completed')>Completed</option>
+            </select>
             <button type="submit" class="admin-action-primary">Apply filters</button>
-            @if($selectedCourse !== null || $search !== '')
+            <a class="admin-action-secondary" href="{{ route('instructor.students.export', request()->only(['course', 'q', 'status'])) }}">Export CSV</a>
+            @if($selectedCourse !== null || $search !== '' || $status !== '')
                 <a href="{{ route('instructor.students.index') }}">Clear</a>
             @endif
         </form>
@@ -51,7 +58,7 @@
                         <td>{{ $enrollment->course->title }}</td>
                         <td>{{ min(100, max(0, (int) $enrollment->progress_percent)) }}%</td>
                         <td><span class="admin-status admin-status--{{ $enrollment->status === 'completed' ? 'success' : 'neutral' }}">{{ ucfirst(str_replace('_',' ', $enrollment->status)) }}</span></td>
-                        <td><a class="admin-table-action" href="{{ route('instructor.courses.edit', $enrollment->course) }}">Manage course</a></td>
+                        <td><a class="admin-table-action" href="{{ route('instructor.students.show', $enrollment) }}">View progress</a></td>
                     </tr>
                 @endforeach
                 </tbody>
