@@ -336,4 +336,112 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-# This workflow only builds a QA archive; it cannot deploy or alter any live database.
+
+  customer-archive-install:
+    name: Independent packaged-customer installation / PHP 8.3
+    needs: qa-package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: qa-only-independent-root
+          MYSQL_DATABASE: edumia_browser_qa
+          MYSQL_USER: edumia_qa
+          MYSQL_PASSWORD: qa-only-customer-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pqa-only-independent-root --silent"
+          --health-interval=10s --health-timeout=5s --health-retries=15
+    steps:
+      - name: Download the archive from the separate build job
+        uses: actions/download-artifact@v4
+        with:
+          name: edumia-integrated-qa
+          path: ${{ runner.temp }}/edumia-received
+
+      - name: Set up minimum tested PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_mysql, pdo_sqlite, xml, tokenizer
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify received QA archive and extract independently
+        run: |
+          set -Eeuo pipefail
+          archive="$RUNNER_TEMP/edumia-received/edumia-integrated-qa.tar.gz"
+          target="$RUNNER_TEMP/edumia-independent-customer"
+          test -s "$archive"
+          tar -tzf "$archive" > "$RUNNER_TEMP/archive-file-list.txt"
+          for required in public/index.php public/build/manifest.json artisan vendor/autoload.php \
+            scripts/browser-acceptance.mjs QA_BUILD.txt; do
+            grep -Fxq "$required" "$RUNNER_TEMP/archive-file-list.txt"
+          done
+          if grep -E '(^|/)\.env$|installer/authorize\.txt$|storage/app/edumia-installed\.lock "$RUNNER_TEMP/archive-file-list.txt"; then
+            echo 'Archive contains prohibited runtime secrets'
+            exit 1
+          fi
+          mkdir -p "$target"
+          tar -xzf "$archive" -C "$target"
+          test ! -e "$target/.env"
+          test ! -e "$target/installer/authorize.txt"
+          test ! -e "$target/storage/app/edumia-installed.lock"
+          grep -Fxq "SOURCE_SHA=$GITHUB_SHA" "$target/QA_BUILD.txt"
+          echo "EDUMIA_INDEPENDENT_ROOT=$target" >> "$GITHUB_ENV"
+          echo 'EDUMIA_FRESH_ARCHIVE_PREFLIGHT=PASS'
+
+      - name: Install from received archive over real loopback HTTP
+        env:
+          EDUMIA_QA_MODE: installation-only
+          EDUMIA_QA_BASE_URL: http://127.0.0.1:8765
+          EDUMIA_QA_INSTALL_CODE: qa-only-independent-code-2026
+          EDUMIA_QA_DATABASE: edumia_browser_qa
+          EDUMIA_QA_DB_USER: edumia_qa
+          EDUMIA_QA_DB_PASSWORD: qa-only-customer-password
+          EDUMIA_QA_ADMIN_PASSWORD: QA-only-StrongPassword123!
+          EDUMIA_QA_EVIDENCE: qa-browser-evidence
+        run: |
+          set -Eeuo pipefail
+          cd "$EDUMIA_INDEPENDENT_ROOT"
+          php scripts/shared-host-preflight.php --root="$PWD" --document-root="$PWD/public" --json > "$RUNNER_TEMP/preflight-before.json"
+          php -r '$a=json_decode(file_get_contents($argv[1]),true,512,JSON_THROW_ON_ERROR); if ($a["failed"] !== 0) exit(1);' "$RUNNER_TEMP/preflight-before.json"
+          npm ci --no-audit --no-fund
+          npm install --no-save --package-lock=false --no-audit --no-fund playwright@1.64.1
+          npx playwright install --with-deps chromium
+          printf '%s' "$EDUMIA_QA_INSTALL_CODE" > installer/authorize.txt
+          chmod 600 installer/authorize.txt
+          php -S 127.0.0.1:8765 -t public > "$RUNNER_TEMP/customer-php-server.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS --max-time 4 -o "$RUNNER_TEMP/customer-probe.html" http://127.0.0.1:8765/installer &&
+              grep -q 'Edumia Installer' "$RUNNER_TEMP/customer-probe.html"; then
+              break
+            fi
+            sleep 1
+          done
+          grep -q 'Edumia Installer' "$RUNNER_TEMP/customer-probe.html"
+          node scripts/browser-acceptance.mjs
+          test -s .env
+          test -s storage/app/edumia-installed.lock
+          test ! -e installer/authorize.txt
+          php scripts/shared-host-preflight.php --root="$PWD" --document-root="$PWD/public" --json > "$RUNNER_TEMP/preflight-after.json"
+          php -r '$a=json_decode(file_get_contents($argv[1]),true,512,JSON_THROW_ON_ERROR); if ($a["failed"] !== 0) exit(1);' "$RUNNER_TEMP/preflight-after.json"
+          echo 'EDUMIA_INDEPENDENT_PACKAGED_INSTALL=PASS'
+
+      - name: Save received-archive admin screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edumia-independent-customer-evidence
+          path: ${{ runner.temp }}/edumia-independent-customer/qa-browser-evidence/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+# Both jobs run on disposable machines and databases. Neither deploys to production.

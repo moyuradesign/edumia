@@ -86,6 +86,19 @@ async function install() {
     verify(await page.getByRole('heading', { name: 'General settings' }).isVisible(),
       'Initial administrator cannot access general settings');
 
+    // Inspect all four actual admin pages in the freshly installed customer copy.
+    for (const module of adminModules) {
+      await navigate(page, module.url);
+      verify(await page.locator(module.container).isVisible(),
+        'Freshly installed admin module missing: ' + module.slug);
+      verify(await page.getByRole('heading', { name: module.heading, exact: true }).isVisible(),
+        'Admin module heading missing: ' + module.slug);
+      const overflow = await page.evaluate(() =>
+        document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      verify(overflow <= 2, 'Fresh install desktop overflow in ' + module.slug + ': ' + overflow);
+      await page.screenshot({ path: path.join(evidence, 'installed-' + module.slug + '-desktop.png') });
+    }
+
     // All admin modules retain their routes in the premium shell.
     await navigate(page, '/dashboard');
     verify(await page.locator('[data-admin-shell]').isVisible(), 'Admin shell was not rendered');
@@ -114,6 +127,16 @@ async function install() {
     verify(!(await page.locator('#panel-navigation').isVisible()), 'Escape did not close dashboard menu');
     verify(await menu.evaluate(element => element === document.activeElement), 'Keyboard focus not restored');
 
+    for (const module of adminModules) {
+      await navigate(page, module.url);
+      verify(await page.locator(module.container).isVisible(),
+        'Freshly installed mobile admin module missing: ' + module.slug);
+      const overflow = await page.evaluate(() =>
+        document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      verify(overflow <= 2, 'Fresh install mobile overflow in ' + module.slug + ': ' + overflow);
+      await page.screenshot({ path: path.join(evidence, 'installed-' + module.slug + '-mobile.png') });
+    }
+
     console.log('EDUMIA_FRESH_MYSQL_INSTALL=PASS');
     console.log('EDUMIA_INSTALLER_CSRF_LOCK_ADMIN=PASS');
   } finally {
@@ -121,6 +144,13 @@ async function install() {
     await browser.close();
   }
 }
+
+const adminModules = [
+  { slug: 'media', url: '/admin/media', heading: 'Media library', container: '.admin-media-workspace' },
+  { slug: 'settings', url: '/admin/settings/general', heading: 'General settings', container: '.admin-settings-workspace' },
+  { slug: 'roles', url: '/admin/roles', heading: 'Roles & permissions', container: '.admin-roles-workspace' },
+  { slug: 'instructors', url: '/admin/instructor-applications', heading: 'Instructor management', container: '.admin-instructor-workspace' },
+];
 
 const scenarios = [
   { name: 'chromium-desktop', engine: chromium, viewport: { width: 1440, height: 900 } },
@@ -330,6 +360,88 @@ async function browse(scenario) {
     verify(await page.locator('input[name="password_confirmation"]').count() === 1,
       'Password confirmation field missing');
 
+    // Browser automation verifies real administrator navigation and layout geometry.
+    await navigate(page, '/login');
+    await page.locator('input[name="email"]').fill(adminEmail);
+    await page.locator('input[name="password"]').fill(adminPassword);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    verify(new URL(page.url()).pathname === '/dashboard',
+      scenario.name + ' administrator login failed');
+
+    for (const module of adminModules) {
+      await navigate(page, module.url);
+      verify(await page.locator(module.container).isVisible(),
+        scenario.name + ' cannot render ' + module.slug);
+      verify(await page.getByRole('heading', { name: module.heading, exact: true }).isVisible(),
+        scenario.name + ' missing ' + module.slug + ' heading');
+      verify(await page.locator('.admin-topbar').isVisible(),
+        scenario.name + ' missing admin topbar in ' + module.slug);
+      const geometry = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        viewport: document.documentElement.clientWidth,
+        main: document.querySelector('#admin-main')?.getBoundingClientRect().width,
+      }));
+      verify(geometry.overflow <= 2,
+        scenario.name + ' ' + module.slug + ' overflows by ' + geometry.overflow + 'px');
+      verify(geometry.main > 0 && geometry.main <= geometry.viewport,
+        scenario.name + ' ' + module.slug + ' content extends beyond viewport');
+      await page.screenshot({ path: path.join(evidence,
+        'admin-' + module.slug + '-' + scenario.name + '.png') });
+    }
+
+    await navigate(page, '/admin/media');
+    verify(await page.locator('input[name="file"][type="file"]').count() === 1,
+      'Private media upload input missing');
+    verify(await page.locator('form[action$="/admin/media"][enctype="multipart/form-data"]').count() === 1,
+      'Private media upload form is missing');
+    await page.locator('select[name="type"]').selectOption('document');
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    verify(new URL(page.url()).searchParams.get('type') === 'document',
+      'Media filter failed to submit');
+
+    await navigate(page, '/admin/settings/general');
+    verify(await page.locator('form[action$="/admin/settings/general"] input[name="site_name"]').count() === 1,
+      'General settings form target missing');
+    verify(await page.locator('select[name="default_locale"]').count() === 1,
+      'Locale selector missing');
+    verify(await page.locator('input[name="allow_registration"][type="checkbox"]').count() === 1,
+      'Registration setting missing');
+
+    await navigate(page, '/admin/roles');
+    verify(await page.locator('form[action$="/admin/roles"] input[name="slug"]').count() === 1,
+      'Create staff role form missing');
+    verify(await page.locator('fieldset.admin-role-checkboxes input[name="permissions[]"]').count() >= 1,
+      'Delegatable permission controls missing');
+
+    await navigate(page, '/admin/instructor-applications');
+    await page.locator('select[name="status"]').selectOption('pending');
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    verify(new URL(page.url()).searchParams.get('status') === 'pending',
+      'Instructor queue status filtering failed');
+
+    await navigate(page, '/admin/media');
+    const previousTheme = await page.locator('html').getAttribute('data-theme');
+    await page.locator('.admin-topbar .theme-toggle').click();
+    verify((await page.locator('html').getAttribute('data-theme')) !== previousTheme,
+      'Admin theme toggle is not interactive');
+    await page.reload({ waitUntil: 'networkidle' });
+    verify((await page.locator('html').getAttribute('data-theme')) !== previousTheme,
+      'Admin theme choice was not saved');
+
+    if (mobile) {
+      const open = page.locator('[data-admin-open]');
+      verify(await open.isVisible(), scenario.name + ' mobile menu button missing');
+      await open.click();
+      verify(await page.locator('[data-admin-sidebar]').isVisible(),
+        scenario.name + ' mobile admin sidebar did not open');
+      await page.locator('[data-admin-backdrop]').click();
+      verify(!(await page.locator('[data-admin-sidebar]').isVisible()),
+        scenario.name + ' mobile admin sidebar did not close');
+    } else {
+      verify(await page.locator('[data-admin-sidebar]').isVisible(),
+        scenario.name + ' desktop sidebar is not visible');
+    }
+
     verify(errors.length === 0, 'Browser console or asset errors: ' + errors.join(' | '));
 
     console.log('EDUMIA_BROWSER=' + scenario.name + ' PASS');
@@ -341,7 +453,12 @@ async function browse(scenario) {
 
 try {
   await install();
-  for (const scenario of scenarios) await browse(scenario);
+  if (process.env.EDUMIA_QA_MODE === 'installation-only') {
+    console.log('EDUMIA_ARCHIVE_CUSTOMER_INSTALL=PASS');
+  } else {
+    for (const scenario of scenarios) await browse(scenario);
+    console.log('EDUMIA_ADMIN_RESPONSIVE_BROWSER_MATRIX=PASS');
+  }
   console.log('EDUMIA_BROWSER_ACCEPTANCE=PASS');
   console.log('EDUMIA_QA_ASSERTIONS=' + assertions);
 } catch (error) {
