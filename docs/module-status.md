@@ -1,6 +1,6 @@
 # Edumia implementation matrix and integrated QA
 
-Updated: 2026-10-31. This is a **source-development snapshot**, not a statement of commercial or deployment readiness.
+Updated: 2026-11-04. This is a **source-development snapshot**, not a statement of commercial or deployment readiness. The implementation history below can lag new commits; see [Release readiness](release-readiness.md) for evidence gates. The administrator-only readiness workspace provides current-installation diagnostics and explicitly open external gates.
 
 ## Repository and deployment policy
 

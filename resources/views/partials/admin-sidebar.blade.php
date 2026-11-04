@@ -48,6 +48,7 @@
                 ['label' => 'Support tickets', 'route' => 'admin.tickets.index', 'match' => 'admin.tickets.*', 'icon' => 'chat'],
                 ['label' => 'Contact inbox', 'route' => 'admin.contacts.index', 'match' => 'admin.contacts.*', 'icon' => 'mail'],
                 ['label' => 'General settings', 'route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'icon' => 'settings'],
+                ['label' => 'Release readiness', 'route' => 'admin.readiness.index', 'match' => 'admin.readiness.*', 'icon' => 'shield'],
             ],
         ],
     ];

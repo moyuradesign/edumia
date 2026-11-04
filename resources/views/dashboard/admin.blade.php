@@ -77,6 +77,7 @@
         <a href="{{ route('admin.commerce.orders.index') }}"><span aria-hidden="true">▤</span><strong>Orders</strong><small>Track purchases</small></a>
         <a href="{{ route('admin.media.index') }}"><span aria-hidden="true">▣</span><strong>Media library</strong><small>Manage assets</small></a>
         <a href="{{ route('admin.settings.edit') }}"><span aria-hidden="true">⚙</span><strong>Settings</strong><small>Platform preferences</small></a>
+        <a href="{{ route('admin.readiness.index') }}"><span aria-hidden="true">◇</span><strong>Release readiness</strong><small>Review remaining acceptance gates</small></a>
     </div>
 
     <div class="admin-data-grid">

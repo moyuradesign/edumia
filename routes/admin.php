@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\Support\ContactController;
 use App\Http\Controllers\Admin\Support\TicketController;
 use App\Http\Controllers\Admin\Support\ForumModerationController;
 use App\Http\Controllers\Admin\System\GeneralSettingsController;
+use App\Http\Controllers\Admin\System\ReleaseReadinessController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Instructor\CourseManagementController;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,7 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
+        Route::get('/release-readiness', ReleaseReadinessController::class)->name('readiness.index');
         Route::get('/settings/general', [GeneralSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('settings.update');
 

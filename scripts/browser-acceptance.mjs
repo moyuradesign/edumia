@@ -68,7 +68,12 @@ async function install() {
       await page.locator('input[name="' + name + '"]').fill(value);
     }
     await page.locator('input[name="accept"]').check();
-    await page.getByRole('button', { name: 'Install Edumia' }).click();
+    // Fresh MySQL migrations can take longer on a cold independent runner.
+    // Keep the navigation bounded, but do not use the short default action timeout.
+    await page.getByRole('button', { name: 'Install Edumia' }).click({ timeout: 120000 });
+    await page.getByRole('heading', { name: 'Edumia installed' }).waitFor({
+      state: 'visible', timeout: 120000,
+    });
     verify(await page.getByRole('heading', { name: 'Edumia installed' }).isVisible(),
       'Fresh MySQL installation failed: installer did not report completion');
     verify(!(await page.locator('body').innerText()).includes(dbPassword), 'Database password leaked to page');
@@ -86,7 +91,7 @@ async function install() {
     verify(await page.getByRole('heading', { name: 'General settings' }).isVisible(),
       'Initial administrator cannot access general settings');
 
-    // Inspect all four actual admin pages in the freshly installed customer copy.
+    // Inspect admin workspaces, including read-only release readiness, in the fresh customer copy.
     for (const module of adminModules) {
       await navigate(page, module.url);
       verify(await page.locator(module.container).isVisible(),
@@ -98,6 +103,17 @@ async function install() {
       verify(overflow <= 2, 'Fresh install desktop overflow in ' + module.slug + ': ' + overflow);
       await page.screenshot({ path: path.join(evidence, 'installed-' + module.slug + '-desktop.png') });
     }
+
+    // Smoke-check every existing admin management listing in the installed MySQL copy.
+    // This verifies that protected routes render; it does not certify business feature parity.
+    for (const moduleUrl of adminManagementRoutes) {
+      await navigate(page, moduleUrl);
+      verify(await page.locator('[data-admin-shell]').isVisible(),
+        'Admin workspace shell missing for ' + moduleUrl);
+      verify(await page.locator('#admin-main').isVisible(),
+        'Admin content failed to render for ' + moduleUrl);
+    }
+    console.log('EDUMIA_ADMIN_MODULE_ROUTE_SMOKE=PASS');
 
     // All admin modules retain their routes in the premium shell.
     await navigate(page, '/dashboard');
@@ -150,6 +166,25 @@ const adminModules = [
   { slug: 'settings', url: '/admin/settings/general', heading: 'General settings', container: '.admin-settings-workspace' },
   { slug: 'roles', url: '/admin/roles', heading: 'Roles & permissions', container: '.admin-roles-workspace' },
   { slug: 'instructors', url: '/admin/instructor-applications', heading: 'Instructor management', container: '.admin-instructor-workspace' },
+  { slug: 'readiness', url: '/admin/release-readiness', heading: 'Release readiness', container: '.admin-readiness-workspace' },
+];
+
+const adminManagementRoutes = [
+  '/admin/users',
+  '/admin/courses',
+  '/admin/categories',
+  '/admin/reviews',
+  '/admin/ebooks',
+  '/admin/bootcamps',
+  '/admin/commerce/orders',
+  '/admin/commerce/accounting',
+  '/admin/commerce/refund-reviews',
+  '/admin/blogs',
+  '/admin/knowledge-base',
+  '/admin/forums',
+  '/admin/tickets',
+  '/admin/contacts',
+  '/admin/reports/learning',
 ];
 
 const scenarios = [
@@ -388,6 +423,14 @@ async function browse(scenario) {
       await page.screenshot({ path: path.join(evidence,
         'admin-' + module.slug + '-' + scenario.name + '.png') });
     }
+
+    await navigate(page, '/admin/release-readiness');
+    verify(await page.getByText('Customer release blocked').isVisible(),
+      'Release approval must remain blocked in simulated browser acceptance');
+    verify(await page.locator('[data-readiness-gate]').count() === 4,
+      'External acceptance gates are not visible');
+    verify(await page.getByText('NOT VERIFIED').count() >= 3,
+      'Hosting, physical-device and commerce evidence must remain unverified');
 
     await navigate(page, '/admin/media');
     verify(await page.locator('input[name="file"][type="file"]').count() === 1,
