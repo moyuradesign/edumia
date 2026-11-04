@@ -115,6 +115,35 @@ async function install() {
     }
     console.log('EDUMIA_ADMIN_MODULE_ROUTE_SMOKE=PASS');
 
+    // New workflows must render on the independently installed MySQL app.
+    await navigate(page, '/admin/team-training');
+    verify(await page.getByRole('heading', { name: 'Team training packages' }).isVisible(),
+      'Free team package administrator UI missing');
+    await navigate(page, '/admin/commerce/gateway-readiness');
+    verify(await page.getByRole('heading', { name: 'External payment readiness' }).isVisible(),
+      'Real provider readiness diagnostics missing');
+    verify((await page.getByRole('button', { name: 'Verify Stripe TEST API connection' }).count()) === 0,
+      'Payment connection must not be falsely available without operator secrets');
+
+    await navigate(page, '/tutors');
+    verify(await page.getByRole('heading', { name: 'Find a tutor' }).isVisible(),
+      'Tutor discovery not routed through the public site');
+    await navigate(page, '/team-training');
+    verify(await page.getByRole('heading', { name: 'Team training' }).isVisible(),
+      'Team package discovery missing');
+
+    await navigate(page, '/instructor/tutoring');
+    verify(await page.getByRole('heading', { name: 'Tutoring studio' }).isVisible(),
+      'Instructor-owned tutor schedule UI missing');
+    await navigate(page, '/my-tutor-bookings');
+    verify(await page.getByRole('heading', { name: 'My tutoring appointments' }).isVisible(),
+      'Private learner tutor booking history missing');
+    await navigate(page, '/my-team-training');
+    verify(await page.getByRole('heading', { name: 'My team training' }).isVisible(),
+      'Team invitation and seat workspace missing');
+    console.log('EDUMIA_TUTORS_TEAMS_ASSESSMENT_PAYMENT_READINESS=PASS');
+
+
     // Audience-specific account screens must share the visual system,
     // but never expose the administrator sidebar on member routes.
     await navigate(page, '/account');
