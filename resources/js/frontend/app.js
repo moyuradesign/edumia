@@ -1,3 +1,4 @@
+import { initQuizTimer } from './modules/quiz-timer.js';
 import { initTheme } from './modules/theme.js';
 import { initPremiumHeader } from './modules/header.js';
 import { initHeroSlider } from './modules/hero-slider.js';
@@ -11,3 +12,5 @@ initMobileMenus();
 initHeroSlider();
 
 initPremiumHeader();
+
+initQuizTimer();
