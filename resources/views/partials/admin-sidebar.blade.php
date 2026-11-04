@@ -31,6 +31,7 @@
             'items' => [
                 ['label' => 'Orders', 'route' => 'admin.commerce.orders.index', 'match' => 'admin.commerce.orders.*', 'icon' => 'cart'],
                 ['label' => 'Accounting', 'route' => 'admin.commerce.accounting.index', 'match' => 'admin.commerce.accounting.*', 'icon' => 'chart'],
+                ['label' => 'Payment readiness', 'route' => 'admin.commerce.gateway-readiness.index', 'match' => 'admin.commerce.gateway-readiness.*', 'icon' => 'shield'],
                 ['label' => 'Refund reviews', 'route' => 'admin.commerce.refunds.index', 'match' => 'admin.commerce.refunds.*', 'icon' => 'shield'],
             ],
         ],
