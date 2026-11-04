@@ -1,6 +1,6 @@
 # Edumia LMS — Feature completion audit
 
-Source baseline: `main` as of 2026-10-31, after the help-center, newsletter, forum, permissions, bootcamp and reporting development pass. This is a code-based implementation status, **not** a claim that the production site has been updated or that CodeCanyon requirements have been met.
+Historical source baseline: main as of 2026-10-31, after the help-center, newsletter, forum, permissions, bootcamp and reporting development pass. **This matrix is a historical workstream snapshot, not a live implementation inventory.** Newer modules and CI acceptance results are recorded separately in [Release readiness](release-readiness.md). This is a code-based implementation status, **not** a claim that the production site has been updated or that CodeCanyon requirements have been met.
 
 ## Acceptance vocabulary
 

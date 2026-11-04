@@ -44,3 +44,10 @@ The automated browser suite opens **Media Library**, **General Settings**, **Rol
 
 The automated tests are not a physical iPhone, Android phone, or tablet; nor are they a hosted cPanel or aaPanel customer environment. On actual staging hardware and hosting, an independent reviewer must perform the cases in [Physical-device acceptance](device-acceptance.md) and [Shared-host acceptance](shared-host-acceptance.md), verify separate browser and hosting PHP handlers, test a clean installation and a backup-backed upgrade, then record dated evidence. All external rows remain **NOT TESTED** unless explicitly signed off with real observations.
 
+
+
+## Administrator release-readiness workspace
+
+An administrator can open GET /admin/release-readiness for read-only runtime diagnostics, unverified external gates and remaining module workstreams. It is included as an additional admin page in the fresh-install and Chromium/Firefox/WebKit responsive browser matrix. This is not a deployment, migration or payment activation control.
+
+Local PASS labels describe only the PHP installation serving the page. Real hosting, physical-device, module and commerce gates stay explicitly NOT VERIFIED or INCOMPLETE until independently evidenced. The authoritative release record is release-readiness.md; see also shared-host-acceptance.md and device-acceptance.md.
