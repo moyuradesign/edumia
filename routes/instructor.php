@@ -17,6 +17,7 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
     ->prefix('instructor')
     ->name('instructor.')
     ->group(function (): void {
+        Route::get('/', \App\Http\Controllers\Instructor\DashboardController::class)->name('dashboard');
         Route::get('/earnings', [EarningsController::class, 'index'])->name('earnings.index');
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
         Route::get('/ebooks/{ebook}/edit', [EbookController::class, 'edit'])->name('ebooks.edit');
         Route::put('/ebooks/{ebook}', [EbookController::class, 'update'])->name('ebooks.update');
 
+        Route::get('/courses', \App\Http\Controllers\Instructor\CourseIndexController::class)->name('courses.index');
         Route::get('/courses/create', [CourseManagementController::class, 'create'])->name('courses.create');
         Route::post('/courses', [CourseManagementController::class, 'store'])->name('courses.store');
         Route::get('/courses/{course}/edit', [CourseManagementController::class, 'edit'])->name('courses.edit');

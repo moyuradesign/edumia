@@ -22,20 +22,19 @@
     </div>
 </div>
 @else
-<body class="panel-page"><header class="panel-header"><div class="container panel-top">
-<a class="brand" href="{{ route('home') }}"><span class="brand-mark">e</span> {{ $siteName }}<span class="brand-dot">.</span></a>
-<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="panel-navigation"
-    aria-label="Open dashboard menu" data-open-label="Open dashboard menu" data-close-label="Close dashboard menu">
-    <span aria-hidden="true">☰</span><span>Menu</span>
-</button>
-<nav class="panel-nav" id="panel-navigation" aria-label="Dashboard navigation"><a href="{{ route('dashboard') }}">Dashboard</a><a href="{{ route('saved-courses.index') }}">Saved courses</a><a href="{{ route('checkout.orders.index') }}">My orders</a><a href="{{ route('ebooks.library') }}">My ebooks</a><a href="{{ route('bootcamps.my') }}">My bootcamps</a>@if(!auth()->user()->canTeach())<a href="{{ route('instructor-application.index') }}">Become an instructor</a>@endif<a href="{{ route('courses.index') }}">Explore</a><a href="{{ route('account.preferences.edit') }}">Preferences</a><a href="{{ route('password.edit') }}">Security</a><a href="{{ route('support.tickets.index') }}">Support</a>
-@if(auth()->user()->isAdmin())<a href="{{ route('admin.categories.index') }}">Categories</a><a href="{{ route('admin.reviews.index') }}">Reviews</a><a href="{{ route('admin.instructor-applications.index') }}">Instructor applications</a><a href="{{ route('admin.media.index') }}">Media Library</a><a href="{{ route('admin.ebooks.index') }}">Ebook approvals</a><a href="{{ route('admin.bootcamps.index') }}">Bootcamp approvals</a><a href="{{ route('admin.reports.learning') }}">Learning reports</a><a href="{{ route('admin.commerce.orders.index') }}">Orders</a><a href="{{ route('admin.commerce.accounting.index') }}">Accounting</a><a href="{{ route('admin.commerce.refunds.index') }}">Refund reviews</a><a href="{{ route('admin.blogs.index') }}">Blog</a><a href="{{ route('admin.roles.index') }}">Staff roles</a><a href="{{ route('admin.contacts.index') }}">Contacts</a><a href="{{ route('admin.tickets.index') }}">Tickets</a><a href="{{ route('admin.forums.index') }}">Forums</a><a href="{{ route('admin.settings.edit') }}">Settings</a>@endif
-@if(auth()->user()->hasPermission('knowledge.manage'))<a href="{{ route('admin.knowledge-base.index') }}">Help Center</a>@endif
-@if(auth()->user()->canTeach())<a href="{{ route('instructor.courses.create') }}">Create course</a><a href="{{ route('instructor.ebooks.index') }}">Manage ebooks</a><a href="{{ route('instructor.bootcamps.index') }}">Manage bootcamps</a><a href="{{ route('instructor.reports.index') }}">My reports</a><a href="{{ route('instructor.earnings.index') }}">My earnings</a>@endif</nav>
-<div class="panel-profile"><span>{{ auth()->user()->name }} · {{ ucfirst(auth()->user()->role) }}</span>
-<button class="theme-toggle" type="button" aria-label="Toggle color theme"><span class="theme-icon">◐</span></button>
-<form action="{{ route('logout') }}" method="post">@csrf<button class="btn btn-quiet" type="submit">Log out</button></form></div></div></header>
-<main class="container panel-main">@if(session('success'))<div class="flash" role="status">{{ session('success') }}</div>@endif
-@if($errors->any())<div class="flash error" role="alert"><strong>Please review:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-@yield('content')</main><footer class="container panel-foot">{{ $siteName }} · © {{ date('Y') }}</footer>@endif
+<body class="panel-page admin-workspace member-workspace">
+<a class="skip-link" href="#member-main">Skip to main content</a>
+<div class="admin-shell" data-member-shell>
+    @include('partials.member-sidebar')
+    <div class="admin-frame">
+        @include('partials.member-topbar')
+        <main class="admin-main" id="member-main">
+            @if(session('success'))<div class="flash" role="status">{{ session('success') }}</div>@endif
+            @if($errors->any())<div class="flash error" role="alert"><strong>Please review:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+            @yield('content')
+        </main>
+        <footer class="admin-footer"><span>{{ $siteName }} · {{ auth()->user()->canTeach() ? 'Instructor workspace' : 'Student workspace' }}</span><span>© {{ date('Y') }}</span></footer>
+    </div>
+</div>
+@endif
 </body></html>

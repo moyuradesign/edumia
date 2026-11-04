@@ -3,7 +3,7 @@
  * All navigation links and forms work without JavaScript.
  */
 export function initAdminShell() {
-  const shell = document.querySelector('[data-admin-shell]');
+  const shell = document.querySelector('[data-admin-shell], [data-member-shell]');
   if (!shell) return;
 
   const openButton = shell.querySelector('[data-admin-open]');
