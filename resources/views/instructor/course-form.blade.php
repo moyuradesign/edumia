@@ -38,11 +38,15 @@
 <p>Schedule external meetings. Joining links are visible only to enrolled learners.</p>
 <a class="btn btn-secondary" href="{{ route('instructor.live-classes.index', $course) }}">Manage live classes</a></section>
 <section class="panel-card"><h2>Knowledge checks</h2><form class="form-row" action="{{ route('instructor.quizzes.store',$course) }}" method="post">@csrf
-<label class="grow">Quiz title<input name="title" required maxlength="190"></label><label>Pass %<input type="number" name="passing_score" min="0" max="100" value="70" required></label><label>Attempts<input type="number" name="attempts_allowed" min="1" max="20" value="3" required></label><button class="btn btn-secondary">Create quiz</button></form>
+<label class="grow">Quiz title<input name="title" required maxlength="190"></label><label>Pass %<input type="number" name="passing_score" min="0" max="100" value="70" required></label><label>Attempts<input type="number" name="attempts_allowed" min="1" max="20" value="3" required></label>
+<label>Time limit (minutes; optional)<input type="number" name="time_limit_minutes" min="5" max="120"></label>
+<label class="checkline"><input type="checkbox" name="randomize_questions" value="1"> Shuffle question order for each attempt</label>
+<button class="btn btn-secondary">Create quiz</button></form>
 @foreach($course->quizzes as $quiz)<div class="builder-section"><h3>{{ $quiz->title }} <small>({{ $quiz->questions->count() }} questions · {{ $quiz->is_published?'published':'draft' }})</small></h3>
 @if($quiz->questions->isNotEmpty())<ol>@foreach($quiz->questions as $question)<li>{{ $question->question }}</li>@endforeach</ol>@endif
 @if(!$quiz->is_published)<form class="stack-form compact-form" action="{{ route('instructor.questions.store',[$course,$quiz]) }}" method="post">@csrf
 <label>Question text<input name="question" required maxlength="2000"></label><div class="form-two">@for($n=0;$n<4;$n++)<label>Option {{ $n+1 }}<input name="options[{{ $n }}]" required maxlength="350"></label>@endfor</div>
+<label>Points<input type="number" name="points" value="1" min="1" max="100" required></label>
 <label>Correct option<select name="correct"><option value="0">Option 1</option><option value="1">Option 2</option><option value="2">Option 3</option><option value="3">Option 4</option></select></label>
 <button class="btn btn-small">Add question</button></form>
 @if($quiz->questions->isNotEmpty())<form action="{{ route('instructor.quizzes.publish',[$course,$quiz]) }}" method="post" class="inline-form">@csrf<button class="btn btn-secondary btn-small">Publish quiz</button></form>@endif

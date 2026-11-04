@@ -83,6 +83,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/learn/{course}/lessons/{lesson}/complete', [LearningController::class, 'complete'])->name('learning.complete');
 
     Route::get('/learn/quizzes/{quiz}', [QuizAttemptController::class, 'show'])->name('learning.quiz');
+    Route::post('/learn/quizzes/{quiz}/start', [QuizAttemptController::class, 'start'])->middleware('throttle:5,1')->name('learning.quiz.start');
     Route::post('/learn/quizzes/{quiz}', [QuizAttemptController::class, 'submit'])->middleware('throttle:10,1')->name('learning.quiz.submit');
 
     Route::get('/certificates/{certificate}', [CertificateController::class, 'show'])->name('certificate.show');
