@@ -134,6 +134,15 @@ async function install() {
     verify((await page.locator('[data-admin-shell]').count()) === 0,
       'Instructor workspace must not expose the admin shell');
     await navigate(page, '/instructor/students');
+    const studentExport = await page.request.get(new URL('/instructor/students/export', base).href);
+    verify(studentExport.status() === 200 &&
+      (studentExport.headers()['content-type'] || '').startsWith('text/csv'),
+      'Instructor roster export must return a real CSV file');
+    verify((await studentExport.text()).includes('Enrollment status'),
+      'Instructor CSV export is missing its real field headers');
+    await navigate(page, '/instructor/reports');
+    verify(await page.getByRole('heading', { name: 'My learning reports' }).isVisible(),
+      'Instructor real learning report missing');
 
     await navigate(page, '/edumia-page-that-does-not-exist', 404);
     verify(await page.locator('.premium-header').count() === 1, '404 does not use the global site header');
