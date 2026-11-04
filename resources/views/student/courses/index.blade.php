@@ -15,7 +15,7 @@
             <label class="sr-only" for="student-course-status">Progress status</label>
             <select id="student-course-status" name="status">
                 <option value="">All courses</option>
-                <option value="in_progress" @selected($filter === 'in_progress')>In progress</option>
+                <option value="active" @selected($filter === 'active')>In progress</option>
                 <option value="completed" @selected($filter === 'completed')>Completed</option>
             </select>
             <button class="admin-action-primary" type="submit">Apply filters</button>

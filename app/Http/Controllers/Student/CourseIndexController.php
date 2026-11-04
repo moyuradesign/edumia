@@ -24,7 +24,7 @@ final class CourseIndexController extends Controller
             ->whereHas('course')
             ->with('course');
 
-        if (in_array($filter, ['in_progress', 'completed'], true)) {
+        if (in_array($filter, ['active', 'completed'], true)) {
             $query->where('status', $filter);
         }
 
