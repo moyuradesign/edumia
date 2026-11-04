@@ -3,8 +3,7 @@
 @section('robots', 'noindex, follow')
 @section('content')
 <section class="site-error-page" aria-labelledby="page-not-found-title">
-    <div class="container">
-        <div class="site-error-card">
+    <div class="site-error-content">
             <span class="site-error-icon" aria-hidden="true">
                 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +22,6 @@
                     <a class="site-error-action" href="{{ route('dashboard') }}">My dashboard</a>
                 @endauth
             </div>
-        </div>
     </div>
 </section>
 @endsection
