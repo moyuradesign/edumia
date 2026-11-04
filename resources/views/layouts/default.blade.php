@@ -1,6 +1,8 @@
 @php
     $publicSettings = app(\App\Services\System\SettingsRepository::class)->general();
     $siteName = $publicSettings['site_name'];
+    // Normal controllers may provide this; exception-rendered pages do not.
+    $languages = $languages ?? \App\Helpers\Localization::LANGUAGES;
 @endphp
 <!doctype html>
 <html lang="{{ $locale ?? 'en' }}" data-theme="light">
