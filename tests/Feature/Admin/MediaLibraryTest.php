@@ -67,4 +67,31 @@ final class MediaLibraryTest extends TestCase
         $this->get('/admin/media/'.$media->id.'/download')->assertForbidden();
         $this->post('/admin/media', [])->assertForbidden();
     }
+
+    public function test_media_workspace_supports_private_asset_search_and_type_filters(): void
+    {
+        $admin = $this->account('admin', 'owner@edumia.test');
+        MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local', 'path' => 'edumia/media/logo.png',
+            'original_name' => 'school-logo.png', 'mime_type' => 'image/png',
+            'size_bytes' => 2048, 'alt_text' => 'School badge', 'visibility' => 'private',
+        ]);
+        MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local', 'path' => 'edumia/media/guide.pdf',
+            'original_name' => 'student-guide.pdf', 'mime_type' => 'application/pdf',
+            'size_bytes' => 4096, 'visibility' => 'private',
+        ]);
+        $this->actingAs($admin)->get('/admin/media')->assertOk()
+            ->assertSee('data-admin-shell', false)->assertSee('Stored file size')
+            ->assertSee('school-logo.png')->assertSee('student-guide.pdf')
+            ->assertSee('Private storage only');
+        $this->get('/admin/media?type=image')->assertOk()
+            ->assertSee('school-logo.png')->assertDontSee('student-guide.pdf');
+        $this->get('/admin/media?type=document')->assertOk()
+            ->assertSee('student-guide.pdf')->assertDontSee('school-logo.png');
+        $this->get('/admin/media?q=badge')->assertOk()
+            ->assertSee('School badge')->assertDontSee('student-guide.pdf');
+        $this->get('/admin/media?type[]=image&q[]=bad')->assertOk();
+    }
+
 }

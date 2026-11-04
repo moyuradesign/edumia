@@ -88,4 +88,19 @@ final class GeneralSettingsTest extends TestCase
         ])->assertSessionHasErrors('support_email');
         $this->assertDatabaseMissing('settings', ['key' => 'support_email']);
     }
+
+    public function test_settings_workspace_uses_organized_sections_without_changing_the_save_contract(): void
+    {
+        $admin = $this->account('admin', 'admin@edumia.test');
+        $this->actingAs($admin)->get('/admin/settings/general')->assertOk()
+            ->assertSee('Platform identity')->assertSee('Language &amp; timezone', false)
+            ->assertSee('Support &amp; registration', false)
+            ->assertSee('name="site_name"', false)
+            ->assertSee('name="default_locale"', false)
+            ->assertSee('name="site_timezone"', false)
+            ->assertSee('name="allow_registration"', false)
+            ->assertSee('action="'.route('admin.settings.update').'"', false)
+            ->assertSee('Save general settings');
+    }
+
 }

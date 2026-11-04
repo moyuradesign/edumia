@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin\Content;
 use App\Http\Requests\Admin\StoreMediaRequest;
 use App\Models\MediaFile;
 use App\Services\Content\MediaStorageService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -16,10 +17,37 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class MediaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $requestedSearch = $request->query('q');
+        $search = is_string($requestedSearch) ? mb_substr(trim($requestedSearch), 0, 100) : '';
+        $requestedType = $request->query('type');
+        $type = is_string($requestedType) && in_array($requestedType, ['all', 'image', 'document'], true)
+            ? $requestedType : 'all';
+
+        $files = MediaFile::query()->with('uploader')->latest('created_at')->latest('id');
+
+        if ($search !== '') {
+            $files->where(static function (Builder $query) use ($search): void {
+                $query->where('original_name', 'like', '%'.$search.'%')
+                    ->orWhere('alt_text', 'like', '%'.$search.'%');
+            });
+        }
+
+        if ($type === 'image') {
+            $files->where('mime_type', 'like', 'image/%');
+        } elseif ($type === 'document') {
+            $files->where('mime_type', 'application/pdf');
+        }
+
         return view('admin.content.media.index', [
-            'media' => MediaFile::query()->with('uploader')->latest()->paginate(20),
+            'media' => $files->paginate(20)->withQueryString(),
+            'search' => $search,
+            'type' => $type,
+            'fileCount' => MediaFile::query()->count(),
+            'imageCount' => MediaFile::query()->where('mime_type', 'like', 'image/%')->count(),
+            'documentCount' => MediaFile::query()->where('mime_type', 'application/pdf')->count(),
+            'totalBytes' => (int) MediaFile::query()->sum('size_bytes'),
         ]);
     }
 
