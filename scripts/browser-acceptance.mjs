@@ -115,6 +115,51 @@ async function install() {
     }
     console.log('EDUMIA_ADMIN_MODULE_ROUTE_SMOKE=PASS');
 
+    // Audience-specific account screens must share the visual system,
+    // but never expose the administrator sidebar on member routes.
+    await navigate(page, '/account');
+    verify(await page.locator('[data-member-shell]').isVisible(), 'Student workspace shell missing');
+    verify(await page.locator('.admin-brand-text small').innerText() === 'STUDENT ACCOUNT',
+      'Student workspace is showing the wrong brand or admin navigation');
+    verify((await page.locator('[data-admin-shell]').count()) === 0,
+      'Student workspace must not expose the admin shell');
+    verify(await page.locator('a[href="/account/certificates"]').count() >= 1,
+      'Student certificate workspace navigation missing');
+    await navigate(page, '/account/certificates');
+
+    await navigate(page, '/instructor');
+    verify(await page.locator('[data-member-shell]').isVisible(), 'Instructor workspace shell missing');
+    verify(await page.locator('.admin-brand-text small').innerText() === 'INSTRUCTOR STUDIO',
+      'Instructor workspace is showing the wrong brand or admin navigation');
+    verify((await page.locator('[data-admin-shell]').count()) === 0,
+      'Instructor workspace must not expose the admin shell');
+    await navigate(page, '/instructor/students');
+
+    await navigate(page, '/edumia-page-that-does-not-exist', 404);
+    verify(await page.locator('.premium-header').count() === 1, '404 does not use the global site header');
+    verify(await page.locator('footer.premium-footer').count() === 1, '404 does not use the global footer');
+    verify(await page.locator('#page-not-found-title').innerText() === 'Page not found',
+      'Focused branded 404 page missing');
+
+    // Role-aware member navigation should remain accessible on a small screen.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await navigate(page, '/account');
+    const memberMenu = page.locator('.panel-header .menu-toggle');
+    verify(await memberMenu.isVisible(), 'Student mobile sidebar toggle missing');
+    await memberMenu.click();
+    verify(await page.locator('#panel-navigation').isVisible(), 'Student mobile sidebar does not open');
+    await page.keyboard.press('Escape');
+    verify(!(await page.locator('#panel-navigation').isVisible()), 'Student sidebar does not close on Escape');
+
+    await navigate(page, '/instructor');
+    verify(await page.locator('.panel-header .menu-toggle').isVisible(), 'Instructor mobile menu missing');
+    await page.locator('.panel-header .menu-toggle').click();
+    verify(await page.locator('#panel-navigation').isVisible(), 'Instructor mobile sidebar does not open');
+    await page.keyboard.press('Escape');
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    console.log('EDUMIA_MEMBER_AUDIENCE_AND_GLOBAL_404=PASS');
+
     // All admin modules retain their routes in the premium shell.
     await navigate(page, '/dashboard');
     verify(await page.locator('[data-admin-shell]').isVisible(), 'Admin shell was not rendered');
