@@ -118,7 +118,10 @@
                             <span class="premium-account-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                             <div><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->email }}</small></div>
                         </div>
-                        <a href="{{ route($workspaceRoute) }}">{{ auth()->user()->canTeach() && !auth()->user()->isAdmin() ? 'Instructor workspace' : (auth()->user()->isAdmin() ? 'Admin dashboard' : 'Student account') }}</a>
+                        <a href="{{ route('dashboard') }}">{{ \App\Helpers\Localization::label('dashboard', $locale) }}</a>
+                        @unless(auth()->user()->isAdmin())
+                            <a href="{{ route($workspaceRoute) }}">{{ auth()->user()->canTeach() ? 'Instructor workspace' : 'Student account' }}</a>
+                        @endunless
                         <a href="{{ route('account.preferences.edit') }}">{{ \App\Helpers\Localization::label('nav_my_profile', $locale) }}</a>
                         <a href="{{ route('checkout.orders.index') }}">{{ \App\Helpers\Localization::label('nav_my_orders', $locale) }}</a>
                         <a href="{{ route('saved-courses.index') }}">{{ \App\Helpers\Localization::label('nav_saved', $locale) }}</a>
