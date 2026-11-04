@@ -108,5 +108,10 @@ final class TutorBookingWorkflowTest extends TestCase
             'scheduled_at' => '2026-11-06T14:00',
         ])->assertStatus(422);
         $this->assertDatabaseCount('tutor_bookings', 0);
+        $offering->update(['rate_per_hour' => null]);
+        $this->post(route('tutors.book', $offering), [
+            'scheduled_at' => '2026-11-06T14:00',
+        ])->assertStatus(422);
+        $this->assertDatabaseCount('tutor_bookings', 0);
     }
 }

@@ -29,7 +29,8 @@ final class TutorBookingService
 
             // Tutor booking is free-only until a verified payment integration
             // supports this product. Never fabricate paid confirmation.
-            abort_unless((float) $offering->rate_per_hour === 0.0, 422, 'Paid tutoring checkout is unavailable.');
+            abort_unless($offering->rate_per_hour !== null
+                && (float) $offering->rate_per_hour === 0.0, 422, 'Paid or unpriced tutoring checkout is unavailable.');
 
             $schedules = TutorSchedule::query()->where('tutor_id', $tutor->getKey())
                 ->where('active', true)->get();
