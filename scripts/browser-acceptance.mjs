@@ -68,7 +68,12 @@ async function install() {
       await page.locator('input[name="' + name + '"]').fill(value);
     }
     await page.locator('input[name="accept"]').check();
-    await page.getByRole('button', { name: 'Install Edumia' }).click();
+    // Fresh MySQL migrations can take longer on a cold independent runner.
+    // Keep the navigation bounded, but do not use the short default action timeout.
+    await page.getByRole('button', { name: 'Install Edumia' }).click({ timeout: 120000 });
+    await page.getByRole('heading', { name: 'Edumia installed' }).waitFor({
+      state: 'visible', timeout: 120000,
+    });
     verify(await page.getByRole('heading', { name: 'Edumia installed' }).isVisible(),
       'Fresh MySQL installation failed: installer did not report completion');
     verify(!(await page.locator('body').innerText()).includes(dbPassword), 'Database password leaked to page');
