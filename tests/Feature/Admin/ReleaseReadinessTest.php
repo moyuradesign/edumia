@@ -59,11 +59,11 @@ final class ReleaseReadinessTest extends TestCase
 
     public function test_runtime_report_never_prints_secret_values(): void
     {
-        config(['app.key' => 'base64:FAKE_QA_KEY_VALUE_NEVER_DISPLAY']);
+        config(['app.key' => str_repeat('K', 32)]);
         $admin = $this->member('admin', 'security@example.test');
         $this->actingAs($admin)->get(route('admin.readiness.index'))
             ->assertOk()
-            ->assertDontSee('FAKE_QA_KEY_VALUE_NEVER_DISPLAY');
+            ->assertDontSee(str_repeat('K', 32));
     }
 
     public function test_external_gates_remain_open_regardless_of_local_signals(): void
