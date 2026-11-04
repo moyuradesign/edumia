@@ -36,6 +36,7 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
         Route::get('/ebooks/{ebook}/edit', [EbookController::class, 'edit'])->name('ebooks.edit');
         Route::put('/ebooks/{ebook}', [EbookController::class, 'update'])->name('ebooks.update');
 
+        Route::get('/students', \App\Http\Controllers\Instructor\StudentDirectoryController::class)->name('students.index');
         Route::get('/courses', \App\Http\Controllers\Instructor\CourseIndexController::class)->name('courses.index');
         Route::get('/courses/create', [CourseManagementController::class, 'create'])->name('courses.create');
         Route::post('/courses', [CourseManagementController::class, 'store'])->name('courses.store');

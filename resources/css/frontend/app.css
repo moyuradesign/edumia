@@ -1903,3 +1903,28 @@ p {
 .premium-header .premium-dropdown { overscroll-behavior: contain; }
 .premium-header .premium-account-menu > a:focus-visible, .premium-header .premium-mega-menu a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (min-width: 1025px) { .premium-header .premium-mega-menu { max-height: min(74dvh, 650px); overflow-y: auto; } }
+
+
+/* Global branded 404: regular website header, navigation and footer remain shared. */
+.site-error-page { display: grid; place-items: center; min-height: min(75vh, 680px);
+  padding-block: clamp(44px, 9vw, 100px); background: var(--surface-alt); }
+.site-error-card { width: min(100%, 740px); text-align: center; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 27px;
+  padding: clamp(30px, 7vw, 75px) clamp(20px, 6vw, 66px); box-shadow: var(--shadow); }
+.site-error-icon { width: 84px; height: 84px; display: grid; place-items: center;
+  border-radius: 25px; margin: 0 auto 20px; background: var(--soft); color: var(--accent); }
+.site-error-icon svg { width: 42px; height: 42px; }
+.site-error-kicker { margin: 0; font-size: 12px; font-weight: 850; letter-spacing: .16em; color: var(--accent); }
+.site-error-card h1 { font-size: clamp(36px, 5vw, 59px); line-height: 1.1; letter-spacing: -.05em;
+  margin: 12px 0 17px; color: var(--ink); }
+.site-error-description { color: var(--muted); max-width: 480px; margin: 0 auto 28px; line-height: 1.7; }
+.site-error-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.site-error-action { display: inline-flex; justify-content: center; align-items: center;
+  padding: 13px 20px; min-height: 48px; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface); font-size: 13px; font-weight: 800; color: var(--ink); }
+.site-error-action--primary { color: #fff; background: #c2410c; border-color: #c2410c; }
+.site-error-action:hover { transform: translateY(-1px); }
+.site-error-action:focus-visible { outline: 3px solid var(--secondary); outline-offset: 3px; }
+@media (max-width: 560px) { .site-error-actions { flex-direction: column; }
+  .site-error-action { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .site-error-action { transition: none; transform: none !important; } }

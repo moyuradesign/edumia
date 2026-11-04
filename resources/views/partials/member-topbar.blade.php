@@ -5,7 +5,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <div class="admin-page-location">
-            <span class="admin-location-label">{{ auth()->user()->canTeach() ? 'INSTRUCTOR / WORKSPACE' : 'STUDENT / WORKSPACE' }}</span>
+            <span class="admin-location-label">{{ $memberAudience === 'instructor' ? 'INSTRUCTOR / WORKSPACE' : 'STUDENT / WORKSPACE' }}</span>
             <strong>@yield('title', 'Overview')</strong>
         </div>
         <div class="admin-topbar-search">
@@ -21,7 +21,7 @@
             <details class="admin-user-popover" data-admin-profile>
                 <summary class="admin-user-trigger" aria-label="Account menu">
                     <span class="admin-user-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
-                    <span class="admin-user-summary"><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->canTeach() ? 'Instructor' : 'Student' }}</small></span>
+                    <span class="admin-user-summary"><strong>{{ auth()->user()->name }}</strong><small>{{ $memberAudience === 'instructor' ? 'Instructor' : 'Student' }}</small></span>
                     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m6 9 6 6 6-6"/></svg>
                 </summary>
                 <div class="admin-user-dropdown">

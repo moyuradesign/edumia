@@ -1,5 +1,5 @@
 @php
-    $teaching = auth()->user()->canTeach();
+    $teaching = $memberAudience === 'instructor';
     $homeRoute = $teaching ? 'instructor.dashboard' : 'account.home';
     $memberGroups = $teaching ? [
         ['label' => 'Workspace', 'items' => [
@@ -8,6 +8,7 @@
         ]],
         ['label' => 'Teaching management', 'items' => [
             ['label' => 'My courses', 'route' => 'instructor.courses.index', 'match' => 'instructor.courses.*', 'icon' => 'book'],
+            ['label' => 'My students', 'route' => 'instructor.students.index', 'match' => 'instructor.students.*', 'icon' => 'users'],
             ['label' => 'Create a course', 'route' => 'instructor.courses.create', 'match' => 'instructor.courses.create', 'icon' => 'plus'],
             ['label' => 'Manage ebooks', 'route' => 'instructor.ebooks.index', 'match' => 'instructor.ebooks.*', 'icon' => 'book'],
             ['label' => 'Manage bootcamps', 'route' => 'instructor.bootcamps.index', 'match' => 'instructor.bootcamps.*', 'icon' => 'grid'],
@@ -23,6 +24,7 @@
         ['label' => 'Workspace', 'items' => [
             ['label' => 'Overview', 'route' => 'account.home', 'match' => 'account.home', 'icon' => 'home'],
             ['label' => 'My courses', 'route' => 'account.courses', 'match' => 'account.courses', 'icon' => 'book'],
+            ['label' => 'Certificates', 'route' => 'account.certificates', 'match' => 'account.certificates', 'icon' => 'shield'],
         ]],
         ['label' => 'My learning', 'items' => [
             ['label' => 'Saved courses', 'route' => 'saved-courses.index', 'match' => 'saved-courses.*', 'icon' => 'star'],
@@ -37,6 +39,13 @@
             ['label' => 'Become an instructor', 'route' => 'instructor-application.index', 'match' => 'instructor-application.*', 'icon' => 'users'],
         ]],
     ];
+    // In a student view, never offer the instructor-application action to existing teachers or admins.
+    if (!$teaching && auth()->user()->canTeach()) {
+        $memberGroups[2]['items'] = array_values(array_filter(
+            $memberGroups[2]['items'],
+            fn ($item) => $item['route'] !== 'instructor-application.index'
+        ));
+    }
 @endphp
 <aside class="admin-sidebar" id="panel-navigation" data-admin-sidebar aria-label="{{ $teaching ? 'Instructor' : 'Student' }} navigation">
     <div class="admin-sidebar-brand">

@@ -35,6 +35,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     // Dedicated student workspace. Instructors may also access their learner records.
     Route::get('/account', \App\Http\Controllers\Student\DashboardController::class)->name('account.home');
     Route::get('/account/courses', \App\Http\Controllers\Student\CourseIndexController::class)->name('account.courses');
+    Route::get('/account/certificates', \App\Http\Controllers\Student\CertificateIndexController::class)->name('account.certificates');
 
     // All roles share this entrypoint; DashboardController chooses the workspace.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
