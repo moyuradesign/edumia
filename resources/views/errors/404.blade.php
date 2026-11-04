@@ -13,7 +13,7 @@
                     <circle cx="13" cy="12" r="5" fill="currentColor" stroke="none"/>
                 </svg>
             </span>
-            <p class="site-error-kicker">404 · PAGE NOT FOUND</p>
+            <p class="site-error-kicker">404 · Not found</p>
             <h1 id="page-not-found-title">Page not found</h1>
             <p class="site-error-description">The page you're looking for doesn't exist or has moved.</p>
             <div class="site-error-actions">
