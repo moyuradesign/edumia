@@ -134,6 +134,11 @@ async function install() {
     verify((await page.locator('[data-admin-shell]').count()) === 0,
       'Instructor workspace must not expose the admin shell');
     await navigate(page, '/instructor/students');
+    verify(await page.locator('a[href*="/instructor/students/export"]').count() >= 1,
+      'Instructor roster is missing its working export action');
+    await navigate(page, '/instructor/students?status=active');
+    verify(await page.locator('select[name="status"]').inputValue() === 'active',
+      'Instructor roster status filter did not retain the selected value');
     const studentExport = await page.request.get(new URL('/instructor/students/export', base).href);
     verify(studentExport.status() === 200 &&
       (studentExport.headers()['content-type'] || '').startsWith('text/csv'),
