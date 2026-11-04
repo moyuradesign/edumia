@@ -37,7 +37,7 @@ final class AccountWorkspacesTest extends TestCase
             ->assertOk()
             ->assertSee('STUDENT ACCOUNT')
             ->assertSee('Welcome back, Student Member')
-            ->assertSee('class="admin-shell"', false)
+            ->assertSee('class="admin-shell" data-member-shell', false)
             ->assertSee('data-admin-search', false)
             ->assertSee('My ebooks')
             ->assertSee('My bootcamps')

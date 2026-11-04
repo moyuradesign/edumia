@@ -24,7 +24,7 @@
 @else
 <body class="panel-page admin-workspace member-workspace">
 <a class="skip-link" href="#member-main">Skip to main content</a>
-<div class="admin-shell" data-admin-shell>
+<div class="admin-shell" data-member-shell>
     @include('partials.member-sidebar')
     <div class="admin-frame">
         @include('partials.member-topbar')
