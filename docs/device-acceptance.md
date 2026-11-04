@@ -16,6 +16,10 @@ Record for **each** device: hardware model, operating system, browser/version, v
 | D08 | Physical device with keyboard | Tab, Shift+Tab, Enter, Space, Escape, focus and menu state | Video and notes | NOT TESTED |
 | D09 | iOS VoiceOver / Android TalkBack | Menu announcements, field names, errors and heading order | Accessibility observations | NOT TESTED |
 | D10 | Physical phone on weak cellular | Reload key pages; check stalled assets, network errors, and usability | Recording and notes | NOT TESTED |
+| D11 | Physical iPhone Safari, administrator | Media, Settings, Roles, Instructor pages; sidebar, backdrop and theme button in portrait/landscape | Redacted screenshots + recording | NOT TESTED |
+| D12 | Physical Android Chrome, administrator | Admin modules, keyboard opening for search/filters, controls and theme persistence | Redacted screenshots + recording | NOT TESTED |
+| D13 | Physical tablet, administrator | Navigation groups, two-column layouts, long tables and filter controls in both orientations | Redacted screenshots | NOT TESTED |
+| D14 | Physical keyboard/screen reader, administrator | Focus order, landmarks, labels and review controls on the four admin pages | Video and accessibility observations | NOT TESTED |
 
 **Testing protocol:** Use an actual physical device, a dedicated staging account, and a separately backed-up disposable MySQL database. Record observed PASS, FAIL or BLOCKED with evidence for each ID. A FAIL/BLOCKED item prevents approval. Do not process a real payment or expose credentials in screenshots.
 

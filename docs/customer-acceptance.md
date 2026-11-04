@@ -13,7 +13,7 @@ This verification is **non-production**. Run only on a fresh, isolated installat
 
 ## Automated acceptance
 
-The existing GitHub **Edumia integrated QA package** workflow provisions a temporary MySQL service and a separate copy of the application. It exercises the installer and smoke-checks responsive pages with headless browsers, then uploads redacted browser evidence. This is a fresh-install rehearsal, **not** a deployment or a test against a customer's database.
+GitHub's **Edumia integrated QA package** workflow installs a disposable copy with a temporary MySQL service, then runs Chromium, Firefox and WebKit browser checks. A dependent, separate-runner job downloads the generated QA archive, verifies that installation secrets are absent, and performs a second fresh HTTP/MySQL installation using PHP 8.3. Both jobs use disposable infrastructure, **not** real hosting-provider accounts or customer databases.
 
 Acceptance covers: installer prerequisites, CSRF rejection, successful first administrator creation, one-time lock, user login, dashboard, public HTML/CSS/JS, language switching, dark/light mode, 390px and 768px mobile/tablet viewports, keyboard interaction, and basic desktop rendering. Tests use a standalone QA account and disposable database.
 
@@ -29,3 +29,18 @@ Headless mobile/tablet viewport simulation cannot replace a physical-device revi
 ## Physical devices and real shared hosting
 
 The evidence-based sign-off documents are [Physical-device acceptance](device-acceptance.md) and [Shared-host acceptance](shared-host-acceptance.md). Both gates remain OPEN until actual hardware and real hosting are tested. Neither CI browser emulation nor a disposable MySQL runner can automatically close them.
+
+## Four administrator workspaces: UI and installation acceptance
+
+The automated browser suite opens **Media Library**, **General Settings**, **Roles & Permissions**, and **Instructor Management** using the new administrator created by the one-time installer. Each page must render its heading and shared admin shell with no page-level horizontal overflow. Browser coverage includes Chromium desktop (1440px), Firefox desktop (1366px), Chromium mobile (390px), Chromium tablet (768px), and WebKit mobile (375px). The suite also checks functional media and instructor filters, registration and language controls, role creation fields, color-theme persistence, and mobile sidebar opening and backdrop dismissal.
+
+- First-run screenshots: `installed-{media,settings,roles,instructors}-{desktop,mobile}.png`.
+- Browser-matrix screenshots: `admin-{media,settings,roles,instructors}-{browser-scenario}.png`.
+- Evidence artifacts: `edumia-browser-evidence` and `edumia-independent-customer-evidence`. Screenshots show only disposable QA users. Do not add real credentials to evidence.
+- The second job downloads `edumia-integrated-qa`, checks its build/source SHA and absence of `.env`, installer code, or installation lock, then completes setup and verifies the resulting lock and administrator pages on a clean runner. A successful source-tree install **alone** does not qualify as archive acceptance.
+- **Automated sign-off:** require both `Edumia quality checks` and **both jobs** of `Edumia integrated QA package` to be green for the **same tested commit SHA**. Check screenshots for clipping, contrast, legibility and touch-target accessibility before release.
+
+### Mandatory external gates (not satisfied by GitHub CI)
+
+The automated tests are not a physical iPhone, Android phone, or tablet; nor are they a hosted cPanel or aaPanel customer environment. On actual staging hardware and hosting, an independent reviewer must perform the cases in [Physical-device acceptance](device-acceptance.md) and [Shared-host acceptance](shared-host-acceptance.md), verify separate browser and hosting PHP handlers, test a clean installation and a backup-backed upgrade, then record dated evidence. All external rows remain **NOT TESTED** unless explicitly signed off with real observations.
+

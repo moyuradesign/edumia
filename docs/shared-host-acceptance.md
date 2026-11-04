@@ -29,5 +29,7 @@ Check the public /courses, /fr/courses and /de/contact routes, both compiled CSS
 | H08 | HTTPS, private paths denied, secure settings | HTTP statuses, redacted review | NOT TESTED |
 | H09 | Physical-device checks on the same staging URL | Link to device-acceptance evidence | NOT TESTED |
 | H10 | Payments disabled and no production data | Configuration review | NOT TESTED |
+| H11 | All four new admin pages open and remain responsive after independent installation | Media, Settings, Roles, Instructors screenshots | NOT TESTED |
+| H12 | Backup-backed upgrade of an existing staging installation, with rollback and data-integrity verification | Backup hash, before/after records, rollback log | NOT TESTED |
 
 **Release gate: OPEN.** All mandatory rows require actual host evidence and reviewer sign-off, not simulated results. Keep sensitive information out of screenshots and reports.
