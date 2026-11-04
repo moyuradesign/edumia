@@ -91,6 +91,15 @@ docs/
 
 No empty PHP files are created merely to make the tree look large.
 
+## Working service additions — 2026-11-05
+
+- **Tutor booking (free):** instructor-owned subject offerings, weekly time-zone availability, learner booking requests, concurrency-safe overlapping-slot rejection, confirmation, private meeting links and cancellation. Paid tutoring remains blocked.
+- **Team training (free):** administrator-created packages linked to eligible published free courses, team-owner activation, reserved seat invitations to active accounts, recipient acceptance and course enrollment. Paid team plans remain blocked.
+- **Advanced assessments:** published single-choice quizzes now support optional server-enforced timed sessions, stable randomized question order, weighted question points, anti-replay, bounded attempts and recorded quiz result history. Advanced question banks, proctoring and automated plagiarism checks are not claimed.
+- **External provider checks:** administrator-only Stripe TEST API connectivity audit with redacted account metadata, no stored secrets, and a separate disabled-by-default live activation flag. Neither sandbox webhook acceptance nor merchant onboarding/settlement eligibility is proven.
+
+New migrations are additive. Back up customer files and DB and run migrations as part of an explicit verified upgrade; never run `migrate:fresh` on a live installation. See [External payment acceptance](external-payment-acceptance.md).
+
 ## Outstanding full-platform modules
 
 Orders, verified Stripe flows, invoice snapshots, refunds and held earnings now have source modules; coupon/redemption logic, production provider tests, disbursements, tax compliance, Bakong dynamic QR, tutor bookings, live conferencing integrations, advanced grading, file attachments for assignments, complete CMS/appearance builder, language phrase management, notifications, advanced reports and CodeCanyon licensing **do not yet constitute complete functional modules**. Complete them with full vertical workflows and tests before advertising commercial readiness.

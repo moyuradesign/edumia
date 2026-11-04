@@ -15,6 +15,7 @@
                 ['label' => 'Categories', 'route' => 'admin.categories.index', 'match' => 'admin.categories.*', 'icon' => 'grid'],
                 ['label' => 'Ebook approvals', 'route' => 'admin.ebooks.index', 'match' => 'admin.ebooks.*', 'icon' => 'book'],
                 ['label' => 'Bootcamp approvals', 'route' => 'admin.bootcamps.index', 'match' => 'admin.bootcamps.*', 'icon' => 'book'],
+                ['label' => 'Team packages', 'route' => 'admin.team-training.index', 'match' => 'admin.team-training.*', 'icon' => 'users'],
             ],
         ],
         [
@@ -30,6 +31,7 @@
             'items' => [
                 ['label' => 'Orders', 'route' => 'admin.commerce.orders.index', 'match' => 'admin.commerce.orders.*', 'icon' => 'cart'],
                 ['label' => 'Accounting', 'route' => 'admin.commerce.accounting.index', 'match' => 'admin.commerce.accounting.*', 'icon' => 'chart'],
+                ['label' => 'Payment readiness', 'route' => 'admin.commerce.gateway-readiness.index', 'match' => 'admin.commerce.gateway-readiness.*', 'icon' => 'shield'],
                 ['label' => 'Refund reviews', 'route' => 'admin.commerce.refunds.index', 'match' => 'admin.commerce.refunds.*', 'icon' => 'shield'],
             ],
         ],

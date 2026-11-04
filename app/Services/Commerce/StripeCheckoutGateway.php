@@ -19,6 +19,7 @@ final class StripeCheckoutGateway
 
         return ($settings['enabled'] ?? false) === true
             && in_array($mode, ['test', 'live'], true)
+            && ($mode !== 'live' || ($settings['live_approved'] ?? false) === true)
             && str_starts_with($secret, 'sk_'.$mode.'_')
             && str_starts_with($webhook, 'whsec_')
             && strlen($secret) >= 15 && strlen($webhook) >= 15;

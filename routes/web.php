@@ -26,6 +26,22 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/courses/{course}', [CartController::class, 'store'])->middleware('throttle:30,1')->name('cart.items.store');
 Route::delete('/cart/courses/{course}', [CartController::class, 'destroy'])->middleware('throttle:30,1')->name('cart.items.destroy');
 
+Route::get('/team-training', [\App\Http\Controllers\Frontend\TeamTrainingController::class, 'index'])->name('teams.index');
+Route::middleware(['auth', 'active'])->group(function (): void {
+    Route::get('/my-team-training', [\App\Http\Controllers\Student\TeamTrainingController::class, 'index'])->name('team.workspaces.index');
+    Route::post('/team-training/{package}/activate', [\App\Http\Controllers\Student\TeamTrainingController::class, 'activate'])->middleware('throttle:5,1')->name('team.packages.activate');
+    Route::post('/my-team-training/{team}/invite', [\App\Http\Controllers\Student\TeamTrainingController::class, 'invite'])->middleware('throttle:10,1')->name('team.members.invite');
+    Route::patch('/my-team-training/invitations/{invitation}', [\App\Http\Controllers\Student\TeamTrainingController::class, 'respond'])->name('team.invitations.respond');
+});
+Route::get('/tutors', [\App\Http\Controllers\Frontend\TutorDirectoryController::class, 'index'])->name('tutors.index');
+Route::get('/tutors/{offering}', [\App\Http\Controllers\Frontend\TutorDirectoryController::class, 'show'])->name('tutors.show');
+Route::middleware(['auth', 'active'])->group(function (): void {
+    Route::post('/tutors/{offering}/book', [\App\Http\Controllers\Frontend\TutorDirectoryController::class, 'book'])
+        ->middleware('throttle:6,1')->name('tutors.book');
+    Route::get('/my-tutor-bookings', [\App\Http\Controllers\Student\TutorBookingController::class, 'index'])->name('tutor.bookings.index');
+    Route::patch('/my-tutor-bookings/{booking}/cancel', [\App\Http\Controllers\Student\TutorBookingController::class, 'cancel'])->name('tutor.bookings.cancel');
+});
+
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');
 Route::get('/bootcamps', [BootcampController::class, 'index'])->name('bootcamps.index');

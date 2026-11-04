@@ -19,6 +19,11 @@ Route::middleware(['auth', 'active', 'role:instructor,admin'])
     ->group(function (): void {
         Route::get('/', \App\Http\Controllers\Instructor\DashboardController::class)->name('dashboard');
         Route::get('/earnings', [EarningsController::class, 'index'])->name('earnings.index');
+        Route::get('/tutoring', [\App\Http\Controllers\Instructor\TutorStudioController::class, 'index'])->name('tutors.index');
+        Route::post('/tutoring/subjects', [\App\Http\Controllers\Instructor\TutorStudioController::class, 'offer'])->middleware('throttle:10,1')->name('tutors.offer');
+        Route::post('/tutoring/availability', [\App\Http\Controllers\Instructor\TutorStudioController::class, 'schedule'])->name('tutors.schedule');
+        Route::patch('/tutoring/availability/{schedule}', [\App\Http\Controllers\Instructor\TutorStudioController::class, 'removeSchedule'])->name('tutors.schedule.remove');
+        Route::patch('/tutoring/bookings/{booking}', [\App\Http\Controllers\Instructor\TutorStudioController::class, 'respond'])->name('tutors.booking.update');
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
         Route::get('/bootcamps', [BootcampController::class, 'index'])->name('bootcamps.index');
