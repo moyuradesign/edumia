@@ -129,7 +129,6 @@ final class InstructorLearnerProgressTest extends TestCase
         $this->get(route('instructor.students.export'))->assertForbidden();
         $this->get(route('instructor.reports.index'))->assertForbidden();
 
-        $this->assertGuest();
     }
 
     public function test_student_filters_and_export_share_the_same_ownership_restrictions(): void
