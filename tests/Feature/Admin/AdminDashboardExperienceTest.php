@@ -106,4 +106,47 @@ final class AdminDashboardExperienceTest extends TestCase
         $this->get('/admin/commerce/orders')->assertForbidden();
         $this->get('/admin/settings/general')->assertForbidden();
     }
+
+    public function test_order_workspace_filters_customers_and_verified_status_without_forging_payments(): void
+    {
+        $admin = $this->member('admin', 'Owner', 'owner@example.test');
+        $buyer = $this->member('student', 'Buyer Alpha', 'alpha@example.test');
+        $secondBuyer = $this->member('student', 'Buyer Beta', 'beta@example.test');
+
+        $createOrder = static function (User $user, string $status, ?\Carbon\CarbonInterface $paidAt = null, ?\Carbon\CarbonInterface $expiresAt = null): Order {
+            return Order::query()->create([
+                'user_id' => $user->id,
+                'reference' => (string) \Illuminate\Support\Str::uuid(),
+                'status' => $status,
+                'currency_code' => 'USD',
+                'subtotal' => '25.00',
+                'total' => '25.00',
+                'paid_at' => $paidAt,
+                'expires_at' => $expiresAt,
+            ]);
+        };
+
+        $pending = $createOrder($buyer, 'pending', null, now()->addDay());
+        $expired = $createOrder($buyer, 'pending', null, now()->subDay());
+        $paid = $createOrder($secondBuyer, 'paid', now());
+
+        $this->actingAs($admin)->get('/admin/commerce/orders')->assertOk()
+            ->assertSee('data-admin-shell', false)
+            ->assertSee('Order management')
+            ->assertSee('Verified paid orders')
+            ->assertSee('Quote expired')
+            ->assertSee('No verified payment');
+
+        $this->get('/admin/commerce/orders?q=Beta')->assertOk()
+            ->assertSee('Buyer Beta')->assertDontSee('Buyer Alpha');
+        $this->get('/admin/commerce/orders?status=paid')->assertOk()
+            ->assertSee($paid->reference)->assertDontSee($pending->reference);
+        $this->get('/admin/commerce/orders?status=pending')->assertOk()
+            ->assertSee($pending->reference)->assertDontSee($expired->reference);
+        $this->get('/admin/commerce/orders?status=expired')->assertOk()
+            ->assertSee($expired->reference)->assertDontSee($pending->reference);
+        $this->get('/admin/commerce/orders?status[]=paid&q[]=invalid')->assertOk();
+        $this->actingAs($buyer)->get('/admin/commerce/orders')->assertForbidden();
+    }
+
 }
