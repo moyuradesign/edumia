@@ -140,6 +140,45 @@ async function install() {
     verify(await page.locator('footer.premium-footer').count() === 1, '404 does not use the global footer');
     verify(await page.locator('#page-not-found-title').innerText() === 'Page not found',
       'Focused branded 404 page missing');
+    const large404 = page.locator('.site-error-artwork');
+    verify(await large404.count() === 1 && await large404.isVisible(),
+      'Large branded 404 SVG artwork missing');
+    const artworkBounds = await large404.boundingBox();
+    verify(artworkBounds && artworkBounds.width >= 280 && artworkBounds.height >= 100,
+      '404 SVG artwork is too small for the desktop viewport');
+
+    const errorLayout = await page.locator('.site-error-page').evaluate(section => {
+      const content = section.querySelector('.site-error-content');
+      if (!content) return null;
+      const outer = section.getBoundingClientRect();
+      const inner = content.getBoundingClientRect();
+      return {
+        horizontalGap: Math.abs((inner.left + inner.width / 2) - (outer.left + outer.width / 2)),
+        verticalGap: Math.abs((inner.top + inner.height / 2) - (outer.top + outer.height / 2)),
+        background: getComputedStyle(section).backgroundColor,
+        cardBackground: getComputedStyle(content).backgroundColor,
+        widthOverflow: inner.right > window.innerWidth + 2,
+      };
+    });
+    verify(errorLayout && errorLayout.horizontalGap <= 3 && errorLayout.verticalGap <= 3,
+      'Global 404 message is not centered in the page canvas');
+    verify(errorLayout.background === 'rgba(0, 0, 0, 0)' &&
+      errorLayout.cardBackground === 'rgba(0, 0, 0, 0)',
+      'Global 404 page must have no tinted section or white card background');
+    verify(!errorLayout.widthOverflow, '404 content overflows the viewport');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await navigate(page, '/edumia-page-that-does-not-exist', 404);
+    verify(await page.locator('.site-error-content').isVisible(),
+      'Global 404 content missing on mobile');
+    const mobileArtwork = await page.locator('.site-error-artwork').boundingBox();
+    verify(mobileArtwork && mobileArtwork.width >= 260 && mobileArtwork.width <= 390,
+      '404 SVG artwork must be large but fit on a phone');
+    verify(await page.locator('#page-not-found-title').count() === 1,
+      '404 title missing on mobile');
+
+    const smallScreenOverflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    verify(smallScreenOverflow <= 2, 'Global 404 horizontal overflow on mobile');
 
     // Role-aware member navigation should remain accessible on a small screen.
     await page.setViewportSize({ width: 390, height: 844 });

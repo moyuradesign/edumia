@@ -3,14 +3,18 @@
 @section('robots', 'noindex, follow')
 @section('content')
 <section class="site-error-page" aria-labelledby="page-not-found-title">
-    <div class="container">
-        <div class="site-error-card">
+    <div class="site-error-content">
             <span class="site-error-icon" aria-hidden="true">
-                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 7h19l7 7v27H12z"/>
-                    <path d="M31 7v8h7M19 26h12M19 33h9"/>
-                    <circle cx="13" cy="12" r="5" fill="currentColor" stroke="none"/>
+                <svg class="site-error-artwork" viewBox="0 0 420 188" fill="none"
+                     xmlns="http://www.w3.org/2000/svg" focusable="false">
+                    <path d="M86 27 26 112h98M104 27v135"
+                          stroke="currentColor" stroke-width="19"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="164" y="27" width="92" height="135" rx="46"
+                          stroke="var(--accent)" stroke-width="19"/>
+                    <path d="m345 27-60 85h98M363 27v135"
+                          stroke="currentColor" stroke-width="19"
+                          stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </span>
             <p class="site-error-kicker">404 · Not found</p>
@@ -23,7 +27,6 @@
                     <a class="site-error-action" href="{{ route('dashboard') }}">My dashboard</a>
                 @endauth
             </div>
-        </div>
     </div>
 </section>
 @endsection
