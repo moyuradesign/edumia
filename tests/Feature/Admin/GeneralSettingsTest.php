@@ -93,8 +93,8 @@ final class GeneralSettingsTest extends TestCase
     {
         $admin = $this->account('admin', 'admin@edumia.test');
         $this->actingAs($admin)->get('/admin/settings/general')->assertOk()
-            ->assertSee('Platform identity')->assertSee('Language &amp; timezone', false)
-            ->assertSee('Support &amp; registration', false)
+            ->assertSee('Platform identity')->assertSee('Language & timezone', false)
+            ->assertSee('Support & registration', false)
             ->assertSee('name="site_name"', false)
             ->assertSee('name="default_locale"', false)
             ->assertSee('name="site_timezone"', false)

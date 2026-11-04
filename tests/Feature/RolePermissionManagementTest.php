@@ -107,7 +107,7 @@ final class RolePermissionManagementTest extends TestCase
 
         $this->get('/admin/roles')->assertOk()
             ->assertSee('data-admin-shell', false)
-            ->assertSee('Roles &amp; permissions', false)
+            ->assertSee('Roles & permissions', false)
             ->assertSee('Delegatable permissions')
             ->assertSee('Help Desk Editor')
             ->assertSee('Manage Help Center articles')
