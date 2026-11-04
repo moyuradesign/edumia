@@ -434,7 +434,10 @@ async function browse(scenario) {
       await open.click();
       verify(await page.locator('[data-admin-sidebar]').isVisible(),
         scenario.name + ' mobile admin sidebar did not open');
-      await page.locator('[data-admin-backdrop]').click();
+      // The backdrop fills the viewport; click the exposed strip to the right of the sidebar.
+      await page.locator('[data-admin-backdrop]').click({
+        position: { x: scenario.viewport.width - 12, y: Math.round(scenario.viewport.height / 2) },
+      });
       verify(!(await page.locator('[data-admin-sidebar]').isVisible()),
         scenario.name + ' mobile admin sidebar did not close');
     } else {
