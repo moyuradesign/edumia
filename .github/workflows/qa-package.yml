@@ -28,6 +28,7 @@ on:
       - 'app/Services/Identity/InstructorApplicationService.php'
       - 'app/Services/Content/MediaStorageService.php'
       - 'app/Services/System/SettingsRepository.php'
+      - 'app/Services/System/ReleaseReadinessService.php'
       - 'resources/js/frontend/modules/language.js'
       - 'resources/views/auth/**'
       - 'resources/views/layouts/auth.blade.php'

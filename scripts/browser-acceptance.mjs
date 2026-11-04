@@ -86,7 +86,7 @@ async function install() {
     verify(await page.getByRole('heading', { name: 'General settings' }).isVisible(),
       'Initial administrator cannot access general settings');
 
-    // Inspect all four actual admin pages in the freshly installed customer copy.
+    // Inspect admin workspaces, including read-only release readiness, in the fresh customer copy.
     for (const module of adminModules) {
       await navigate(page, module.url);
       verify(await page.locator(module.container).isVisible(),
@@ -150,6 +150,7 @@ const adminModules = [
   { slug: 'settings', url: '/admin/settings/general', heading: 'General settings', container: '.admin-settings-workspace' },
   { slug: 'roles', url: '/admin/roles', heading: 'Roles & permissions', container: '.admin-roles-workspace' },
   { slug: 'instructors', url: '/admin/instructor-applications', heading: 'Instructor management', container: '.admin-instructor-workspace' },
+  { slug: 'readiness', url: '/admin/release-readiness', heading: 'Release readiness', container: '.admin-readiness-workspace' },
 ];
 
 const scenarios = [
@@ -388,6 +389,14 @@ async function browse(scenario) {
       await page.screenshot({ path: path.join(evidence,
         'admin-' + module.slug + '-' + scenario.name + '.png') });
     }
+
+    await navigate(page, '/admin/release-readiness');
+    verify(await page.getByText('Customer release blocked').isVisible(),
+      'Release approval must remain blocked in simulated browser acceptance');
+    verify(await page.locator('[data-readiness-gate]').count() === 4,
+      'External acceptance gates are not visible');
+    verify(await page.getByText('NOT VERIFIED').count() >= 3,
+      'Hosting, physical-device and commerce evidence must remain unverified');
 
     await navigate(page, '/admin/media');
     verify(await page.locator('input[name="file"][type="file"]').count() === 1,
