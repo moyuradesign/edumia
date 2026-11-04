@@ -3,13 +3,18 @@
 
     // The route selects the workspace, not the logged-in user's highest privilege.
     // Keep the existing administrator dashboard and its navigation unchanged.
-    $adminWorkspace = auth()->user()->isAdmin()
-        && (request()->routeIs('dashboard') || request()->routeIs('admin.*'));
-
     $explicitStudentWorkspace = request()->routeIs(
         'account.home', 'account.courses', 'account.certificates'
     );
-    $memberAudience = request()->routeIs('instructor.*')
+    $explicitInstructorWorkspace = request()->routeIs('instructor.*');
+
+    // Preserve every existing admin page, including shared profile and support
+    // pages. Only explicit learner or instructor routes switch workspace chrome.
+    $adminWorkspace = auth()->user()->isAdmin()
+        && !$explicitStudentWorkspace
+        && !$explicitInstructorWorkspace;
+
+    $memberAudience = $explicitInstructorWorkspace
         ? 'instructor'
         : ($explicitStudentWorkspace
             ? 'student'

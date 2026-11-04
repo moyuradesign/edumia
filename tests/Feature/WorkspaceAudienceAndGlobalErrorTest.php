@@ -53,6 +53,7 @@ final class WorkspaceAudienceAndGlobalErrorTest extends TestCase
             ->assertSee('href="'.route('instructor.students.index').'"', false);
 
         $this->get('/admin/settings/general')->assertOk()->assertSee('ADMIN CONSOLE');
+        $this->get('/account/preferences')->assertOk()->assertSee('ADMIN CONSOLE');
     }
 
     public function test_student_and_instructor_have_separate_workspaces_and_active_navigation(): void
