@@ -111,4 +111,38 @@ final class InstructorApplicationTest extends TestCase
         ])->assertSessionHasErrors(['experience', 'motivation', 'portfolio_url']);
         $this->assertDatabaseCount('applications', 0);
     }
+
+    public function test_instructor_workspace_filters_applicants_and_reviews_without_changing_entitlements(): void
+    {
+        $admin = $this->member('admin', 'admin@edumia.test');
+        $studentOne = $this->member('student', 'first@edumia.test');
+        $studentTwo = $this->member('student', 'second@edumia.test');
+
+        $this->actingAs($studentOne)->post('/instructor-application', $this->application())->assertRedirect();
+        $approved = Application::query()->where('user_id', $studentOne->id)->firstOrFail();
+        $this->actingAs($studentTwo)->post('/instructor-application', $this->application())->assertRedirect();
+        $pending = Application::query()->where('user_id', $studentTwo->id)->firstOrFail();
+
+        $this->actingAs($admin)->patch('/admin/instructor-applications/'.$approved->id, [
+            'decision' => 'approved', 'review_note' => 'Experience verified.',
+        ])->assertRedirect();
+        $this->get('/admin/instructor-applications')->assertOk()
+            ->assertSee('data-admin-shell', false)
+            ->assertSee('Instructor management')->assertSee('Pending review')
+            ->assertSee('first@edumia.test')->assertSee('second@edumia.test')
+            ->assertSee('Experience verified.');
+        $this->get('/admin/instructor-applications?status=pending')->assertOk()
+            ->assertSee('second@edumia.test')->assertDontSee('first@edumia.test');
+        $this->get('/admin/instructor-applications?status=approved')->assertOk()
+            ->assertSee('first@edumia.test')->assertDontSee('second@edumia.test');
+        $this->get('/admin/instructor-applications?q=second%40edumia.test')->assertOk()
+            ->assertSee('second@edumia.test')->assertDontSee('first@edumia.test');
+        $this->get('/admin/instructor-applications?status[]=approved&q[]=invalid')->assertOk();
+
+        $this->assertSame('instructor', $studentOne->fresh()->role);
+        $this->assertSame('student', $studentTwo->fresh()->role);
+        $this->assertSame('pending', $pending->fresh()->status);
+        $this->actingAs($studentTwo)->get('/admin/instructor-applications')->assertForbidden();
+    }
+
 }

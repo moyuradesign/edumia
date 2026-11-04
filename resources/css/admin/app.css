@@ -1159,3 +1159,75 @@ progress {
   .admin-media-filters > button { width: 100%; }
   .admin-settings-save button { width: 100%; }
 }
+
+/* Staff roles: scoped permission cards and audited assignment forms. */
+.admin-roles-workspace, .admin-instructor-workspace { display: grid; gap: 22px; }
+.admin-roles-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.admin-roles-summary > .admin-widget { display: grid; align-content: start; gap: 8px; padding: 20px; }
+.admin-roles-summary strong { color: var(--ink); font-size: clamp(27px,2.5vw,36px); font-weight: 850; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.admin-roles-summary p { margin: 0; color: var(--muted); font-size: 12px; }
+.admin-roles-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); align-items: start; gap: 16px; }
+.admin-role-cards { display: grid; gap: 13px; }
+.admin-role-card { border: 1px solid var(--border); border-radius: 14px; padding: 19px; background: var(--surface-alt); min-width: 0; }
+.admin-role-header { display: flex; gap: 10px; justify-content: space-between; align-items: flex-start; }
+.admin-role-header h3 { margin: 0 0 5px; font-size: 16px; color: var(--ink); }
+.admin-role-header code { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.admin-role-card > p { font-size: 12px; color: var(--muted); line-height: 1.6; margin: 12px 0; }
+.admin-role-permissions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-block: 10px; }
+.admin-role-permissions > strong { flex: 1 1 100%; font-size: 11px; color: var(--ink); }
+.admin-role-permission { display: inline-flex; border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; background: var(--surface); font-size: 11px; color: var(--ink); }
+.admin-role-controls { display: grid; gap: 9px; margin-top: 12px; }
+.admin-role-controls details { border: 1px solid var(--border); border-radius: 11px; background: var(--surface); min-width: 0; }
+.admin-role-controls summary { cursor: pointer; padding: 12px 13px; color: var(--ink); font-size: 12px; font-weight: 780; }
+.admin-role-controls details[open] > summary { border-bottom: 1px solid var(--border); }
+.admin-role-form { display: grid; gap: 15px; }
+.admin-role-controls .admin-role-form { padding: 15px; }
+.admin-role-form > label { display: grid; gap: 7px; font-size: 12px; color: var(--ink); font-weight: 760; }
+.admin-role-form input:not([type="checkbox"]), .admin-role-form select, .admin-role-form textarea {
+  display: block; width: 100%; min-width: 0; min-height: 43px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--surface-alt); color: var(--ink); font: inherit; font-size: 12px; padding: 10px 12px;
+}
+.admin-role-form textarea { min-height: 82px; resize: vertical; }
+.admin-role-form .admin-action-primary { cursor: pointer; }
+.admin-role-checkboxes { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin: 0; }
+.admin-role-checkboxes legend { font-size: 12px; font-weight: 780; color: var(--ink); padding-inline: 5px; }
+.admin-role-checkboxes label { display: flex; gap: 9px; align-items: center; padding: 5px 0; color: var(--ink); font-size: 12px; line-height: 1.5; }
+.admin-role-checkboxes input { width: 17px; height: 17px; accent-color: var(--accent); flex: 0 0 17px; }
+.admin-role-create { position: sticky; top: 92px; }
+.admin-role-create .admin-field-hint a, .admin-role-controls .admin-field-hint a { color: var(--accent); text-decoration: underline; }
+@media (max-width: 1350px) { .admin-roles-layout { grid-template-columns: 1fr; } .admin-role-create { position: static; } }
+@media (max-width: 690px) { .admin-roles-summary { gap: 9px; } .admin-roles-summary > .admin-widget { padding: 12px; } .admin-roles-summary strong { font-size: 24px; } }
+
+/* Instructor review: status queues and application details. */
+.admin-instructor-filters > div:first-child { flex: 2 1 220px; }
+.admin-instructor-filters > div:nth-child(2) { flex: 1 1 170px; }
+.admin-instructor-cards { display: grid; gap: 14px; }
+.admin-instructor-card { border: 1px solid var(--border); border-radius: 15px; padding: clamp(14px,1.7vw,23px); background: var(--surface-alt); min-width: 0; }
+.admin-instructor-card-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.admin-instructor-identity { display: flex; align-items: center; min-width: 0; gap: 12px; }
+.admin-instructor-identity h3 { margin: 0 0 4px; font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
+.admin-instructor-identity p { margin: 0; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.admin-instructor-meta { display: grid; grid-template-columns: minmax(0,2fr) 1fr .5fr; gap: 12px; border-block: 1px solid var(--border); margin: 17px 0; padding-block: 13px; }
+.admin-instructor-meta span { min-width: 0; font-size: 12px; color: var(--ink); overflow-wrap: anywhere; }
+.admin-instructor-meta strong { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+.admin-instructor-details { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.admin-instructor-details summary { cursor: pointer; padding: 12px; font-weight: 760; color: var(--ink); font-size: 12px; }
+.admin-instructor-details-content { display: grid; gap: 13px; padding: 0 15px 16px; }
+.admin-instructor-details-content h4 { margin: 0 0 5px; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+.admin-instructor-details-content p { margin: 0; overflow-wrap: anywhere; color: var(--ink); line-height: 1.75; font-size: 12px; }
+.admin-instructor-details-content a { font-weight: 760; color: var(--accent); font-size: 12px; overflow-wrap: anywhere; }
+.admin-instructor-decision { display: grid; gap: 13px; padding-top: 17px; }
+.admin-instructor-decision-fields { display: grid; grid-template-columns: minmax(160px,.7fr) minmax(0,1.3fr); gap: 12px; }
+.admin-instructor-decision-fields label { display: grid; gap: 7px; min-width: 0; color: var(--ink); font-weight: 760; font-size: 12px; }
+.admin-instructor-decision-fields select, .admin-instructor-decision-fields textarea { width: 100%; min-width: 0; padding: 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; }
+.admin-instructor-decision-fields textarea { resize: vertical; }
+.admin-instructor-decision > button { justify-self: start; cursor: pointer; }
+.admin-instructor-reviewed { margin-top: 13px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.admin-instructor-reviewed p { margin: 6px 0 0; }
+@media (max-width: 690px) {
+  .admin-instructor-filters > div:first-child, .admin-instructor-filters > div:nth-child(2) { flex: 1 1 100%; }
+  .admin-instructor-filters > button { width: 100%; }
+  .admin-instructor-meta { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .admin-instructor-decision-fields { grid-template-columns: 1fr; }
+  .admin-instructor-decision > button { width: 100%; }
+}

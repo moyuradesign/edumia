@@ -95,4 +95,26 @@ final class RolePermissionManagementTest extends TestCase
         ])->assertRedirect();
         $this->assertFalse($student->fresh()->hasPermission('knowledge.manage'));
     }
+
+    public function test_staff_role_workspace_renders_real_grants_and_existing_assignment_actions(): void
+    {
+        $admin = $this->user('admin', 'owner@edumia.test');
+        $this->actingAs($admin)->post('/admin/roles', [
+            'name' => 'Help Desk Editor', 'slug' => 'help-desk-editor',
+            'permissions' => ['knowledge.manage'],
+        ])->assertRedirect(route('admin.roles.index'));
+        $role = Role::query()->firstOrFail();
+
+        $this->get('/admin/roles')->assertOk()
+            ->assertSee('data-admin-shell', false)
+            ->assertSee('Roles &amp; permissions', false)
+            ->assertSee('Delegatable permissions')
+            ->assertSee('Help Desk Editor')
+            ->assertSee('Manage Help Center articles')
+            ->assertSee('action="'.route('admin.roles.update', $role).'"', false)
+            ->assertSee('action="'.route('admin.roles.members', $role).'"', false)
+            ->assertSee('name="user_id"', false)
+            ->assertSee('This form cannot create new system permissions');
+    }
+
 }
