@@ -154,7 +154,7 @@ final class InstructorLearnerProgressTest extends TestCase
 
         $response = $this->get(route('instructor.students.export', ['status' => 'active']));
         $response->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
-        $response->assertHeader('cache-control', 'private, no-store, max-age=0');
+        $response->assertHeader('cache-control', 'max-age=0, no-store, private');
 
         ob_start();
         $response->baseResponse->sendContent();

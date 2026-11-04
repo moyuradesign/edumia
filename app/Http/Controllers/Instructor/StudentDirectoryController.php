@@ -76,7 +76,7 @@ final class StudentDirectoryController extends Controller
 
         $assignments = Assignment::query()->where('course_id', $courseId)
             ->where('published', true)
-            ->with(['submissions' => fn (Builder $query) =>
+            ->with(['submissions' => fn ($query) =>
                 $query->where('user_id', $studentId)
                     ->select(['id', 'assignment_id', 'user_id', 'score', 'submitted_at', 'graded_at'])])
             ->orderBy('id')->get();
