@@ -973,7 +973,8 @@ progress {
   .admin-page-location { flex: 1 1 100px; }
   .admin-topbar-search { order: 4; flex: 1 1 100%; max-width: none; }
   .admin-topbar-actions { margin-left: auto; }
-  .admin-topbar-actions > .admin-topbar-icon { display: none; }
+  /* Keep the theme control accessible on phones; support is available in the sidebar. */
+  .admin-topbar-actions > a.admin-topbar-icon { display: none; }
   .admin-user-trigger { border: 0; padding: 0; }
   .admin-dashboard { gap: 19px; }
   .admin-stats { gap: 10px; }
