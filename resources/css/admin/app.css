@@ -1061,3 +1061,19 @@ progress {
   .admin-order-filters > div:first-child, .admin-order-filters > div:nth-child(2) { flex: 1 1 100%; }
   .admin-order-filters > button { width: 100%; }
 }
+
+/* Support inbox: status-aware operational queue sharing the admin shell. */
+.admin-ticket-workspace { display: grid; gap: 22px; }
+.admin-ticket-filters > div:first-child { flex: 2 1 260px; min-width: 0; }
+.admin-ticket-filters > div:nth-child(2) { flex: 1 1 180px; min-width: 0; }
+.admin-ticket-list .admin-table { min-width: 730px; }
+.admin-ticket-list .admin-table td, .admin-ticket-list .admin-table th { font-size: 12px; }
+.admin-ticket-list .admin-table td strong { display: block; font-weight: 770; }
+.admin-ticket-list .admin-table td small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.admin-ticket-list .admin-table td:first-child { max-width: 290px; overflow-wrap: anywhere; }
+.admin-ticket-list .admin-table time { white-space: nowrap; color: var(--muted); }
+.admin-ticket-list .admin-table-action { white-space: nowrap; }
+@media (max-width: 700px) {
+  .admin-ticket-filters > div:first-child, .admin-ticket-filters > div:nth-child(2) { flex: 1 1 100%; }
+  .admin-ticket-filters > button { width: 100%; }
+}

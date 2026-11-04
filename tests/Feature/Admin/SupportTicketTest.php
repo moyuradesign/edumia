@@ -100,4 +100,33 @@ final class SupportTicketTest extends TestCase
             ->assertOk()
             ->assertSee('Private internal administrative notes');
     }
+
+    public function test_admin_support_directory_filters_by_requester_and_open_closed_status(): void
+    {
+        $admin = $this->account('admin', 'admin@edumia.test');
+        $student = $this->account('student', 'student@edumia.test');
+        $secondStudent = $this->account('student', 'other@edumia.test');
+        $open = $this->createTicket($student);
+        $closed = Ticket::query()->create([
+            'requester_id' => $secondStudent->id,
+            'status_id' => $open->status_id,
+            'subject' => 'Payment support question',
+            'description' => 'Checking the support status filter.',
+        ]);
+
+        $this->actingAs($admin)->patch('/admin/tickets/'.$closed->id, ['status' => 'closed'])->assertRedirect();
+        $this->get('/admin/tickets')->assertOk()
+            ->assertSee('data-admin-shell', false)->assertSee('Support ticket inbox')
+            ->assertSee('Ticket directory')->assertSee('Open tickets')->assertSee('Closed tickets');
+
+        $this->get('/admin/tickets?status=open')->assertOk()
+            ->assertSee($open->subject)->assertDontSee($closed->subject);
+        $this->get('/admin/tickets?status=closed')->assertOk()
+            ->assertSee($closed->subject)->assertDontSee($open->subject);
+        $this->get('/admin/tickets?q=other%40edumia.test')->assertOk()
+            ->assertSee($closed->subject)->assertDontSee($open->subject);
+        $this->get('/admin/tickets?status[]=invalid&q[]=invalid')->assertOk();
+        $this->actingAs($student)->get('/admin/tickets')->assertForbidden();
+    }
+
 }
