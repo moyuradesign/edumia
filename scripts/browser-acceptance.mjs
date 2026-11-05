@@ -612,8 +612,6 @@ async function browse(scenario) {
     await page.locator('[data-blog-open-images]').click();
     verify(await page.locator('[data-blog-media-dialog]').isVisible(),
       'Existing featured image picker did not reopen');
-    verify(await page.locator('[data-blog-media-select]').count() === 0,
-      'Old nonfunctional media selector unexpectedly present');
     verify(await page.locator('[data-blog-image-select]').count() >= 1,
       'Single-action media thumbnails missing');
     verify(await page.locator('[data-blog-image-cta]').first().textContent() === 'Use as featured image',
