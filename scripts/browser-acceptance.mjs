@@ -584,12 +584,60 @@ async function browse(scenario) {
     await page.locator('[data-blog-preview-button]').click();
     verify(await page.locator('[data-blog-body]').isVisible(),
       'Blog article editor did not return from preview');
+    // Regression: the featured-image picker must NEVER insert Markdown into the article.
+    const originalBody = await page.locator('[data-blog-body]').inputValue();
     await page.locator('[data-blog-open-images]').click();
     verify(await page.locator('[data-blog-media-dialog]').isVisible(),
       'Blog media picker failed to open');
-    await page.locator('[data-blog-close-images]').click();
-    verify(!(await page.locator('[data-blog-media-dialog]').isVisible()),
-      'Blog media picker failed to close');
+    verify(await page.locator('[data-blog-media-heading]').textContent() === 'Choose featured image',
+      'Featured image picker opened in wrong mode');
+
+    const imageName = 'featured-picker-' + scenario.name + '.png';
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGN8my7KwMDAxMDAwMDAAAAR7gFtFOwPagAAAABJRU5ErkJggg==',
+      'base64');
+    await page.locator('[data-blog-media-file]').setInputFiles({
+      name: imageName, mimeType: 'image/png', buffer: png,
+    });
+    await page.locator('[data-blog-media-dialog]').waitFor({ state: 'hidden', timeout: 15000 });
+    const selectedId = await page.locator('[data-blog-featured-id]').inputValue();
+    verify(/^\d+$/.test(selectedId), 'Uploaded featured image ID was not populated');
+    verify(await page.locator('[data-blog-featured-preview]').isVisible(),
+      'Featured image thumbnail did not appear in sidebar');
+    verify(await page.locator('[data-blog-featured-name]').textContent() === imageName,
+      'Featured image filename not updated');
+    verify(await page.locator('[data-blog-body]').inputValue() === originalBody,
+      'Featured image upload wrongly changed article body');
+
+    await page.locator('[data-blog-open-images]').click();
+    verify(await page.locator('[data-blog-media-dialog]').isVisible(),
+      'Existing featured image picker did not reopen');
+    verify(await page.locator('[data-blog-image-select]').count() >= 1,
+      'Single-action media thumbnails missing');
+    verify(await page.locator('[data-blog-image-cta]').first().textContent() === 'Use as featured image',
+      'Featured image cards have ambiguous actions');
+    await page.locator('[data-blog-image-select]').filter({ hasText: imageName }).first().click();
+    verify(await page.locator('[data-blog-featured-id]').inputValue() === selectedId,
+      'Featured image picker did not select library image');
+    verify(await page.locator('[data-blog-body]').inputValue() === originalBody,
+      'Choosing featured image inserted an image into the text editor');
+
+    await page.locator('[data-blog-format="image"]').click();
+    verify(await page.locator('[data-blog-media-heading]').textContent() === 'Insert article image',
+      'Inline image toolbar opened featured-image mode');
+    verify(await page.locator('[data-blog-image-cta]').first().textContent() === 'Insert into article',
+      'Inline image cards show incorrect action');
+    await page.locator('[data-blog-image-select]').filter({ hasText: imageName }).first().click();
+    verify((await page.locator('[data-blog-body]').inputValue()).includes('edumia-media:' + selectedId),
+      'Editor toolbar failed to insert selected library image');
+    verify(await page.locator('[data-blog-featured-id]').inputValue() === selectedId,
+      'Inline image insertion unexpectedly changed featured-image selection');
+    await page.locator('[data-blog-clear-image]').click();
+    verify(await page.locator('[data-blog-featured-id]').inputValue() === '',
+      'Remove featured image did not clear its saved form ID');
+    verify(!(await page.locator('[data-blog-featured-preview]').isVisible()),
+      'Removed featured image preview remains visible');
+
     const blogOverflow = await page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
     verify(blogOverflow <= 2, 'Premium blog composer overflows viewport');

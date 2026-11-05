@@ -198,8 +198,8 @@
 
     <dialog class="blog-media-dialog" data-blog-media-dialog aria-labelledby="blog-media-heading">
         <div class="blog-media-head">
-            <div><h2 id="blog-media-heading">Choose an image</h2>
-                <p>Select an existing library image or upload a new one.</p></div>
+            <div><h2 id="blog-media-heading" data-blog-media-heading>Choose featured image</h2>
+                <p data-blog-media-subtitle>Select an image to display in the Featured Image panel.</p></div>
             <button class="blog-icon-button" type="button" data-blog-close-images aria-label="Close image library">✕</button>
         </div>
         <div class="blog-media-tools">
@@ -214,16 +214,15 @@
         <div class="blog-media-grid" data-blog-media-grid aria-label="Available images">
             @foreach($images as $image)
                 <div class="blog-media-item" data-blog-image-item>
-                    <img loading="lazy" src="{{ route('admin.blogs.media.preview', $image) }}" alt="{{ $image->alt_text ?: $image->original_name }}">
-                    <strong>{{ $image->original_name }}</strong>
-                    <div class="blog-media-item-actions">
-                        <button type="button" data-blog-image-action="featured" data-id="{{ $image->getKey() }}"
-                            data-url="{{ route('admin.blogs.media.preview', $image) }}" data-name="{{ $image->original_name }}"
-                            data-alt="{{ $image->alt_text ?: $image->original_name }}">Feature</button>
-                        <button type="button" data-blog-image-action="inline" data-id="{{ $image->getKey() }}"
-                            data-url="{{ route('admin.blogs.media.preview', $image) }}" data-name="{{ $image->original_name }}"
-                            data-alt="{{ $image->alt_text ?: $image->original_name }}">Insert</button>
-                    </div>
+                    <button type="button" class="blog-media-select" data-blog-image-select
+                        data-id="{{ $image->getKey() }}"
+                        data-url="{{ route('admin.blogs.media.preview', $image) }}"
+                        data-name="{{ $image->original_name }}"
+                        data-alt="{{ $image->alt_text ?: $image->original_name }}">
+                        <img loading="lazy" src="{{ route('admin.blogs.media.preview', $image) }}" alt="">
+                        <strong>{{ $image->original_name }}</strong>
+                        <span class="blog-media-cta" data-blog-image-cta>Use as featured image</span>
+                    </button>
                 </div>
             @endforeach
         </div>

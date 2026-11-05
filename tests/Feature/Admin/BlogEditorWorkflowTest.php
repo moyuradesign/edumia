@@ -53,7 +53,9 @@ final class BlogEditorWorkflowTest extends TestCase
 
     public function test_editor_shows_toolbar_public_url_category_publish_and_image_actions(): void
     {
+        Storage::fake('local');
         $admin = $this->member('admin', 'owner@edumia.test');
+        $this->media($admin);
         $this->actingAs($admin)->get(route('admin.blogs.create'))->assertOk()
             ->assertSee('data-blog-editor', false)
             ->assertSee('data-blog-format="bold"', false)
@@ -64,7 +66,10 @@ final class BlogEditorWorkflowTest extends TestCase
             ->assertSee('Create category')
             ->assertSee('Choose image')
             ->assertSee('Publish')
-            ->assertSee('data-blog-preview-button', false);
+            ->assertSee('data-blog-preview-button', false)
+            ->assertSee('data-blog-image-select', false)
+            ->assertSee('data-blog-image-cta', false)
+            ->assertDontSee('data-blog-image-action=', false);
         $this->get(route('admin.blogs.media.search'))->assertOk()
             ->assertJsonPath('next_page', null);
     }
