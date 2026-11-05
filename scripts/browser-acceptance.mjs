@@ -576,6 +576,7 @@ async function browse(scenario) {
     verify((await page.locator('[data-blog-body]').inputValue()).includes('**Learning with structure.**'),
       'Blog bold-formatting toolbar did not change article content');
     await page.locator('[data-blog-preview-button]').click();
+    await page.locator('[data-blog-preview]').waitFor({ state: 'visible', timeout: 15000 });
     verify(await page.locator('[data-blog-preview]').isVisible(),
       'Safe article preview failed to render');
     verify(await page.locator('[data-blog-preview] strong').isVisible(),
