@@ -125,7 +125,8 @@ final class BlogEditorWorkflowTest extends TestCase
             ->assertSee('Study Advice')
             ->assertSee('Students reading at a desk')
             ->assertSee('<strong>Focus</strong>', false)
-            ->assertDontSee('<script>', false);
+            ->assertDontSee('<script>alert("xss")</script>', false)
+            ->assertSee('&lt;script&gt;alert', false);
         $this->get(route('blog.index'))->assertOk()
             ->assertSee('Study Advice')
             ->assertSee(route('blog.image', ['slug' => $post->slug, 'media' => $image]), false);
