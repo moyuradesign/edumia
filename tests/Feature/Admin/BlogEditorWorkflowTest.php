@@ -64,7 +64,10 @@ final class BlogEditorWorkflowTest extends TestCase
             ->assertSee('Create category')
             ->assertSee('Choose image')
             ->assertSee('Publish')
-            ->assertSee('data-blog-preview-button', false);
+            ->assertSee('data-blog-preview-button', false)
+            ->assertSee('data-blog-image-select', false)
+            ->assertSee('data-blog-image-cta', false)
+            ->assertDontSee('data-blog-image-action=', false);
         $this->get(route('admin.blogs.media.search'))->assertOk()
             ->assertJsonPath('next_page', null);
     }
