@@ -86,6 +86,11 @@ Route::middleware(['auth', 'active', 'role:admin'])
 
 
 
+        Route::post('/blogs/preview', [BlogController::class, 'preview'])->middleware('throttle:60,1')->name('blogs.preview');
+        Route::post('/blog-categories', [BlogController::class, 'addCategory'])->middleware('throttle:20,1')->name('blogs.categories.store');
+        Route::get('/blog-images', [BlogController::class, 'mediaSearch'])->name('blogs.media.search');
+        Route::post('/blog-images', [BlogController::class, 'uploadImage'])->middleware('throttle:20,1')->name('blogs.media.upload');
+        Route::get('/blog-images/{media}', [BlogController::class, 'image'])->name('blogs.media.preview');
         Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
         Route::get('/blogs/create', [BlogController::class, 'create'])->name('blogs.create');
         Route::post('/blogs', [BlogController::class, 'store'])->name('blogs.store');

@@ -49,6 +49,8 @@ Route::get('/bootcamps/{slug}', [BootcampController::class, 'show'])->name('boot
 Route::get('/ebooks', [EbookController::class, 'index'])->name('ebooks.index');
 Route::get('/ebooks/{slug}', [EbookController::class, 'show'])->name('ebooks.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}/image/{media}', [BlogController::class, 'image'])
+    ->whereNumber('media')->name('blog.image');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'store'])
     ->middleware('throttle:3,1')->name('newsletter.subscribe');

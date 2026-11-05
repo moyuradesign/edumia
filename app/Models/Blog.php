@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class Blog extends Model
 {
-    protected $fillable = ['author_id', 'title', 'slug', 'excerpt', 'body', 'status', 'published_at'];
+    protected $fillable = ['author_id', 'title', 'slug', 'excerpt', 'body', 'status', 'published_at', 'category_id', 'featured_media_id'];
 
     protected function casts(): array
     {
@@ -20,6 +20,16 @@ final class Blog extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(BlogCategory::class, 'category_id');
+    }
+
+    public function featuredImage(): BelongsTo
+    {
+        return $this->belongsTo(MediaFile::class, 'featured_media_id');
     }
 
     public function scopePublished(Builder $query): Builder

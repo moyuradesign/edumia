@@ -6,6 +6,7 @@ namespace App\Services\Content;
 
 use App\Models\AuditEvent;
 use App\Models\MediaFile;
+use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -56,6 +57,12 @@ final class MediaStorageService
     public function delete(User $actor, MediaFile $media): void
     {
         abort_unless($actor->isAdmin(), 403);
+        abort_if(
+            Blog::query()->where('featured_media_id', $media->getKey())
+                ->orWhere('body', 'like', '%edumia-media:'.$media->getKey().'%')->exists(),
+            422,
+            'This image is used by a blog article. Remove it from the article before deleting.'
+        );
         // Keep one well-defined storage disk until a secure multi-disk migration exists.
         abort_unless($media->disk === 'local', 422);
 
