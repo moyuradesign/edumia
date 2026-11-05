@@ -601,7 +601,7 @@ async function browse(scenario) {
     });
     await page.locator('[data-blog-media-dialog]').waitFor({ state: 'hidden', timeout: 15000 });
     const selectedId = await page.locator('[data-blog-featured-id]').inputValue();
-    verify(/^\\d+$/.test(selectedId), 'Uploaded featured image ID was not populated');
+    verify(/^\d+$/.test(selectedId), 'Uploaded featured image ID was not populated');
     verify(await page.locator('[data-blog-featured-preview]').isVisible(),
       'Featured image thumbnail did not appear in sidebar');
     verify(await page.locator('[data-blog-featured-name]').textContent() === imageName,
