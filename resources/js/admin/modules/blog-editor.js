@@ -29,6 +29,7 @@ export function initBlogEditor() {
   let nextPage = 2;
   let searchTimer;
   let searchVersion = 0;
+  let pickerMode = 'featured';
 
   const announce = (text) => { if (feedback) feedback.textContent = text; };
   const notifyImage = (text) => { if (imageMessage) imageMessage.textContent = text; };
@@ -137,7 +138,7 @@ export function initBlogEditor() {
         break;
       }
       case 'link': addLink(); break;
-      case 'image': showMedia(); break;
+      case 'image': showMedia('inline'); break;
       default: break;
     }
   };
@@ -258,49 +259,67 @@ export function initBlogEditor() {
   });
 
   let lastFocus;
-  const showMedia = () => {
+  const choiceLabel = () => pickerMode === 'featured'
+    ? 'Use as featured image' : 'Insert into article';
+  const refreshImageChoices = () => {
+    imageGrid?.querySelectorAll('[data-blog-image-cta]').forEach(element => {
+      element.textContent = choiceLabel();
+    });
+  };
+  const showMedia = (mode = 'featured') => {
     if (!dialog) return;
+    pickerMode = mode === 'inline' ? 'inline' : 'featured';
+    dialog.dataset.blogMediaMode = pickerMode;
+    root.querySelector('[data-blog-media-heading]').textContent =
+      pickerMode === 'featured' ? 'Choose featured image' : 'Insert article image';
+    root.querySelector('[data-blog-media-subtitle]').textContent =
+      pickerMode === 'featured'
+        ? 'Select an image to display in the Featured Image panel.'
+        : 'Select an image to insert at the cursor in your article.';
+    refreshImageChoices();
     lastFocus = document.activeElement;
     dialog.showModal();
     imageSearch.focus();
   };
-  root.querySelector('[data-blog-open-images]')?.addEventListener('click', showMedia);
+  root.querySelector('[data-blog-open-images]')?.addEventListener('click', () => showMedia('featured'));
   root.querySelector('[data-blog-close-images]')?.addEventListener('click', () => dialog.close());
   dialog?.addEventListener('close', () => lastFocus?.focus?.());
-  imageGrid?.addEventListener('click', event => {
-    const button = event.target.closest('[data-blog-image-action]');
-    if (!button) return;
-    const data = { id: button.dataset.id, url: button.dataset.url,
-      name: button.dataset.name, alt: button.dataset.alt };
-    if (button.dataset.blogImageAction === 'featured') setFeatured(data);
-    else insertInline(data);
+  const applyImage = (image) => {
+    if (pickerMode === 'featured') setFeatured(image);
+    else insertInline(image);
     dialog.close();
+  };
+  imageGrid?.addEventListener('click', event => {
+    const button = event.target.closest('[data-blog-image-select]');
+    if (!button || !imageGrid.contains(button)) return;
+    applyImage({ id: button.dataset.id, url: button.dataset.url,
+      name: button.dataset.name, alt: button.dataset.alt });
   });
 
   const addMediaCard = (image) => {
     const card = document.createElement('div');
     card.className = 'blog-media-item';
     card.dataset.blogImageItem = '';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'blog-media-select';
+    button.dataset.blogImageSelect = '';
+    button.dataset.id = String(image.id);
+    button.dataset.url = image.url;
+    button.dataset.name = image.name;
+    button.dataset.alt = image.alt || image.name;
     const img = document.createElement('img');
     img.src = image.url;
-    img.alt = image.alt || image.name;
+    img.alt = '';
     img.loading = 'lazy';
     const heading = document.createElement('strong');
     heading.textContent = image.name;
-    const actions = document.createElement('div');
-    actions.className = 'blog-media-item-actions';
-    ['featured', 'inline'].forEach(action => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.dataset.blogImageAction = action;
-      button.dataset.id = String(image.id);
-      button.dataset.url = image.url;
-      button.dataset.name = image.name;
-      button.dataset.alt = image.alt;
-      button.textContent = action === 'featured' ? 'Feature' : 'Insert';
-      actions.append(button);
-    });
-    card.append(img, heading, actions);
+    const cta = document.createElement('span');
+    cta.className = 'blog-media-cta';
+    cta.dataset.blogImageCta = '';
+    cta.textContent = choiceLabel();
+    button.append(img, heading, cta);
+    card.append(button);
     return card;
   };
   const searchImages = async (page = 1, append = false) => {
@@ -320,7 +339,7 @@ export function initBlogEditor() {
       data.images.forEach(image => imageGrid.append(addMediaCard(image)));
       nextPage = data.next_page;
       imageMore.hidden = nextPage === null;
-      notifyImage(data.images.length ? 'Choose Feature or Insert beneath an image.' : 'No matching images found.');
+      notifyImage(data.images.length ? 'Select the image you want to use.' : 'No matching images found.');
     } catch (error) {
       if (thisRequest === searchVersion) notifyImage(error.message);
     } finally { if (thisRequest === searchVersion) imageMore.disabled = false; }
@@ -353,7 +372,7 @@ export function initBlogEditor() {
       const image = await response.json();
       if (!response.ok) throw new Error(image.message || 'Image upload failed.');
       imageGrid.prepend(addMediaCard(image));
-      notifyImage('Image uploaded. Select Feature or Insert.');
+      applyImage(image);
     } catch (error) { notifyImage(error.message); }
     finally { input.value = ''; }
   });
