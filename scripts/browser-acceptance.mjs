@@ -559,6 +559,40 @@ async function browse(scenario) {
     verify(await page.getByText('NOT VERIFIED').count() >= 3,
       'Hosting, physical-device and commerce evidence must remain unverified');
 
+    // The editor must be interactive, not a placeholder toolbar or static card.
+    await navigate(page, '/admin/blogs/create');
+    verify(await page.locator('[data-blog-editor]').isVisible(),
+      'Premium blog composer missing from admin blog create');
+    verify(await page.locator('[data-blog-copy-url] svg').count() === 1,
+      'SVG copy-link control missing');
+    verify(await page.getByRole('heading', { name: 'Featured Image' }).count() === 1,
+      'Featured Image sidebar missing');
+    await page.locator('[data-blog-title]').fill('Practical Study Techniques');
+    verify(await page.locator('[data-blog-slug]').inputValue() === 'practical-study-techniques',
+      'Article slug is not generated from its title');
+    await page.locator('[data-blog-body]').fill('Learning with structure.');
+    await page.locator('[data-blog-body]').selectText();
+    await page.locator('[data-blog-format="bold"]').click();
+    verify((await page.locator('[data-blog-body]').inputValue()).includes('**Learning with structure.**'),
+      'Blog bold-formatting toolbar did not change article content');
+    await page.locator('[data-blog-preview-button]').click();
+    verify(await page.locator('[data-blog-preview]').isVisible(),
+      'Safe article preview failed to render');
+    verify(await page.locator('[data-blog-preview] strong').isVisible(),
+      'Markdown preview did not format bold text');
+    await page.locator('[data-blog-preview-button]').click();
+    verify(await page.locator('[data-blog-body]').isVisible(),
+      'Blog article editor did not return from preview');
+    await page.locator('[data-blog-open-images]').click();
+    verify(await page.locator('[data-blog-media-dialog]').isVisible(),
+      'Blog media picker failed to open');
+    await page.locator('[data-blog-close-images]').click();
+    verify(!(await page.locator('[data-blog-media-dialog]').isVisible()),
+      'Blog media picker failed to close');
+    const blogOverflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    verify(blogOverflow <= 2, 'Premium blog composer overflows viewport');
+
     await navigate(page, '/admin/media');
     verify(await page.locator('input[name="file"][type="file"]').count() === 1,
       'Private media upload input missing');
