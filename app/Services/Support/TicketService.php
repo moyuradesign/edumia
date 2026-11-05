@@ -47,7 +47,7 @@ final class TicketService
 
     public function changeStatus(User $actor, Ticket $ticket, string $status): void
     {
-        abort_unless($actor->isAdmin(), 403);
+        abort_unless($actor->hasPermission('support.tickets.manage'), 403);
 
         DB::transaction(function () use ($actor, $ticket, $status): void {
             $ticket = Ticket::query()->lockForUpdate()->with('status')->findOrFail($ticket->getKey());
@@ -75,7 +75,7 @@ final class TicketService
 
     public function assertCanRead(User $actor, Ticket $ticket): void
     {
-        abort_unless($actor->isActive() && ($actor->isAdmin() || $ticket->requester_id === $actor->getKey()), 403);
+        abort_unless($actor->isActive() && ($actor->hasPermission('support.tickets.manage') || $ticket->requester_id === $actor->getKey()), 403);
     }
 
     private function status(string $slug): TicketStatus

@@ -16,7 +16,7 @@ final class MediaStorageService
 {
     public function upload(User $actor, UploadedFile $file, ?string $altText): MediaFile
     {
-        abort_unless($actor->isAdmin(), 403);
+        abort_unless($actor->hasPermission('media.manage'), 403);
 
         $disk = Storage::disk('local');
         $path = $disk->putFile('edumia/media', $file);
@@ -56,7 +56,7 @@ final class MediaStorageService
 
     public function delete(User $actor, MediaFile $media): void
     {
-        abort_unless($actor->isAdmin(), 403);
+        abort_unless($actor->hasPermission('media.manage'), 403);
         abort_if(
             Blog::query()->where('featured_media_id', $media->getKey())
                 ->orWhere('body', 'like', '%edumia-media:'.$media->getKey().'%')->exists(),

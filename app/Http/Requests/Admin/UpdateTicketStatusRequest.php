@@ -11,7 +11,7 @@ final class UpdateTicketStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() ?? false;
+        return $this->user()?->hasPermission('support.tickets.manage') ?? false;
     }
 
     public function rules(): array

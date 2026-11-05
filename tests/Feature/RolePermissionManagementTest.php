@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Models\MediaFile;
 use App\Models\Role;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 final class RolePermissionManagementTest extends TestCase
@@ -115,6 +119,103 @@ final class RolePermissionManagementTest extends TestCase
             ->assertSee('action="'.route('admin.roles.members', $role).'"', false)
             ->assertSee('name="user_id"', false)
             ->assertSee('This form cannot create new system permissions');
+    }
+
+    public function test_media_management_role_grants_private_file_workflow_without_admin_access(): void
+    {
+        Storage::fake('local');
+        $admin = $this->user('admin', 'media-admin@edumia.test');
+        $staff = $this->user('student', 'media-staff@edumia.test');
+        $this->actingAs($admin)->post('/admin/roles', [
+            'name' => 'Media manager', 'slug' => 'media-manager', 'permissions' => ['media.manage'],
+        ])->assertRedirect(route('admin.roles.index'));
+        $role = Role::query()->where('slug', 'media-manager')->firstOrFail();
+        $this->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $staff->id, 'grant' => 1,
+        ])->assertRedirect(route('admin.roles.index'));
+
+        $this->actingAs($staff->fresh())->get('/admin/media')->assertOk()
+            ->assertSee('Staff tools')
+            ->assertSee('Media library')
+            ->assertDontSee('Staff roles');
+        $this->get('/admin/tickets')->assertForbidden();
+        $this->get('/admin/roles')->assertForbidden();
+        $this->get('/admin/users')->assertForbidden();
+        $this->get('/admin/blogs')->assertForbidden();
+
+        $this->post('/admin/media', [
+            'file' => UploadedFile::fake()->createWithContent(
+                'staff-guide.pdf', "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF"
+            ),
+            'alt_text' => 'Staff guide',
+        ])->assertRedirect(route('admin.media.index'));
+
+        $media = MediaFile::query()->firstOrFail();
+        $this->assertSame($staff->id, $media->user_id);
+        Storage::disk('local')->assertExists($media->path);
+        $this->get('/admin/media/'.$media->id.'/download')->assertOk();
+        $this->delete('/admin/media/'.$media->id)->assertRedirect(route('admin.media.index'));
+        Storage::disk('local')->assertMissing($media->path);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $staff->id, 'action' => 'media.uploaded',
+        ]);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $staff->id, 'action' => 'media.deleted',
+        ]);
+
+        $this->actingAs($admin)->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $staff->id, 'grant' => 0,
+        ])->assertRedirect();
+        $this->actingAs($staff->fresh())->get('/admin/media')->assertForbidden();
+        $this->post('/admin/media', [])->assertForbidden();
+    }
+
+    public function test_support_staff_can_process_tickets_but_not_manage_admin_or_media(): void
+    {
+        $owner = $this->user('student', 'ticket-owner@edumia.test');
+        $this->actingAs($owner)->post('/support/tickets', [
+            'subject' => 'Course completion not reflected',
+            'description' => 'My lesson completion status is not updating.',
+        ])->assertRedirect();
+        $ticket = Ticket::query()->firstOrFail();
+
+        $admin = $this->user('admin', 'support-admin@edumia.test');
+        $staff = $this->user('student', 'support-staff@edumia.test');
+        $this->actingAs($admin)->post('/admin/roles', [
+            'name' => 'Support agent', 'slug' => 'support-agent',
+            'permissions' => ['support.tickets.manage'],
+        ])->assertRedirect(route('admin.roles.index'));
+        $role = Role::query()->where('slug', 'support-agent')->firstOrFail();
+        $this->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $staff->id, 'grant' => 1,
+        ])->assertRedirect();
+
+        $this->actingAs($staff->fresh())->get('/admin/tickets')->assertOk()
+            ->assertSee('Support inbox')
+            ->assertSee('Course completion not reflected');
+        $this->get('/admin/tickets/'.$ticket->id)->assertOk()
+            ->assertSee('My lesson completion status');
+        $this->get('/support/tickets/'.$ticket->id)->assertOk();
+        $this->post('/support/tickets/'.$ticket->id.'/reply', [
+            'body' => 'We are reviewing your completion record.',
+        ])->assertRedirect(route('support.tickets.show', $ticket));
+        $this->patch('/admin/tickets/'.$ticket->id, [
+            'status' => 'closed',
+        ])->assertRedirect(route('admin.tickets.show', $ticket));
+        $this->assertNotNull($ticket->fresh()->closed_at);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $staff->id, 'action' => 'tickets.status_updated',
+        ]);
+
+        $this->get('/admin/media')->assertForbidden();
+        $this->get('/admin/roles')->assertForbidden();
+        $this->get('/admin/settings/general')->assertForbidden();
+
+        $this->actingAs($admin)->put('/admin/roles/'.$role->id, [
+            'name' => 'Support agent', 'slug' => 'support-agent', 'permissions' => [],
+        ])->assertRedirect(route('admin.roles.index'));
+        $this->actingAs($staff->fresh())->get('/admin/tickets')->assertForbidden();
+        $this->get('/support/tickets/'.$ticket->id)->assertForbidden();
     }
 
 }

@@ -6,7 +6,7 @@
         <div>
             <span class="admin-eyebrow">CONTENT MANAGEMENT</span>
             <h1 id="media-heading">Media library</h1>
-            <p>Organize private learning assets with secure uploads and administrator-only downloads.</p>
+            <p>Organize private learning assets with secure uploads and downloads for authorized staff.</p>
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-secondary" href="{{ route('dashboard') }}">Overview</a>

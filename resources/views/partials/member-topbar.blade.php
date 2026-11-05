@@ -5,7 +5,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <div class="admin-page-location">
-            <span class="admin-location-label">{{ $memberAudience === 'instructor' ? 'INSTRUCTOR / WORKSPACE' : 'STUDENT / WORKSPACE' }}</span>
+            <span class="admin-location-label">{{ $staffWorkspace ? 'STAFF / WORKSPACE' : ($memberAudience === 'instructor' ? 'INSTRUCTOR / WORKSPACE' : 'STUDENT / WORKSPACE') }}</span>
             <strong>@yield('title', 'Overview')</strong>
         </div>
         <div class="admin-topbar-search">

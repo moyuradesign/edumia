@@ -14,6 +14,8 @@ final class RoleManagementService
 {
     public const DELEGATABLE = [
         'knowledge.manage' => 'Manage Help Center articles',
+        'media.manage' => 'Upload, download and manage private Media Library files',
+        'support.tickets.manage' => 'Review, reply to and update customer support tickets',
     ];
 
     public function save(User $actor, array $data, ?Role $role = null): Role

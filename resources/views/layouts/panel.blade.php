@@ -14,6 +14,10 @@
         && !$explicitStudentWorkspace
         && !$explicitInstructorWorkspace;
 
+    $staffWorkspace = ! $adminWorkspace && request()->routeIs(
+        'admin.media.*', 'admin.tickets.*', 'admin.knowledge-base.*'
+    );
+
     $memberAudience = $explicitInstructorWorkspace
         ? 'instructor'
         : ($explicitStudentWorkspace
@@ -54,7 +58,7 @@
             @if($errors->any())<div class="flash error" role="alert"><strong>Please review:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
             @yield('content')
         </main>
-        <footer class="admin-footer"><span>{{ $siteName }} · {{ $memberAudience === 'instructor' ? 'Instructor workspace' : 'Student workspace' }}</span><span>© {{ date('Y') }}</span></footer>
+        <footer class="admin-footer"><span>{{ $siteName }} · {{ $staffWorkspace ? 'Staff tools' : ($memberAudience === 'instructor' ? 'Instructor workspace' : 'Student workspace') }}</span><span>© {{ date('Y') }}</span></footer>
     </div>
 </div>
 @endif

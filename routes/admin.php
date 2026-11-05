@@ -73,9 +73,6 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::patch('/forums/{forum}', [ForumModerationController::class, 'topic'])->name('forums.update');
         Route::patch('/forum-replies/{reply}', [ForumModerationController::class, 'reply'])->name('forum-replies.update');
 
-        Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
-        Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
-        Route::patch('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
 
         Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
         Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('contacts.show');
@@ -98,15 +95,28 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::put('/blogs/{blog}', [BlogController::class, 'update'])->name('blogs.update');
         Route::delete('/blogs/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy');
 
-        Route::get('/media', [MediaController::class, 'index'])->name('media.index');
-        Route::post('/media', [MediaController::class, 'store'])->name('media.store');
-        Route::get('/media/{media}/download', [MediaController::class, 'download'])->name('media.download');
-        Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
         Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
         Route::post('/courses/{course}/publish', [CourseManagementController::class, 'publish'])->name('courses.publish');
         Route::post('/courses/{course}/unpublish', [CourseManagementController::class, 'unpublish'])->name('courses.unpublish');
         Route::post('/certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])->name('certificates.revoke');
+    });
+
+
+// Explicit, revocable custom-role capabilities. They do not confer administrator access.
+Route::middleware(['auth', 'active', 'permission:media.manage'])
+    ->prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/media', [MediaController::class, 'index'])->name('media.index');
+        Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+        Route::get('/media/{media}/download', [MediaController::class, 'download'])->name('media.download');
+        Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
+    });
+
+Route::middleware(['auth', 'active', 'permission:support.tickets.manage'])
+    ->prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+        Route::patch('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
     });
 
 // Knowledge-base management can be delegated without granting full administrator access.
