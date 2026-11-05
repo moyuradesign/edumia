@@ -9,7 +9,6 @@
             <p>Organize private learning assets with secure uploads and downloads for authorized staff.</p>
         </div>
         <div class="admin-welcome-actions">
-            <a class="admin-action-secondary" href="{{ route('dashboard') }}">Overview</a>
             <a class="admin-action-primary" href="#media-upload">Upload media</a>
         </div>
     </div>

@@ -1470,3 +1470,39 @@ progress {
  .blog-media-dialog { padding:14px; } .blog-media-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
  .blog-media-tools > * { flex:1 1 100%; } .blog-editor-footer { flex-direction:column; }
 }
+
+/* Premium page-heading actions shared by /admin, /instructor and /account. */
+.admin-workspace .admin-welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px 22px;
+}
+.admin-workspace .admin-welcome > :first-child { min-width: 0; }
+.admin-workspace .admin-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: flex-end;
+  justify-self: end;
+  align-self: start;
+  max-width: 100%;
+}
+.admin-workspace .admin-welcome > :is(a, button, form) {
+  justify-self: end;
+  align-self: start;
+}
+.admin-workspace .panel-heading {
+  align-items: flex-start;
+}
+.admin-workspace .panel-heading > :first-child { flex: 1 1 260px; min-width: 0; }
+.admin-workspace .panel-heading > :is(a, button, form, .admin-welcome-actions) {
+  margin-left: auto;
+  align-self: flex-start;
+}
+.admin-sidebar .admin-nav-link svg[data-nav-icon] { flex: 0 0 19px; width: 19px; height: 19px; }
+@media (max-width: 690px) {
+  .admin-workspace .admin-welcome { grid-template-columns: minmax(0, 1fr); }
+  .admin-workspace .admin-welcome-actions,
+  .admin-workspace .admin-welcome > :is(a, button, form) { justify-self: end; }
+}

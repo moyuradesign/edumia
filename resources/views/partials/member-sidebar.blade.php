@@ -3,44 +3,44 @@
     $homeRoute = $teaching ? 'instructor.dashboard' : 'account.home';
     $memberGroups = $teaching ? [
         ['label' => 'Workspace', 'items' => [
-            ['label' => 'Overview', 'route' => 'instructor.dashboard', 'match' => 'instructor.dashboard', 'icon' => 'home'],
-            ['label' => 'Learning reports', 'route' => 'instructor.reports.index', 'match' => 'instructor.reports.*', 'icon' => 'chart'],
+            ['label' => 'Overview', 'route' => 'instructor.dashboard', 'match' => 'instructor.dashboard', 'icon' => 'teacher-overview'],
+            ['label' => 'Learning reports', 'route' => 'instructor.reports.index', 'match' => 'instructor.reports.*', 'icon' => 'teacher-reports'],
         ]],
         ['label' => 'Teaching management', 'items' => [
-            ['label' => 'My courses', 'route' => 'instructor.courses.index', 'match' => 'instructor.courses.*', 'icon' => 'book'],
-            ['label' => 'My students', 'route' => 'instructor.students.index', 'match' => 'instructor.students.*', 'icon' => 'users'],
-            ['label' => 'Create a course', 'route' => 'instructor.courses.create', 'match' => 'instructor.courses.create', 'icon' => 'plus'],
-            ['label' => 'Manage ebooks', 'route' => 'instructor.ebooks.index', 'match' => 'instructor.ebooks.*', 'icon' => 'book'],
-            ['label' => 'Manage bootcamps', 'route' => 'instructor.bootcamps.index', 'match' => 'instructor.bootcamps.*', 'icon' => 'grid'],
-            ['label' => 'Tutoring studio', 'route' => 'instructor.tutors.index', 'match' => 'instructor.tutors.*', 'icon' => 'users'],
-            ['label' => 'Team training', 'route' => 'team.workspaces.index', 'match' => 'team.workspaces.*', 'icon' => 'users'],
+            ['label' => 'My courses', 'route' => 'instructor.courses.index', 'match' => 'instructor.courses.*', 'icon' => 'teacher-courses'],
+            ['label' => 'My students', 'route' => 'instructor.students.index', 'match' => 'instructor.students.*', 'icon' => 'teacher-students'],
+            ['label' => 'Create a course', 'route' => 'instructor.courses.create', 'match' => 'instructor.courses.create', 'icon' => 'teacher-create-course'],
+            ['label' => 'Manage ebooks', 'route' => 'instructor.ebooks.index', 'match' => 'instructor.ebooks.*', 'icon' => 'teacher-ebooks'],
+            ['label' => 'Manage bootcamps', 'route' => 'instructor.bootcamps.index', 'match' => 'instructor.bootcamps.*', 'icon' => 'teacher-bootcamps'],
+            ['label' => 'Tutoring studio', 'route' => 'instructor.tutors.index', 'match' => 'instructor.tutors.*', 'icon' => 'teacher-tutors'],
+            ['label' => 'Team training', 'route' => 'team.workspaces.index', 'match' => 'team.workspaces.*', 'icon' => 'team-workspaces'],
         ]],
         ['label' => 'Account & support', 'items' => [
-            ['label' => 'My earnings', 'route' => 'instructor.earnings.index', 'match' => 'instructor.earnings.*', 'icon' => 'chart'],
-            ['label' => 'My learning', 'route' => 'account.home', 'match' => 'account.home', 'icon' => 'book'],
-            ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'settings'],
-            ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'shield'],
-            ['label' => 'Support tickets', 'route' => 'support.tickets.index', 'match' => 'support.tickets.*', 'icon' => 'chat'],
+            ['label' => 'My earnings', 'route' => 'instructor.earnings.index', 'match' => 'instructor.earnings.*', 'icon' => 'teacher-earnings'],
+            ['label' => 'My learning', 'route' => 'account.home', 'match' => 'account.home', 'icon' => 'teacher-learning'],
+            ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'member-preferences'],
+            ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'member-security'],
+            ['label' => 'Support tickets', 'route' => 'support.tickets.index', 'match' => 'support.tickets.*', 'icon' => 'member-support'],
         ]],
     ] : [
         ['label' => 'Workspace', 'items' => [
-            ['label' => 'Overview', 'route' => 'account.home', 'match' => 'account.home', 'icon' => 'home'],
-            ['label' => 'My courses', 'route' => 'account.courses', 'match' => 'account.courses', 'icon' => 'book'],
-            ['label' => 'Certificates', 'route' => 'account.certificates', 'match' => 'account.certificates', 'icon' => 'shield'],
+            ['label' => 'Overview', 'route' => 'account.home', 'match' => 'account.home', 'icon' => 'student-overview'],
+            ['label' => 'My courses', 'route' => 'account.courses', 'match' => 'account.courses', 'icon' => 'student-courses'],
+            ['label' => 'Certificates', 'route' => 'account.certificates', 'match' => 'account.certificates', 'icon' => 'student-certificates'],
         ]],
         ['label' => 'My learning', 'items' => [
-            ['label' => 'Saved courses', 'route' => 'saved-courses.index', 'match' => 'saved-courses.*', 'icon' => 'star'],
-            ['label' => 'My ebooks', 'route' => 'ebooks.library', 'match' => 'ebooks.library', 'icon' => 'book'],
-            ['label' => 'My bootcamps', 'route' => 'bootcamps.my', 'match' => 'bootcamps.my', 'icon' => 'grid'],
-            ['label' => 'Tutor appointments', 'route' => 'tutor.bookings.index', 'match' => 'tutor.bookings.*', 'icon' => 'users'],
-            ['label' => 'Team training', 'route' => 'team.workspaces.index', 'match' => 'team.workspaces.*', 'icon' => 'users'],
-            ['label' => 'Purchase history', 'route' => 'checkout.orders.index', 'match' => 'checkout.orders.*', 'icon' => 'cart'],
+            ['label' => 'Saved courses', 'route' => 'saved-courses.index', 'match' => 'saved-courses.*', 'icon' => 'student-saved'],
+            ['label' => 'My ebooks', 'route' => 'ebooks.library', 'match' => 'ebooks.library', 'icon' => 'student-ebooks'],
+            ['label' => 'My bootcamps', 'route' => 'bootcamps.my', 'match' => 'bootcamps.my', 'icon' => 'student-bootcamps'],
+            ['label' => 'Tutor appointments', 'route' => 'tutor.bookings.index', 'match' => 'tutor.bookings.*', 'icon' => 'student-tutors'],
+            ['label' => 'Team training', 'route' => 'team.workspaces.index', 'match' => 'team.workspaces.*', 'icon' => 'team-workspaces'],
+            ['label' => 'Purchase history', 'route' => 'checkout.orders.index', 'match' => 'checkout.orders.*', 'icon' => 'student-orders'],
         ]],
         ['label' => 'Account & support', 'items' => [
-            ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'settings'],
-            ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'shield'],
-            ['label' => 'Support tickets', 'route' => 'support.tickets.index', 'match' => 'support.tickets.*', 'icon' => 'chat'],
-            ['label' => 'Become an instructor', 'route' => 'instructor-application.index', 'match' => 'instructor-application.*', 'icon' => 'users'],
+            ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'member-preferences'],
+            ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'member-security'],
+            ['label' => 'Support tickets', 'route' => 'support.tickets.index', 'match' => 'support.tickets.*', 'icon' => 'member-support'],
+            ['label' => 'Become an instructor', 'route' => 'instructor-application.index', 'match' => 'instructor-application.*', 'icon' => 'student-instructor-application'],
         ]],
     ];
     // In a student view, never offer the instructor-application action to existing teachers or admins.
@@ -54,13 +54,13 @@
     // Show only the authorized destinations; no administrator-only links are exposed.
     $staffTools = [];
     if (auth()->user()->hasPermission('media.manage')) {
-        $staffTools[] = ['label' => 'Media library', 'route' => 'admin.media.index', 'match' => 'admin.media.*', 'icon' => 'grid'];
+        $staffTools[] = ['label' => 'Media library', 'route' => 'admin.media.index', 'match' => 'admin.media.*', 'icon' => 'staff-media'];
     }
     if (auth()->user()->hasPermission('support.tickets.manage')) {
-        $staffTools[] = ['label' => 'Support inbox', 'route' => 'admin.tickets.index', 'match' => 'admin.tickets.*', 'icon' => 'chat'];
+        $staffTools[] = ['label' => 'Support inbox', 'route' => 'admin.tickets.index', 'match' => 'admin.tickets.*', 'icon' => 'staff-support'];
     }
     if (auth()->user()->hasPermission('knowledge.manage')) {
-        $staffTools[] = ['label' => 'Help center', 'route' => 'admin.knowledge-base.index', 'match' => 'admin.knowledge-base.*', 'icon' => 'book'];
+        $staffTools[] = ['label' => 'Help center', 'route' => 'admin.knowledge-base.index', 'match' => 'admin.knowledge-base.*', 'icon' => 'staff-help'];
     }
     if ($staffTools !== []) {
         $memberGroups[] = ['label' => 'Staff tools', 'items' => $staffTools];
@@ -87,21 +87,7 @@
                         @php $active = request()->routeIs($item['match']) || ($item['route'] === $homeRoute && request()->routeIs('dashboard')); @endphp
                         <a class="admin-nav-link {{ $active ? 'is-active' : '' }}" href="{{ route($item['route']) }}"
                            data-admin-nav-link @if($active) aria-current="page" @endif>
-                            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                @switch($item['icon'])
-                                    @case('home')<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>@break
-                                    @case('book')<path d="M3 5h8a3 3 0 0 1 3 3v12a3 3 0 0 0-3-3H3V5ZM21 5h-7a3 3 0 0 0-3 3v12a3 3 0 0 1 3-3h7V5Z"/>@break
-                                    @case('chart')<path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/>@break
-                                    @case('grid')<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>@break
-                                    @case('star')<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>@break
-                                    @case('cart')<circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M2 3h2l3 13h13l2-10H5"/>@break
-                                    @case('settings')<circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2"/>@break
-                                    @case('shield')<path d="M12 3 4 6v6c0 5.5 3.5 8 8 9 4.5-1 8-3.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>@break
-                                    @case('chat')<path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 9h8m-8 4h5"/>@break
-                                    @case('users')<circle cx="9" cy="8" r="3"/><path d="M3 20v-1c0-3 2-5 6-5s6 2 6 5v1M16 5a3 3 0 0 1 0 6m2 4c2 1 3 2 3 5"/>@break
-                                    @case('plus')<path d="M12 4v16M4 12h16"/>@break
-                                @endswitch
-                            </svg>
+                            @include('partials.sidebar-icon', ['icon' => $item['icon']])
                             <span>{{ $item['label'] }}</span>
                             @if($active)<span class="admin-active-indicator" aria-hidden="true"></span>@endif
                         </a>

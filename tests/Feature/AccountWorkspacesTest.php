@@ -113,4 +113,47 @@ final class AccountWorkspacesTest extends TestCase
             ->assertSee('Browse courses')
             ->assertDontSee('nginx');
     }
+    public function test_all_account_sidebars_have_distinct_accessible_svg_icons(): void
+    {
+        $accounts = [
+            ['admin', 'nav-owner@edumia.test', '/dashboard', 20],
+            ['instructor', 'nav-teacher@edumia.test', '/instructor', 12],
+            ['student', 'nav-learner@edumia.test', '/account', 12],
+        ];
+
+        foreach ($accounts as [$role, $email, $path, $minimum]) {
+            $user = $this->member($role, $email);
+            $html = (string) $this->actingAs($user)->get($path)->assertOk()->getContent();
+
+            preg_match_all('/<svg[^>]*data-nav-icon="([^"]+)"[^>]*>(.*?)<\\/svg>/s', $html, $matches);
+            $this->assertGreaterThanOrEqual($minimum, count($matches[1]), $role.' menu SVG count');
+            $this->assertCount(count(array_unique($matches[1])), $matches[1], $role.' must not reuse menu icons');
+            $this->assertCount(count(array_unique($matches[2])), $matches[2], $role.' must have unique SVG artwork');
+            foreach ($matches[2] as $art) {
+                $this->assertNotSame('', trim($art), 'Menu icon must have a visible SVG glyph.');
+            }
+        }
+    }
+
+    public function test_account_page_headers_omit_redundant_overview_links(): void
+    {
+        $admin = $this->member('admin', 'nav-pages-admin@edumia.test');
+        foreach ([
+            '/admin/courses', '/admin/users', '/admin/settings/general',
+            '/admin/release-readiness', '/admin/media', '/admin/tickets',
+        ] as $path) {
+            $response = $this->actingAs($admin)->get($path);
+            $response->assertOk()->assertDontSee('Back to overview');
+            // Sidebar overview navigation remains available for deliberate navigation.
+            $response->assertSee('data-admin-nav-link', false);
+        }
+
+        $this->get('/admin/users')->assertSee('Staff roles');
+        $this->get('/admin/media')->assertSee('Upload media');
+
+        $student = $this->member('student', 'nav-certificates@edumia.test');
+        $this->actingAs($student)->get('/account/certificates')
+            ->assertOk()->assertDontSee('Back to overview');
+    }
+
 }

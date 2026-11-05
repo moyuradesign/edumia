@@ -8,7 +8,6 @@
             <h1 id="settings-heading">General settings</h1>
             <p>Manage platform identity, regional defaults, support contact details, and student registration.</p>
         </div>
-        <a class="admin-action-secondary" href="{{ route('dashboard') }}">Back to overview</a>
     </div>
 
     <form class="admin-settings-form" method="post" action="{{ route('admin.settings.update') }}">

@@ -10,7 +10,6 @@
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-secondary" href="{{ route('admin.settings.edit') }}">General settings</a>
-            <a class="admin-action-secondary" href="{{ route('dashboard') }}">Back to overview</a>
         </div>
     </div>
 

@@ -7,7 +7,6 @@
             <h1>My certificates</h1>
             <p>View certificates awarded for your completed courses.</p>
         </div>
-        <div class="admin-welcome-actions"><a class="admin-action-secondary" href="{{ route('account.home') }}">Back to overview</a></div>
     </div>
 
     <section class="admin-widget" aria-labelledby="certificate-list-heading">

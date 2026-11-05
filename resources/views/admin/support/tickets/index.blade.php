@@ -10,7 +10,6 @@
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-secondary" href="{{ route('admin.contacts.index') }}">Contact inbox</a>
-            <a class="admin-action-primary" href="{{ route('dashboard') }}">Admin overview</a>
         </div>
     </div>
 

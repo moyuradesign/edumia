@@ -10,7 +10,6 @@
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-secondary" href="{{ route('admin.roles.index') }}">Staff roles</a>
-            <a class="admin-action-secondary" href="{{ route('dashboard') }}#admin-members">Back to overview</a>
         </div>
     </div>
 

@@ -8,7 +8,6 @@
             <h1 id="admin-course-heading">Course management</h1>
             <p>Review public, pending, and draft courses across all instructors.</p>
         </div>
-        <a class="admin-action-secondary" href="{{ route('dashboard') }}">Back to overview</a>
     </div>
 
     <div class="admin-widget admin-course-index-widget">
