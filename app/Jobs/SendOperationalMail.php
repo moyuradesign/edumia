@@ -72,11 +72,17 @@ final class SendOperationalMail implements ShouldQueue
         }
         $destination = rtrim((string) config('app.url'), '/').$relative;
 
-        Mail::to($user->email)->send(new OperationalMail(
-            (string) data_get($data, 'title', 'Account update'),
-            (string) data_get($data, 'message', 'There is an update to your account.'),
-            $destination
-        ));
+        try {
+            Mail::to($user->email)->send(new OperationalMail(
+                (string) data_get($data, 'title', 'Account update'),
+                (string) data_get($data, 'message', 'There is an update to your account.'),
+                $destination
+            ));
+        } catch (Throwable $exception) {
+            // Laravel persists failed-job exception messages. Do not chain
+            // the original SMTP exception, whose text may reveal secrets.
+            throw new \RuntimeException('Operational mail transport unavailable.');
+        }
         // Accepted by the configured SMTP transport, NOT proof of inbox delivery.
         AuditEvent::create([
             'actor_id' => null, 'subject_type' => User::class,

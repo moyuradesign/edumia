@@ -199,4 +199,16 @@ final class OperationalNotificationTest extends TestCase
             'subject_id' => $owner->id, 'action' => 'notifications.mail_accepted',
         ]);
     }
+    public function test_failed_mail_audit_omits_provider_exception_details(): void
+    {
+        $owner = $this->member('student', 'secure-failure@edumia.test');
+        $job = new SendOperationalMail($owner->id, '5eef164c-c91d-43ac-8e95-101ef2d0b872');
+        $job->failed(new \RuntimeException('SMTP password=super-private-secret'));
+        $event = \App\Models\AuditEvent::query()
+            ->where('action', 'notifications.mail_failed')->firstOrFail();
+        $this->assertSame('RuntimeException', $event->new_values['error_category']);
+        $this->assertStringNotContainsString('super-private-secret',
+            json_encode($event->toArray(), JSON_THROW_ON_ERROR));
+    }
+
 }
