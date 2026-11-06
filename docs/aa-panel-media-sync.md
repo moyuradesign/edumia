@@ -36,3 +36,12 @@ Rollback is available using the exact successful backup path:
 Check the authorized Media Library and Blog editor on desktop and mobile;
 verify private image previews, metadata edit, audit activity, featured-image
 picker separate from inline insertion and student access denial.
+
+## Paginated audit history
+
+The existing `media.manage` authorization also controls a paginated
+Media audit history section. This reports uploads, alternative text
+changes and deleted file references with actor identity and timestamps.
+Media and audit listings use separate `page` and `audit_page` parameters,
+so reviewing history does not disturb the active media filters. No schema
+changes are required.

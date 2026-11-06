@@ -179,4 +179,34 @@ final class MediaLibraryTest extends TestCase
         $this->get(route('admin.media.download', $image))->assertNotFound();
     }
 
+    public function test_media_audit_history_paginates_separately_and_is_permission_gated(): void
+    {
+        $admin = $this->account('admin', 'audit-admin@edumia.test');
+        $student = $this->account('student', 'audit-student@edumia.test');
+        $asset = MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local',
+            'path' => 'edumia/media/history.png',
+            'original_name' => 'history.png', 'mime_type' => 'image/png',
+            'size_bytes' => 100, 'visibility' => 'private',
+        ]);
+        for ($i = 0; $i < 22; $i++) {
+            \App\Models\AuditEvent::query()->create([
+                'actor_id' => $admin->id,
+                'subject_type' => MediaFile::class,
+                'subject_id' => $asset->id,
+                'action' => 'media.description_updated',
+                'previous_values' => ['alt_text' => 'Before '.$i],
+                'new_values' => ['alt_text' => 'After '.$i],
+            ]);
+        }
+
+        $this->actingAs($admin)->get('/admin/media?audit_page=2')
+            ->assertOk()->assertSee('Media audit history')
+            ->assertSee('After 0')->assertDontSee('After 21');
+        $this->get('/admin/media?audit_page=1')
+            ->assertOk()->assertSee('After 21')->assertDontSee('After 0');
+        $this->actingAs($student)->get('/admin/media?audit_page=1')
+            ->assertForbidden();
+    }
+
 }
