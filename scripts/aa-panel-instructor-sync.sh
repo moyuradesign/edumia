@@ -30,6 +30,7 @@ ROLLBACK=''
 STAGE=''
 BACKUP=''
 APPLY_STARTED=0
+STEP='read-only preflight'
 
 usage() {
     cat <<'HELP'
@@ -119,9 +120,16 @@ clean_up() {
     fi
 }
 on_error() {
-    status="$1"
+    local status="$1"
     trap - ERR
+    # set -E inherits ERR traps inside subshells. Leave rollback exclusively
+    # to the parent process, which also owns the backup and state variables.
+    if (( BASH_SUBSHELL > 0 )); then
+        return "$status"
+    fi
+    echo "DEPLOYMENT STOPPED during: $STEP (exit $status)." >&2
     if [ "$APPLY_STARTED" -eq 1 ] && [ -n "$BACKUP" ] && [ -f "$BACKUP/files.tar.gz" ]; then
+        APPLY_STARTED=0
         echo 'APPLY FAILED: Restoring protected pre-sync source backup.' >&2
         tar -xzf "$BACKUP/files.tar.gz" -C "$APP" || true
         for added in $ADDED; do
@@ -158,6 +166,56 @@ refresh_views() {
         runuser -u "$WEB_USER" -- "$PHP" artisan view:cache
         verify_release_view_cache
     )
+}
+
+verify_instructor_routes() {
+    (
+        cd "$APP"
+        runuser -u "$WEB_USER" -- "$PHP" artisan route:list --json
+    ) > "$STAGE/registered-routes.json"
+
+    "$PHP" -r '
+        $rows = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
+        if (! is_array($rows)) {
+            fwrite(STDERR, "BLOCKED: Unable to parse registered routes.\n");
+            exit(1);
+        }
+        $found = [];
+        foreach ($rows as $item) {
+            if (is_array($item) && is_string($item["name"] ?? null)) {
+                $found[$item["name"]] = $item;
+            }
+        }
+        $required = [
+            "admin.instructors.index" => ["GET", "admin/instructors"],
+            "admin.instructors.assignments" => ["GET", "admin/instructors/{user}/assignments"],
+            "admin.instructors.status" => ["PATCH", "admin/instructors/{user}/status"],
+            "admin.instructors.assignments.reassign" => ["POST", "admin/instructors/{user}/assignments/{course}"],
+        ];
+        $problems = [];
+        foreach ($required as $name => [$verb, $uri]) {
+            $item = $found[$name] ?? null;
+            if (! $item) {
+                $problems[] = "Missing instructor route: ".$name;
+            } elseif (! in_array($verb, explode("|", (string) ($item["method"] ?? "")), true)
+                || trim((string) ($item["uri"] ?? ""), "/") !== $uri) {
+                $problems[] = "Incorrect instructor route method or URI: ".$name;
+            }
+        }
+        if ($problems !== []) {
+            foreach ($problems as $problem) {
+                fwrite(STDERR, "BLOCKED: ".$problem.PHP_EOL);
+            }
+            $visible = array_keys(array_filter($found,
+                static fn ($item, $name) => str_contains($name, "instructor"),
+                ARRAY_FILTER_USE_BOTH));
+            fwrite(STDERR, "Visible instructor routes: ".(
+                $visible === [] ? "(none)" : implode(", ", $visible)
+            ).PHP_EOL);
+            exit(1);
+        }
+        echo "EDUMIA_INSTRUCTOR_ROUTES=PASS (4 registered routes)".PHP_EOL;
+    ' "$STAGE/registered-routes.json"
 }
 
 if [ "$MODE" = '--rollback' ]; then
@@ -358,6 +416,7 @@ printf 'Source commit: %s\nApp: %s\n' "$SHA" "$APP" > "$BACKUP/source.txt"
 echo "Protected backup: $BACKUP"
 
 APPLY_STARTED=1
+STEP='installing instructor source files'
 for relative in $FILES; do
     if cmp -s "$STAGE/new/$relative" "$APP/$relative"; then
         continue
@@ -373,14 +432,11 @@ for relative in $FILES; do
     chmod 0644 "$temporary"
     mv -f -- "$temporary" "$APP/$relative"
 done
+STEP='rebuilding Laravel views and clearing route cache'
 refresh_views
-(
-    cd "$APP"
-    # Only apply requires the newly introduced endpoint. A rollback legitimately
-    # returns to the previous route list.
-    routes="$(runuser -u "$WEB_USER" -- "$PHP" artisan route:list --name=admin.instructors)"
-    grep -Fq 'instructors.assignments' <<< "$routes"
-)
+STEP='validating instructor route registration'
+verify_instructor_routes
+STEP='recording deployed file checksums'
 (cd "$APP" && sha256sum $FILES) > "$BACKUP/deployed.sha256"
 APPLY_STARTED=0
 echo "DEPLOYMENT SUCCESS: Instructor Management upgraded from GitHub commit $SHA"

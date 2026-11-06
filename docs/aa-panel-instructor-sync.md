@@ -116,3 +116,22 @@ Backups include the four original production files and the three
 newly created paths. Each successful installation also writes a protected
 `deployed.sha256` manifest: explicit rollback refuses to overwrite any
 files modified after deployment. Read-only `--check` never changes files.
+
+## Failed apply: route verification and single rollback
+
+The first live apply successfully rebuilt Blade and reported
+`EDUMIA_VIEW_CACHE=PASS`, but the old formatted `route:list --name`
+check failed and Bash inherited the ERR trap into nested shells.
+The installer attempted to restore the saved sources more than once.
+This was not a completed installation.
+
+The revised installer checks `artisan route:list --json` and verifies
+four named instructor endpoints with their actual HTTP methods and URI.
+If any route is missing or mismatched, it reports the observed instructor
+route names before attempting a **single parent-process rollback**.
+Failures also identify the stage that failed.
+
+The failed backup may not have `deployed.sha256`, and cannot be used for
+the regular `--rollback` command. Check its tar content against current
+files and inspect the recorded created-file list first. An aaPanel check
+and route-list inspection must confirm the restored state before retrying.
