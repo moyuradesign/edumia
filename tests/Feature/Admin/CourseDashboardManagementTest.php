@@ -116,8 +116,13 @@ final class CourseDashboardManagementTest extends TestCase
             'title' => 'Science Published Course', 'slug' => 'science-published-course',
             'status' => 'published', 'visibility' => 'public', 'published_at' => now(),
         ]);
+        $section = \App\Models\Section::query()->create([
+            'course_id' => $pending->id, 'title' => 'Introduction section',
+            'sort_order' => 1, 'is_published' => false,
+        ]);
         \App\Models\Lesson::query()->create([
-            'course_id' => $pending->id, 'title' => 'First lesson',
+            'course_id' => $pending->id, 'section_id' => $section->id,
+            'title' => 'First lesson',
             'slug' => 'first-design-lesson', 'content' => 'Introduction',
         ]);
 
