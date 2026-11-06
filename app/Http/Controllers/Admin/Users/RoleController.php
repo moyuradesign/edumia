@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\Users;
 
 use App\Http\Requests\Admin\RoleRequest;
+use App\Models\AuditEvent;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Identity\RoleManagementService;
@@ -16,11 +17,23 @@ use Illuminate\View\View;
 
 final class RoleController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $rawSearch = $request->query('member_q');
+        $memberSearch = is_string($rawSearch) ? mb_substr(trim($rawSearch), 0, 100) : '';
+
         return view('admin.users.roles.index', [
             'roles' => Role::query()->with('permissions')->withCount('users')->orderBy('name')->get(),
             'permissions' => RoleManagementService::DELEGATABLE,
+            'memberSearch' => $memberSearch,
+            'memberOptions' => User::query()->where('status', 'active')->where('role', '!=', 'admin')
+                ->when($memberSearch !== '', fn ($q) => $q->where(fn ($inner) =>
+                    $inner->where('name', 'like', '%'.$memberSearch.'%')
+                        ->orWhere('email', 'like', '%'.$memberSearch.'%')))
+                ->orderBy('name')->limit(25)->get(['id', 'name', 'email']),
+            'roleHistory' => AuditEvent::query()->with('actor')
+                ->whereIn('action', ['roles.created', 'roles.updated', 'roles.assigned', 'roles.revoked'])
+                ->latest('id')->paginate(15, ['*'], 'audit_page')->withQueryString(),
         ]);
     }
 

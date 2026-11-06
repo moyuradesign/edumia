@@ -22,6 +22,7 @@ final class RoleManagementService
     {
         abort_unless($actor->isAdmin(), 403);
         $permissions = array_values(array_unique($data['permissions'] ?? []));
+        sort($permissions, SORT_STRING);
 
         return DB::transaction(function () use ($actor, $data, $permissions, $role): Role {
             $role = $role
@@ -29,10 +30,22 @@ final class RoleManagementService
                 : new Role;
 
             $existing = $role->exists;
-            $role->fill([
+            $previous = $existing ? [
+                'name' => $role->name,
+                'slug' => $role->slug,
+                'description' => $role->description,
+                'permissions' => $role->permissions()->pluck('permissions.name')->sort()->values()->all(),
+            ] : null;
+            $current = [
                 'name' => $data['name'],
                 'slug' => $data['slug'],
                 'description' => $data['description'] ?? null,
+                'permissions' => $permissions,
+            ];
+            $role->fill([
+                'name' => $current['name'],
+                'slug' => $current['slug'],
+                'description' => $current['description'],
             ])->save();
 
             $ids = [];
@@ -45,13 +58,16 @@ final class RoleManagementService
             }
 
             $role->permissions()->sync($ids);
-            AuditEvent::create([
-                'actor_id' => $actor->getKey(),
-                'subject_type' => Role::class,
-                'subject_id' => $role->getKey(),
-                'action' => $existing ? 'roles.updated' : 'roles.created',
-                'new_values' => ['slug' => $role->slug, 'permissions' => $permissions],
-            ]);
+            if (! $existing || $previous !== $current) {
+                AuditEvent::create([
+                    'actor_id' => $actor->getKey(),
+                    'subject_type' => Role::class,
+                    'subject_id' => $role->getKey(),
+                    'action' => $existing ? 'roles.updated' : 'roles.created',
+                    'previous_values' => $previous,
+                    'new_values' => $current,
+                ]);
+            }
 
             return $role;
         });
@@ -64,7 +80,17 @@ final class RoleManagementService
         DB::transaction(function () use ($actor, $role, $member, $grant): void {
             $role = Role::query()->lockForUpdate()->findOrFail($role->getKey());
             $member = User::query()->lockForUpdate()->findOrFail($member->getKey());
-            abort_unless($member->isActive(), 422, 'Only active users can receive a staff role.');
+            // Revocation is allowed even if a member is suspended; grants
+            // require an active non-admin member and never change user.role.
+            if ($grant) {
+                abort_unless($member->isActive() && ! $member->isAdmin(), 422,
+                    'Only active non-administrator members can receive staff roles.');
+            }
+            $wasAssigned = $role->users()->where('users.id', $member->getKey())->exists();
+            if ($wasAssigned === $grant) {
+                return;
+            }
+
             if ($grant) {
                 $member->customRoles()->syncWithoutDetaching([$role->getKey()]);
             } else {
@@ -76,7 +102,15 @@ final class RoleManagementService
                 'subject_type' => User::class,
                 'subject_id' => $member->getKey(),
                 'action' => $grant ? 'roles.assigned' : 'roles.revoked',
-                'new_values' => ['role_slug' => $role->slug],
+                'previous_values' => [
+                    'role_id' => $role->getKey(), 'role_slug' => $role->slug,
+                    'assigned' => $wasAssigned,
+                ],
+                'new_values' => [
+                    'role_id' => $role->getKey(), 'role_slug' => $role->slug,
+                    'assigned' => $grant,
+                    'permissions' => $role->permissions()->pluck('permissions.name')->sort()->values()->all(),
+                ],
             ]);
         });
     }

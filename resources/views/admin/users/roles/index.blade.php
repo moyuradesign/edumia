@@ -13,11 +13,58 @@
         </div>
     </div>
 
+    @if ($errors->any())
+        <div class="admin-widget" role="alert"><strong>Role update needs attention</strong>
+            <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        </div>
+    @endif
+
     <div class="admin-roles-summary">
         <div class="admin-widget"><span class="admin-widget-kicker">CUSTOM ROLES</span><strong>{{ number_format($roles->count()) }}</strong><p>Active role definitions</p></div>
         <div class="admin-widget"><span class="admin-widget-kicker">DELEGATABLE PERMISSIONS</span><strong>{{ number_format(count($permissions)) }}</strong><p>Explicitly permitted capabilities</p></div>
         <div class="admin-widget"><span class="admin-widget-kicker">ROLE ASSIGNMENTS</span><strong>{{ number_format($roles->sum('users_count')) }}</strong><p>Memberships across custom roles</p></div>
     </div>
+
+    <section class="admin-widget" aria-labelledby="role-permission-matrix">
+        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">LEAST PRIVILEGE</span>
+            <h2 id="role-permission-matrix">Permission matrix</h2>
+            <p>Only these three delegated capabilities are available; none grants access to administrator settings or role management.</p>
+        </div></div>
+        <div class="table-scroll"><table class="admin-table">
+            <thead><tr><th scope="col">Capability</th>
+                @foreach($roles as $matrixRole)<th scope="col">{{ $matrixRole->name }}</th>@endforeach
+            </tr></thead>
+            <tbody>
+                @foreach($permissions as $permissionKey => $permissionLabel)
+                    <tr><th scope="row">{{ $permissionLabel }}</th>
+                        @foreach($roles as $matrixRole)
+                            <td>{{ $matrixRole->permissions->contains('name', $permissionKey) ? 'Granted' : 'Not granted' }}</td>
+                        @endforeach
+                    </tr>
+                @endforeach
+            </tbody>
+        </table></div>
+    </section>
+
+    <section class="admin-widget" aria-labelledby="staff-member-search-heading">
+        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">MEMBER LOOKUP</span>
+            <h2 id="staff-member-search-heading">Find an eligible staff member</h2>
+            <p>Search active non-administrator accounts. Member IDs stay compatible with the existing assignment forms.</p>
+        </div></div>
+        <form method="get" action="{{ route('admin.roles.index') }}" class="admin-role-form">
+            <label for="role-member-query">Name or email
+                <input id="role-member-query" name="member_q" value="{{ $memberSearch }}" maxlength="100"
+                       placeholder="Search member directory">
+            </label>
+            <button class="admin-action-secondary" type="submit">Find accounts</button>
+        </form>
+        <datalist id="role-eligible-members">
+            @foreach($memberOptions as $memberOption)
+                <option value="{{ $memberOption->id }}" label="{{ $memberOption->name }} — {{ $memberOption->email }}"></option>
+            @endforeach
+        </datalist>
+        <p class="admin-field-hint">{{ $memberOptions->count() }} matching accounts shown (maximum 25). Only active non-administrators can receive delegated roles.</p>
+    </section>
 
     <div class="admin-roles-layout">
         <section class="admin-widget admin-role-directory" aria-labelledby="roles-directory-title">
@@ -62,7 +109,8 @@
                                 <form class="admin-role-form" method="post" action="{{ route('admin.roles.members', $role) }}">
                                     @csrf
                                     <label>Member account ID
-                                        <input name="user_id" type="number" min="1" step="1" required placeholder="Enter account ID">
+                                        <input name="user_id" type="number" min="1" step="1" required
+                                               list="role-eligible-members" placeholder="Select or enter account ID">
                                     </label>
                                     <label>Action
                                         <select name="grant" required>
@@ -103,5 +151,38 @@
             </form>
         </section>
     </div>
+
+    <section class="admin-widget" aria-labelledby="role-audit-title">
+        <div class="admin-widget-heading"><div><span class="admin-widget-kicker">ACCOUNTABILITY</span>
+            <h2 id="role-audit-title">Role governance history</h2>
+            <p>Changes to role definitions and memberships are recorded with the acting administrator.</p>
+        </div></div>
+        <div class="table-scroll"><table class="admin-table">
+            <thead><tr><th scope="col">When</th><th scope="col">Activity</th>
+                <th scope="col">Role</th><th scope="col">Member / permissions</th><th scope="col">Actor</th>
+            </tr></thead>
+            <tbody>
+                @forelse($roleHistory as $event)
+                    <tr>
+                        <td>{{ $event->created_at?->format('M j, Y · H:i') }}</td>
+                        <td>{{ str_replace(['roles.', '_'], ['', ' '], $event->action) }}</td>
+                        <td>{{ data_get($event->new_values, 'slug', data_get($event->new_values, 'role_slug', 'Role #'.$event->subject_id)) }}</td>
+                        <td>
+                            @if(in_array($event->action, ['roles.assigned', 'roles.revoked'], true))
+                                Member #{{ $event->subject_id }} · {{ data_get($event->new_values, 'assigned') ? 'Granted' : 'Revoked' }}
+                            @else
+                                <small>Before: {{ implode(', ', (array) data_get($event->previous_values, 'permissions', [])) ?: 'None' }}</small>
+                                <small>After: {{ implode(', ', (array) data_get($event->new_values, 'permissions', [])) ?: 'None' }}</small>
+                            @endif
+                        </td>
+                        <td>{{ $event->actor?->name ?? 'Former administrator' }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5"><div class="admin-empty"><strong>No role changes recorded</strong></div></td></tr>
+                @endforelse
+            </tbody>
+        </table></div>
+        <div class="admin-course-pagination">{{ $roleHistory->onEachSide(1)->links() }}</div>
+    </section>
 </section>
 @endsection

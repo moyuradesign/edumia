@@ -15,11 +15,27 @@ final class RoleRequest extends FormRequest
         return $this->user()?->isAdmin() ?? false;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $fields = [];
+        foreach (['name', 'slug', 'description'] as $key) {
+            $value = $this->input($key);
+            if (is_string($value)) {
+                $fields[$key] = trim($value);
+            }
+        }
+        if (isset($fields['slug'])) {
+            $fields['slug'] = strtolower($fields['slug']);
+        }
+        $this->merge($fields);
+    }
+
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:150'],
             'slug' => ['required', 'alpha_dash:ascii', 'max:120',
+                Rule::notIn(['admin', 'administrator', 'owner', 'root', 'system', 'super-admin', 'developer']),
                 Rule::unique('roles', 'slug')->ignore($this->route('role')?->getKey())],
             'description' => ['nullable', 'string', 'max:500'],
             'permissions' => ['sometimes', 'array', 'max:10'],
