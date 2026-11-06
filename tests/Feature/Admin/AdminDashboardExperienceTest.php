@@ -164,4 +164,14 @@ final class AdminDashboardExperienceTest extends TestCase
             ->assertSee('No automatic payouts');
     }
 
+    public function test_administrator_entrypoint_redirects_to_existing_dashboard_with_role_checks(): void
+    {
+        $this->get('/admin')->assertRedirect(route('login'));
+        $student = $this->member('student', 'Learner', 'admin-entry-student@example.test');
+        $this->actingAs($student)->get('/admin')->assertForbidden();
+        $admin = $this->member('admin', 'Owner', 'admin-entry-owner@example.test');
+        $this->actingAs($admin)->get('/admin')->assertRedirect(route('dashboard'));
+        $this->get('/admin/')->assertRedirect(route('dashboard'));
+    }
+
 }

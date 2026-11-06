@@ -31,6 +31,8 @@ Route::middleware(['auth', 'active', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function (): void {
+        // Canonical administrator entrance; preserve /dashboard as the existing overview.
+        Route::get('/', fn () => redirect()->route('dashboard'))->name('index');
         Route::get('/users', [MemberDirectoryController::class, 'index'])->name('users.index');
         Route::put('/users/{user}', MemberController::class)->name('users.update');
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
