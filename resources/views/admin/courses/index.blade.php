@@ -10,6 +10,16 @@
         </div>
     </div>
 
+    <nav class="admin-course-summary" aria-label="Course status filters">
+        @foreach(['all' => 'All courses', 'pending' => 'Pending review', 'published' => 'Published', 'draft' => 'Drafts'] as $key => $label)
+            <a class="admin-course-summary-link {{ $status === $key ? 'is-selected' : '' }}"
+                href="{{ route('admin.courses.index', array_filter(['status' => $key, 'q' => $search, 'instructor' => $instructor, 'sort' => $sort !== 'newest' ? $sort : null], fn ($value) => $value !== null && $value !== '')) }}"
+                @if($status === $key) aria-current="page" @endif>
+                <span>{{ $label }}</span><strong>{{ number_format($courseCounts[$key]) }}</strong>
+            </a>
+        @endforeach
+    </nav>
+
     <div class="admin-widget admin-course-index-widget">
         <form class="admin-course-filters" action="{{ route('admin.courses.index') }}" method="get">
             <div>
@@ -25,10 +35,28 @@
                     @endforeach
                 </select>
             </div>
+            <div>
+                <label class="sr-only" for="admin-course-instructor">Filter by instructor</label>
+                <select name="instructor" id="admin-course-instructor">
+                    <option value="">All instructors</option>
+                    @foreach($instructors as $teacher)
+                        <option value="{{ $teacher->id }}" @selected($instructor === $teacher->id)>{{ $teacher->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="sr-only" for="admin-course-sort">Sort courses</label>
+                <select name="sort" id="admin-course-sort">
+                    <option value="newest" @selected($sort === 'newest')>Newest first</option>
+                    <option value="oldest" @selected($sort === 'oldest')>Oldest first</option>
+                    <option value="title" @selected($sort === 'title')>Course title</option>
+                </select>
+            </div>
             <button class="admin-action-primary" type="submit">Filter courses</button>
-            @if($search !== '' || $status !== 'all')<a class="admin-action-secondary" href="{{ route('admin.courses.index') }}">Clear</a>@endif
+            @if($search !== '' || $status !== 'all' || $instructor !== null || $sort !== 'newest')<a class="admin-action-secondary" href="{{ route('admin.courses.index') }}">Clear</a>@endif
         </form>
 
+        <p class="admin-course-results">Showing {{ $courses->firstItem() ?? 0 }}–{{ $courses->lastItem() ?? 0 }} of {{ number_format($courses->total()) }} matching courses</p>
         <div class="table-scroll">
             <table class="admin-table">
                 <thead><tr><th>Course</th><th>Instructor</th><th>Learning</th><th>Status</th><th>Actions</th></tr></thead>
@@ -36,8 +64,8 @@
                 @forelse($courses as $course)
                     <tr>
                         <td><strong>{{ $course->title }}</strong><small>{{ $course->category?->name ?? 'Uncategorized' }}</small></td>
-                        <td>{{ $course->instructor?->name ?? 'Unknown' }}</td>
-                        <td>{{ $course->lessons_count }} lessons</td>
+                        <td><a class="admin-course-instructor-link" href="{{ route('admin.courses.index', ['instructor' => $course->instructor_id]) }}">{{ $course->instructor?->name ?? 'Unknown' }}</a></td>
+                        <td>{{ $course->lessons_count }} lessons<small>{{ number_format($course->enrollments_count) }} enrollments</small></td>
                         <td><span class="admin-status admin-status--{{ $course->status === 'published' ? 'success' : 'neutral' }}">{{ ucfirst($course->status) }}</span></td>
                         <td><div class="admin-course-actions">
                             <a class="admin-table-action admin-table-action--quiet" href="{{ route('instructor.courses.edit', $course) }}">Edit</a>
@@ -58,7 +86,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="admin-course-pagination">{{ $courses->links() }}</div>
+        <div class="admin-course-pagination">{{ $courses->onEachSide(1)->links() }}</div>
     </div>
 </section>
 @endsection

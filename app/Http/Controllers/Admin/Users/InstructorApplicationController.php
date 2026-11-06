@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Users;
 
 use App\Http\Requests\Admin\ReviewInstructorApplicationRequest;
 use App\Models\Application;
+use App\Models\User;
 use App\Services\Identity\InstructorApplicationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -48,6 +49,36 @@ final class InstructorApplicationController extends Controller
             'pendingApplications' => (clone $base)->where('status', 'pending')->count(),
             'approvedApplications' => (clone $base)->where('status', 'approved')->count(),
             'rejectedApplications' => (clone $base)->where('status', 'rejected')->count(),
+        ]);
+    }
+
+    public function faculty(Request $request): View
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        $rawSearch = $request->query('q');
+        $search = is_string($rawSearch) ? mb_substr(trim($rawSearch), 0, 100) : '';
+        $rawStatus = $request->query('status');
+        $status = is_string($rawStatus) && in_array($rawStatus, ['all', 'active', 'suspended'], true)
+            ? $rawStatus : 'all';
+
+        $teachers = User::query()->where('role', 'instructor')
+            ->withCount([
+                'courses',
+                'courses as published_courses_count' => fn (Builder $query) => $query->where('status', 'published'),
+            ])
+            ->when($search !== '', fn ($query) => $query
+                ->where(fn ($builder) => $builder->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')))
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->orderBy('name')->orderBy('id')->paginate(20)->withQueryString();
+
+        $base = User::query()->where('role', 'instructor');
+        return view('admin.users.instructors', [
+            'instructors' => $teachers, 'search' => $search, 'status' => $status,
+            'allInstructors' => (clone $base)->count(),
+            'activeInstructors' => (clone $base)->where('status', 'active')->count(),
+            'suspendedInstructors' => (clone $base)->where('status', 'suspended')->count(),
         ]);
     }
 

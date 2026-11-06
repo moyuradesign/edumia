@@ -68,4 +68,30 @@ final class CourseDashboardManagementTest extends TestCase
         $this->get('/admin/courses')->assertRedirect(route('login'));
         $this->actingAs($student)->get('/admin/courses')->assertForbidden();
     }
+    public function test_instructor_filter_counts_and_sort_work_without_exposing_other_admin_data(): void
+    {
+        $admin = $this->member('admin', 'filter-admin@edumia.test');
+        $a = $this->member('instructor', 'filter-a@edumia.test');
+        $b = $this->member('instructor', 'filter-b@edumia.test');
+        Course::query()->create([
+            'instructor_id' => $a->id, 'title' => 'A Design Class',
+            'slug' => 'a-design-class', 'status' => 'published', 'visibility' => 'public',
+        ]);
+        Course::query()->create([
+            'instructor_id' => $b->id, 'title' => 'B Science Class',
+            'slug' => 'b-science-class', 'status' => 'pending', 'visibility' => 'private',
+        ]);
+        $this->actingAs($admin)->get('/admin/courses')->assertOk()
+            ->assertSee('Pending review')->assertSee('admin-course-instructor')
+            ->assertSee('admin-course-sort')->assertSee('A Design Class')->assertSee('B Science Class');
+
+        $this->get('/admin/courses?instructor='.$a->id.'&sort=title')->assertOk()
+            ->assertSee('A Design Class')->assertDontSee('B Science Class')
+            ->assertSee('value="'.$a->id.'" selected', false);
+        $this->get('/admin/courses?instructor='.$b->id.'&status=pending')->assertOk()
+            ->assertSee('B Science Class')->assertDontSee('A Design Class');
+        $this->get('/admin/courses?instructor[]=7&sort[]=newest')->assertOk();
+        $this->actingAs($b)->get('/admin/courses')->assertForbidden();
+    }
+
 }

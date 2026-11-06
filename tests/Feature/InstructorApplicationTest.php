@@ -145,4 +145,26 @@ final class InstructorApplicationTest extends TestCase
         $this->actingAs($studentTwo)->get('/admin/instructor-applications')->assertForbidden();
     }
 
+    public function test_instructor_directory_is_admin_only_and_scoped_to_actual_teachers(): void
+    {
+        $admin = $this->member('admin', 'faculty-admin@edumia.test');
+        $teacher = $this->member('instructor', 'faculty-teacher@edumia.test');
+        $other = $this->member('student', 'faculty-student@edumia.test');
+        \App\Models\Course::query()->create([
+            'instructor_id' => $teacher->id, 'title' => 'Teaching Methods',
+            'slug' => 'teaching-methods', 'status' => 'published', 'visibility' => 'public',
+        ]);
+
+        $this->actingAs($admin)->get('/admin/instructors')->assertOk()
+            ->assertSee('Instructor directory')
+            ->assertSee('faculty-teacher@edumia.test')
+            ->assertDontSee('faculty-student@edumia.test')
+            ->assertSee('View courses')
+            ->assertSee('href="'.route('admin.courses.index', ['instructor' => $teacher->id]).'"', false);
+        $this->get('/admin/instructors?q=not-found')->assertOk()
+            ->assertDontSee('faculty-teacher@edumia.test');
+        $this->get('/admin/instructors?q[]=invalid&status[]=active')->assertOk();
+        $this->actingAs($other)->get('/admin/instructors')->assertForbidden();
+    }
+
 }

@@ -1506,3 +1506,16 @@ progress {
   .admin-workspace .admin-welcome-actions,
   .admin-workspace .admin-welcome > :is(a, button, form) { justify-self: end; }
 }
+
+/* Course status snapshot and instructor directory */
+.admin-course-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.admin-course-summary-link { display:flex; min-width:0; align-items:center; justify-content:space-between; gap:8px; padding:17px; border:1px solid var(--border); border-radius:14px; background:var(--surface); color:var(--ink); text-decoration:none; }
+.admin-course-summary-link span { font-size:12px; font-weight:750; color:var(--muted); }
+.admin-course-summary-link strong { font-size:23px; font-weight:850; font-variant-numeric:tabular-nums; }
+.admin-course-summary-link:hover,.admin-course-summary-link.is-selected { border-color:var(--accent); }
+.admin-course-summary-link.is-selected span { color:var(--accent); }
+.admin-course-results { margin:0 0 14px; font-size:12px; color:var(--muted); }
+.admin-course-instructor-link { font-weight:700; color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+.admin-course-management .admin-course-filters > div { flex:1 1 140px; min-width:130px; }
+.admin-course-management .admin-course-filters > div:first-child { flex:2 1 205px; }
+@media(max-width:690px){ .admin-course-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } .admin-course-summary-link { padding:12px; } .admin-course-summary-link strong{font-size:19px;} }
