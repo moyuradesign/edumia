@@ -7,6 +7,7 @@ namespace App\Services\Identity;
 use App\Models\Application;
 use App\Models\AuditEvent;
 use App\Models\User;
+use App\Services\Notifications\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -95,6 +96,15 @@ final class InstructorApplicationService
                     'note_recorded' => $note !== null && trim($note) !== '',
                 ],
             ]);
+
+            // Do not include private application details or reviewer notes
+            // in outbound notifications.
+            app(NotificationService::class)->deliver($applicant, 'instructor_decision',
+                'Instructor application '.$decision,
+                $decision === 'approved'
+                    ? 'Your instructor application was approved.'
+                    : 'Your instructor application was reviewed and not approved.',
+                '/instructor-application');
         }, 3);
     }
 }

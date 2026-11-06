@@ -8,6 +8,7 @@ use App\Models\AuditEvent;
 use App\Models\Ticket;
 use App\Models\TicketStatus;
 use App\Models\User;
+use App\Services\Notifications\NotificationService;
 use Illuminate\Support\Facades\DB;
 
 final class TicketService
@@ -19,12 +20,25 @@ final class TicketService
         return DB::transaction(function () use ($requester, $attributes): Ticket {
             $status = $this->status('open');
 
-            return Ticket::create([
+            $ticket = Ticket::create([
                 'requester_id' => $requester->getKey(),
                 'status_id' => $status->getKey(),
                 'subject' => $attributes['subject'],
                 'description' => $attributes['description'],
             ]);
+
+            // Staff receive only an ID-based notification; customer
+            // descriptions are never copied into an admin-wide inbox.
+            User::query()->where('role', 'admin')->where('status', 'active')
+                ->orderBy('id')->chunkById(100, function ($admins) use ($ticket): void {
+                    foreach ($admins as $admin) {
+                        app(NotificationService::class)->deliver($admin, 'support_reply',
+                            'New support ticket', 'A customer opened a support ticket.',
+                            '/admin/tickets/'.$ticket->getKey());
+                    }
+                });
+
+            return $ticket;
         });
     }
 
@@ -42,6 +56,24 @@ final class TicketService
                 'body' => $body,
                 'is_internal' => false,
             ]);
+
+            if ($actor->getKey() !== $ticket->requester_id) {
+                $requester = User::query()->find($ticket->requester_id);
+                if ($requester) {
+                    app(NotificationService::class)->deliver($requester, 'support_reply',
+                        'New support reply', 'Your support ticket has a new reply.',
+                        '/support/tickets/'.$ticket->getKey());
+                }
+            } else {
+                User::query()->where('role', 'admin')->where('status', 'active')
+                    ->orderBy('id')->chunkById(100, function ($admins) use ($ticket): void {
+                        foreach ($admins as $admin) {
+                            app(NotificationService::class)->deliver($admin, 'support_reply',
+                                'Support ticket updated', 'A customer replied to a support ticket.',
+                                '/admin/tickets/'.$ticket->getKey());
+                        }
+                    });
+            }
         });
     }
 
@@ -70,6 +102,13 @@ final class TicketService
                 'previous_values' => ['status' => $before],
                 'new_values' => ['status' => $status],
             ]);
+            $requester = User::query()->find($ticket->requester_id);
+            if ($requester) {
+                app(NotificationService::class)->deliver($requester, 'support_status',
+                    'Support ticket '.$status,
+                    'Your support ticket status has changed.',
+                    '/support/tickets/'.$ticket->getKey());
+            }
         });
     }
 
