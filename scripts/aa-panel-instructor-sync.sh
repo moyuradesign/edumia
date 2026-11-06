@@ -140,7 +140,6 @@ refresh_views() {
         runuser -u "$WEB_USER" -- "$PHP" artisan route:clear
         runuser -u "$WEB_USER" -- "$PHP" artisan view:clear
         runuser -u "$WEB_USER" -- "$PHP" artisan view:cache
-        runuser -u "$WEB_USER" -- "$PHP" artisan route:list --name=admin.instructors             | grep -Fq 'instructors.assignments'
         verify_release_view_cache
     )
 }
@@ -285,6 +284,11 @@ for relative in $FILES; do
     mv -f -- "$temporary" "$APP/$relative"
 done
 refresh_views
+(
+    cd "$APP"
+    # Verify only on apply; rollback legitimately restores older route definitions.
+    runuser -u "$WEB_USER" -- "$PHP" artisan route:list --name=admin.instructors | grep -Fq 'instructors.assignments'
+)
 APPLY_STARTED=0
 echo "DEPLOYMENT SUCCESS: Instructor Management upgraded from GitHub commit $SHA"
 echo "Protected rollback: $BACKUP"
