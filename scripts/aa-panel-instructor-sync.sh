@@ -13,6 +13,11 @@ WEB_USER='www'
 SOURCE='/root/edumia-github'
 BACKUPS='/root/edumia-instructor-sync-backups'
 BASE_SHA='9cbd579442bd902a6d6e45adba92b94af628db78'
+# Exact Git blob hashes from the 2026-11-06 read-only live reconciliation.
+# They permit ONLY known missing/altered instructor and routing source.
+APPROVED_LIVE_CONTROLLER='5318ae7bf46231d7b8ee000d1304101b4f0bfae6'
+APPROVED_LIVE_APPLICATION_VIEW='005b033aeb05e12a76b91b24280bcaa53bf50b7b'
+APPROVED_LIVE_ROUTES='755492dd287615f6fdd6ec607006c109e4be48c2'
 # The live site predates the instructor-directory view; it may be absent.
 # Classify that view as new so it is only created when missing, and removed
 # on rollback. Never overwrite an existing unknown version.
@@ -124,6 +129,7 @@ on_error() {
                 rm -f -- "$APP/$added" || true
             fi
         done
+        (cd "$APP" && runuser -u "$WEB_USER" -- "$PHP" artisan route:clear) || true
         (cd "$APP" && runuser -u "$WEB_USER" -- "$PHP" artisan view:clear) || true
     fi
     clean_up
@@ -165,6 +171,13 @@ if [ "$MODE" = '--rollback' ]; then
     actual_hash="$(sha256sum "$ROLLBACK/files.tar.gz" | cut -d ' ' -f1)"
     [ "$expected_hash" = "$actual_hash" ] || { echo 'Rollback backup hash mismatch.' >&2; exit 1; }
     validate_archive "$ROLLBACK/files.tar.gz"
+    [ -f "$ROLLBACK/deployed.sha256" ] || {
+        echo 'Rollback refused: deployed file-hash manifest is missing.' >&2; exit 1;
+    }
+    (cd "$APP" && sha256sum -c --quiet "$ROLLBACK/deployed.sha256") || {
+        echo 'Rollback refused: files have changed since this release was deployed.' >&2
+        exit 1
+    }
     for added in $ADDED; do
         [ ! -L "$APP/$added" ] || { echo 'Symlink at rollback target.' >&2; exit 1; }
     done
@@ -221,15 +234,82 @@ for relative in app/Http/Controllers/Admin/Users/InstructorApplicationController
                 app/Services/Identity/InstructorManagementService.php routes/admin.php; do
     "$PHP" -l "$STAGE/new/$relative" >/dev/null
 done
-# Stop before any write if a live file has changes outside this release.
+# Construct a deterministic production-specific routes variant. The live
+# routing differences were audited as four missing lines (admin redirect
+# comment + route, and two media routes) plus the instructor directory route.
+# Do not restore the unrelated routes merely to enable instructor features.
+cat > "$STAGE/observed-route-omissions.txt" <<'ROUTE_OMISSIONS'
+        // Canonical administrator entrance; preserve /dashboard as the existing overview.
+        Route::get('/', fn () => redirect()->route('dashboard'))->name('index');
+        Route::get('/media/{media}/preview', [MediaController::class, 'preview'])->name('media.preview');
+        Route::put('/media/{media}', [MediaController::class, 'update'])->name('media.update');
+ROUTE_OMISSIONS
+
+mkdir -p "$STAGE/variant" "$STAGE/base-variant"
+# Every omission must be present exactly once in the audited GitHub source.
+while IFS= read -r omitted; do
+    for original in "$STAGE/base/routes/admin.php" "$STAGE/new/routes/admin.php"; do
+        matches="$(grep -Fxc -- "$omitted" "$original" || true)"
+        [ "$matches" = 1 ] || {
+            echo "BLOCKED: Route reconciliation source has changed: $omitted" >&2
+            exit 1
+        }
+    done
+done < "$STAGE/observed-route-omissions.txt"
+grep -Fvxf "$STAGE/observed-route-omissions.txt" \
+    "$STAGE/base/routes/admin.php" > "$STAGE/base-variant/routes-admin.php"
+grep -Fvxf "$STAGE/observed-route-omissions.txt" \
+    "$STAGE/new/routes/admin.php" > "$STAGE/variant/routes-admin.php"
+directory_route="        Route::get('/instructors', [InstructorApplicationController::class, 'faculty'])->name('instructors.index');"
+[ "$(grep -Fxc -- "$directory_route" "$STAGE/base-variant/routes-admin.php" || true)" = 1 ] || {
+    echo 'BLOCKED: Instructor directory baseline has changed.' >&2
+    exit 1
+}
+grep -Fvx -- "$directory_route" "$STAGE/base-variant/routes-admin.php" \
+    > "$STAGE/base-variant/without-directory.php"
+[ "$(git -C "$SOURCE" hash-object "$STAGE/base-variant/without-directory.php")" = "$APPROVED_LIVE_ROUTES" ] || {
+    echo 'BLOCKED: Audited live route variant cannot be reproduced.' >&2
+    exit 1
+}
+"$PHP" -l "$STAGE/variant/routes-admin.php" >/dev/null
+
+# Stop before any write if a live file differs from both the approved GitHub
+# sources and the exact, previously audited production variant.
+route_mode='canonical'
 for relative in $EXISTING; do
-    if ! cmp -s "$APP/$relative" "$STAGE/base/$relative" &&
-       ! cmp -s "$APP/$relative" "$STAGE/new/$relative"; then
-        echo "BLOCKED: Live source differs from approved baseline: $relative" >&2
-        echo 'Inspect and reconcile those local changes before deploying.' >&2
-        exit 1
+    live_hash="$(git -C "$SOURCE" hash-object "$APP/$relative")"
+    baseline_hash="$(git -C "$SOURCE" hash-object "$STAGE/base/$relative")"
+    target_hash="$(git -C "$SOURCE" hash-object "$STAGE/new/$relative")"
+
+    if [ "$relative" = 'routes/admin.php' ]; then
+        reconciled_hash="$(git -C "$SOURCE" hash-object "$STAGE/variant/routes-admin.php")"
+        if [ "$live_hash" = "$APPROVED_LIVE_ROUTES" ] ||
+           [ "$live_hash" = "$reconciled_hash" ]; then
+            route_mode='audited-production'
+            cp -- "$STAGE/variant/routes-admin.php" "$STAGE/new/routes/admin.php"
+        elif [ "$live_hash" != "$baseline_hash" ] &&
+             [ "$live_hash" != "$target_hash" ]; then
+            echo "BLOCKED: Unknown live route changes: $relative" >&2
+            exit 1
+        fi
+    elif [ "$live_hash" != "$baseline_hash" ] &&
+         [ "$live_hash" != "$target_hash" ]; then
+        approved=''
+        case "$relative" in
+            app/Http/Controllers/Admin/Users/InstructorApplicationController.php)
+                approved="$APPROVED_LIVE_CONTROLLER" ;;
+            resources/views/admin/users/instructor-applications.blade.php)
+                approved="$APPROVED_LIVE_APPLICATION_VIEW" ;;
+        esac
+        if [ -z "$approved" ] || [ "$live_hash" != "$approved" ]; then
+            echo "BLOCKED: Live source differs from approved baseline: $relative" >&2
+            echo 'Inspect and reconcile those local changes before deploying.' >&2
+            exit 1
+        fi
+        echo "AUDITED VARIANT:  $relative"
     fi
 done
+echo "Route profile:    $route_mode (unrelated live routes preserved)"
 for relative in $ADDED; do
     if [ -L "$APP/$relative" ] ||
        { [ -e "$APP/$relative" ] && ! cmp -s "$APP/$relative" "$STAGE/new/$relative"; }; then
@@ -296,9 +376,12 @@ done
 refresh_views
 (
     cd "$APP"
-    # Verify only on apply; rollback legitimately restores older route definitions.
-    runuser -u "$WEB_USER" -- "$PHP" artisan route:list --name=admin.instructors | grep -Fq 'instructors.assignments'
+    # Only apply requires the newly introduced endpoint. A rollback legitimately
+    # returns to the previous route list.
+    routes="$(runuser -u "$WEB_USER" -- "$PHP" artisan route:list --name=admin.instructors)"
+    grep -Fq 'instructors.assignments' <<< "$routes"
 )
+(cd "$APP" && sha256sum $FILES) > "$BACKUP/deployed.sha256"
 APPLY_STARTED=0
 echo "DEPLOYMENT SUCCESS: Instructor Management upgraded from GitHub commit $SHA"
 echo "Protected rollback: $BACKUP"

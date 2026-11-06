@@ -9,6 +9,7 @@
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-primary" href="{{ route('admin.instructors.index') }}">Instructor directory</a>
+            <a class="admin-action-secondary" href="{{ route('admin.users.index', ['role' => 'instructor']) }}">All instructors</a>
             <a class="admin-action-secondary" href="{{ route('admin.roles.index') }}">Staff roles</a>
         </div>
     </div>

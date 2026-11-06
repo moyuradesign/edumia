@@ -87,3 +87,32 @@ upgrade actually created.
 If another required file is missing or differs from the approved baseline,
 `--check` stops without writing to the production application. Do not copy
 unrelated project files to bypass that guard.
+
+## Audited production source reconciliation
+
+The 2026-11-06 terminal audit established three differences from the
+pre-upgrade GitHub baseline:
+
+- InstructorApplicationController.php omitted the old `faculty()` method
+  (Git blob `5318ae7bf46231d7b8ee000d1304101b4f0bfae6`).
+- Instructor application view used an **All instructors** link to the member
+  directory instead of the not-yet-installed instructor directory
+  (Git blob `005b033aeb05e12a76b91b24280bcaa53bf50b7b`).
+- routes/admin.php omitted the admin redirect and media preview/update
+  routes, along with the old instructor-directory endpoint
+  (Git blob `755492dd287615f6fdd6ec607006c109e4be48c2`).
+
+These hashes are allowlisted **only as exact known inputs**, not as a
+general bypass. The new instructor directory and endpoints are activated,
+and the member-directory link is retained alongside the new navigation.
+
+The production route file is derived deterministically from the pinned
+GitHub instructor release, with the observed unrelated admin redirect and
+media preview/update routes still omitted. The synchronizer reproduces the
+known pre-upgrade route hash from GitHub source before accepting that variant.
+Unrecognized production content causes a blocking error, with no writes.
+
+Backups include the four original production files and the three
+newly created paths. Each successful installation also writes a protected
+`deployed.sha256` manifest: explicit rollback refuses to overwrite any
+files modified after deployment. Read-only `--check` never changes files.
