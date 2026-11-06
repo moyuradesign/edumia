@@ -218,4 +218,85 @@ final class RolePermissionManagementTest extends TestCase
         $this->get('/support/tickets/'.$ticket->id)->assertForbidden();
     }
 
+    public function test_role_updates_track_previous_permissions_and_ignore_no_op_memberships(): void
+    {
+        $admin = $this->user('admin', 'governance-admin@edumia.test');
+        $staff = $this->user('student', 'delegated-member@edumia.test');
+        $this->actingAs($admin)->post('/admin/roles', [
+            'name' => '  Content Reviewer  ', 'slug' => '  CONTENT-REVIEWER  ',
+            'permissions' => ['knowledge.manage', 'media.manage'],
+        ])->assertRedirect();
+        $role = Role::query()->firstOrFail();
+        $this->assertSame('content-reviewer', $role->slug);
+
+        $this->put('/admin/roles/'.$role->id, [
+            'name' => 'Content Reviewer', 'slug' => 'content-reviewer',
+            'permissions' => ['knowledge.manage'],
+        ])->assertRedirect();
+
+        $event = \App\Models\AuditEvent::query()->where('action', 'roles.updated')->firstOrFail();
+        $this->assertSame(['knowledge.manage', 'media.manage'], $event->previous_values['permissions']);
+        $this->assertSame(['knowledge.manage'], $event->new_values['permissions']);
+        $this->assertSame($admin->id, $event->actor_id);
+
+        $this->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $staff->id, 'grant' => 1,
+        ])->assertRedirect();
+        $count = \App\Models\AuditEvent::query()->where('action', 'roles.assigned')->count();
+        $this->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $staff->id, 'grant' => 1,
+        ])->assertRedirect();
+        $this->assertSame($count, \App\Models\AuditEvent::query()
+            ->where('action', 'roles.assigned')->count());
+
+        $staff->forceFill(['status' => 'suspended'])->save();
+        $this->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $staff->id, 'grant' => 0,
+        ])->assertRedirect();
+        $this->assertFalse($staff->fresh()->hasPermission('knowledge.manage'));
+        $this->assertDatabaseHas('audit_events', [
+            'action' => 'roles.revoked', 'actor_id' => $admin->id, 'subject_id' => $staff->id,
+        ]);
+    }
+
+    public function test_reserved_roles_and_admin_assignment_are_rejected(): void
+    {
+        $admin = $this->user('admin', 'role-owner@edumia.test');
+        $this->actingAs($admin)->post('/admin/roles', [
+            'name' => 'Superuser', 'slug' => 'admin', 'permissions' => ['media.manage'],
+        ])->assertSessionHasErrors('slug');
+        $this->assertDatabaseCount('roles', 0);
+
+        $this->post('/admin/roles', [
+            'name' => 'Media only', 'slug' => 'media-only',
+            'permissions' => ['media.manage'],
+        ])->assertRedirect();
+        $role = Role::query()->firstOrFail();
+        $this->post('/admin/roles/'.$role->id.'/members', [
+            'user_id' => $admin->id, 'grant' => 1,
+        ])->assertStatus(422);
+        $this->assertDatabaseCount('role_user', 0);
+    }
+
+    public function test_role_directory_shows_matrix_member_lookup_and_governance_history(): void
+    {
+        $admin = $this->user('admin', 'staff-operator@edumia.test');
+        $staff = $this->user('student', 'eligible-learner@edumia.test');
+        $this->actingAs($admin)->post('/admin/roles', [
+            'name' => 'Reviewer', 'slug' => 'reviewer',
+            'permissions' => ['knowledge.manage'],
+        ])->assertRedirect();
+
+        $this->get('/admin/roles?member_q=eligible-learner')->assertOk()
+            ->assertSee('Permission matrix')
+            ->assertSee('Role governance history')
+            ->assertSee('eligible-learner@edumia.test')
+            ->assertSee('id="role-eligible-members"', false)
+            ->assertSee('value="'.$staff->id.'"', false)
+            ->assertSee('Granted')
+            ->assertSee('Staff roles');
+        $this->actingAs($staff)->get('/admin/roles?member_q=eligible-learner')
+            ->assertForbidden();
+    }
+
 }

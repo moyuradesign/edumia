@@ -103,4 +103,64 @@ final class GeneralSettingsTest extends TestCase
             ->assertSee('Save general settings');
     }
 
+    public function test_settings_normalization_audit_history_and_invalid_region_are_enforced(): void
+    {
+        $admin = $this->account('admin', 'settings-operator@edumia.test');
+
+        $payload = [
+            'site_name' => '  Global Edumia Campus  ',
+            'support_email' => '  help@example.test  ',
+            'default_locale' => 'en',
+            'site_timezone' => ' Asia/Phnom_Penh ',
+            'allow_registration' => '0',
+            'homepage_notice' => '  New learning courses  ',
+        ];
+        $this->actingAs($admin)->put('/admin/settings/general', $payload)
+            ->assertRedirect(route('admin.settings.edit'));
+
+        $this->assertDatabaseHas('settings', ['key' => 'site_name', 'value' => 'Global Edumia Campus']);
+        $this->assertDatabaseHas('settings', ['key' => 'support_email', 'value' => 'help@example.test']);
+        $this->assertDatabaseHas('settings', ['key' => 'site_timezone', 'value' => 'Asia/Phnom_Penh']);
+        $this->assertDatabaseHas('settings', ['key' => 'allow_registration', 'value' => '0']);
+        $this->get('/admin/settings/general')->assertOk()
+            ->assertSee('Settings change history')
+            ->assertSee('settings-site-name')
+            ->assertSee('name="allow_registration" value="0"', false)
+            ->assertSee('Global Edumia Campus')
+            ->assertSee('help@example.test');
+
+        $count = \App\Models\AuditEvent::query()->where('action', 'settings.updated')->count();
+        $this->put('/admin/settings/general', $payload)->assertRedirect();
+        $this->assertSame($count, \App\Models\AuditEvent::query()
+            ->where('action', 'settings.updated')->count(), 'No audit event for a no-op save.');
+
+        $this->put('/admin/settings/general', [
+            'site_name' => 'Invalid defaults',
+            'default_locale' => 'unknown_language',
+            'site_timezone' => 'Invalid/Mars',
+            'support_email' => 'bad@',
+            'allow_registration' => '1',
+        ])->assertSessionHasErrors(['default_locale', 'site_timezone', 'support_email']);
+        $this->assertDatabaseHas('settings', ['key' => 'site_name', 'value' => 'Global Edumia Campus']);
+    }
+
+    public function test_only_administrator_can_read_settings_audit_history(): void
+    {
+        $admin = $this->account('admin', 'settings-admin@edumia.test');
+        $student = $this->account('student', 'settings-reader@edumia.test');
+        $this->actingAs($admin)->put('/admin/settings/general', [
+            'site_name' => 'Edumia Audit Center',
+            'allow_registration' => '1',
+        ])->assertRedirect();
+
+        $this->get('/admin/settings/general?history_page=1')->assertOk()
+            ->assertSee('Settings change history')
+            ->assertSee('settings-admin');
+
+        $this->actingAs($student)->get('/admin/settings/general?history_page=1')
+            ->assertForbidden();
+        $this->put('/admin/settings/general', ['site_name' => 'Escalated'])
+            ->assertForbidden();
+    }
+
 }
