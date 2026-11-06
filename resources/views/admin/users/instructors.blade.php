@@ -75,9 +75,12 @@
                                       action="{{ route('admin.instructors.status', $teacher) }}"
                                       data-confirm="Confirm changing teaching access for {{ $teacher->name }}?">
                                     @csrf @method('PATCH')
-                                    <label class="sr-only" for="faculty-access-reason-{{ $teacher->id }}">Reason for changing {{ $teacher->name }} access</label>
-                                    <textarea id="faculty-access-reason-{{ $teacher->id }}" name="reason" rows="2"
-                                              required minlength="10" maxlength="1000" placeholder="Required reason (10–1000 characters)"></textarea>
+                                    <div class="admin-instructor-decision-fields">
+                                        <label for="faculty-access-reason-{{ $teacher->id }}">Reason for access change
+                                            <textarea id="faculty-access-reason-{{ $teacher->id }}" name="reason" rows="2"
+                                                      required minlength="10" maxlength="1000" placeholder="Required reason (10–1000 characters)"></textarea>
+                                        </label>
+                                    </div>
                                     <input type="hidden" name="status" value="{{ $teacher->status === 'active' ? 'suspended' : 'active' }}">
                                     <button class="admin-action-secondary" type="submit">{{ $teacher->status === 'active' ? 'Suspend access' : 'Restore access' }}</button>
                                 </form>

@@ -21,6 +21,7 @@ final class InstructorManagementService
     {
         abort_unless($actor->isAdmin(), 403);
         abort_unless(in_array($status, ['active', 'suspended'], true), 422);
+        $reason = $this->reviewReason($reason);
 
         DB::transaction(function () use ($actor, $instructor, $status, $reason): void {
             $locked = User::query()->lockForUpdate()->findOrFail($instructor->getKey());
@@ -49,6 +50,7 @@ final class InstructorManagementService
     public function reassign(User $actor, User $from, Course $course, User $to, string $reason): void
     {
         abort_unless($actor->isAdmin(), 403);
+        $reason = $this->reviewReason($reason);
 
         DB::transaction(function () use ($actor, $from, $course, $to, $reason): void {
             // Lock course first, then instructor accounts in a stable order.
@@ -96,5 +98,17 @@ final class InstructorManagementService
                 ],
             ]);
         }, 3);
+    }
+
+    private function reviewReason(string $reason): string
+    {
+        $normalized = trim($reason);
+        if (mb_strlen($normalized) < 10 || mb_strlen($normalized) > 1000) {
+            throw ValidationException::withMessages([
+                'reason' => 'Provide a meaningful reason between 10 and 1000 characters.',
+            ]);
+        }
+
+        return $normalized;
     }
 }

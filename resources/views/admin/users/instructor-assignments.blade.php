@@ -38,17 +38,21 @@
                                           action="{{ route('admin.instructors.assignments.reassign', [$instructor, $course]) }}"
                                           data-confirm="Transfer ownership of {{ $course->title }}? This is audited.">
                                         @csrf
-                                        <label for="assignment-target-{{ $course->id }}">Assign to active instructor</label>
-                                        <select id="assignment-target-{{ $course->id }}" name="new_instructor_id" required>
-                                            <option value="">Select instructor</option>
-                                            @foreach($targets as $target)
-                                                <option value="{{ $target->id }}">{{ $target->name }} ({{ $target->email }})</option>
-                                            @endforeach
-                                        </select>
-                                        <label class="sr-only" for="assignment-reason-{{ $course->id }}">Reason for reassignment</label>
-                                        <textarea id="assignment-reason-{{ $course->id }}" name="reason"
-                                                  required minlength="10" maxlength="1000" rows="2"
-                                                  placeholder="Required transfer reason (10–1000 characters)"></textarea>
+                                        <div class="admin-instructor-decision-fields">
+                                            <label for="assignment-target-{{ $course->id }}">Assign to active instructor
+                                                <select id="assignment-target-{{ $course->id }}" name="new_instructor_id" required>
+                                                    <option value="">Select instructor</option>
+                                                    @foreach($targets as $target)
+                                                        <option value="{{ $target->id }}">{{ $target->name }} ({{ $target->email }})</option>
+                                                    @endforeach
+                                                </select>
+                                            </label>
+                                            <label for="assignment-reason-{{ $course->id }}">Reason for reassignment
+                                                <textarea id="assignment-reason-{{ $course->id }}" name="reason"
+                                                          required minlength="10" maxlength="1000" rows="2"
+                                                          placeholder="Required transfer reason (10–1000 characters)"></textarea>
+                                            </label>
+                                        </div>
                                         <button class="admin-action-primary" type="submit">Transfer assignment</button>
                                         <small>Transfer is blocked if an order exists, even when other criteria are satisfied.</small>
                                     </form>

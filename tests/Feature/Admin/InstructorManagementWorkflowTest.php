@@ -113,6 +113,9 @@ final class InstructorManagementWorkflowTest extends TestCase
         $this->patch('/admin/instructors/'.$teacher->id.'/status', [
             'status' => 'suspended', 'reason' => 'A duplicate status decision.',
         ])->assertSessionHasErrors('status');
+        $this->patch('/admin/instructors/'.$teacher->id.'/status', [
+            'status' => 'active', 'reason' => str_repeat(' ', 12),
+        ])->assertSessionHasErrors('reason');
         $this->assertSame(1, AuditEvent::where('action', 'instructors.status_changed')->count());
 
         $this->patch('/admin/instructors/'.$teacher->id.'/status', [
@@ -199,6 +202,10 @@ final class InstructorManagementWorkflowTest extends TestCase
             'new_instructor_id' => $source->id,
             'reason' => 'Cannot assign a teacher to themselves.',
         ])->assertSessionHasErrors('new_instructor_id');
+        $this->post('/admin/instructors/'.$source->id.'/assignments/'.$regular->id, [
+            'new_instructor_id' => $target->id,
+            'reason' => str_repeat(' ', 12),
+        ])->assertSessionHasErrors('reason');
         $this->post('/admin/instructors/'.$target->id.'/assignments/'.$regular->id, [
             'new_instructor_id' => $target->id,
             'reason' => 'Must not change courses from other instructors.',
