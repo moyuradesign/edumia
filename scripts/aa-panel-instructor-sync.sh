@@ -13,8 +13,11 @@ WEB_USER='www'
 SOURCE='/root/edumia-github'
 BACKUPS='/root/edumia-instructor-sync-backups'
 BASE_SHA='9cbd579442bd902a6d6e45adba92b94af628db78'
-EXISTING='app/Http/Controllers/Admin/Users/InstructorApplicationController.php app/Services/Identity/InstructorApplicationService.php resources/views/admin/users/instructor-applications.blade.php resources/views/admin/users/instructors.blade.php routes/admin.php'
-ADDED='app/Services/Identity/InstructorManagementService.php resources/views/admin/users/instructor-assignments.blade.php'
+# The live site predates the instructor-directory view; it may be absent.
+# Classify that view as new so it is only created when missing, and removed
+# on rollback. Never overwrite an existing unknown version.
+EXISTING='app/Http/Controllers/Admin/Users/InstructorApplicationController.php app/Services/Identity/InstructorApplicationService.php resources/views/admin/users/instructor-applications.blade.php routes/admin.php'
+ADDED='resources/views/admin/users/instructors.blade.php app/Services/Identity/InstructorManagementService.php resources/views/admin/users/instructor-assignments.blade.php'
 FILES="$EXISTING $ADDED"
 MODE=''
 SHA=''
@@ -92,11 +95,18 @@ verify_release_view_cache() {
     )
 }
 verify_release_view_cache
+# Check every required original before stopping, to report all layout gaps.
+missing=0
 for relative in $EXISTING; do
-    [ -f "$APP/$relative" ] && [ ! -L "$APP/$relative" ] || {
-        echo "Missing or symlinked live file: $relative" >&2; exit 1;
-    }
+    if [ ! -f "$APP/$relative" ] || [ -L "$APP/$relative" ]; then
+        echo "BLOCKED: Required live file missing or symlinked: $relative" >&2
+        missing=1
+    fi
 done
+[ "$missing" -eq 0 ] || {
+    echo 'No files changed. Review the live release layout before applying.' >&2
+    exit 1
+}
 
 clean_up() {
     if [ -n "$STAGE" ] && [ -d "$STAGE" ]; then
@@ -128,7 +138,7 @@ validate_archive() {
     actual="$(tar -tzf "$archive" | LC_ALL=C sort)"
     expected="$(printf '%s\n' $EXISTING | LC_ALL=C sort)"
     [ "$actual" = "$expected" ] || {
-        echo 'Backup contents do not match the two approved source files.' >&2; return 1;
+        echo 'Backup contents do not match the four protected original files.' >&2; return 1;
     }
 }
 
@@ -228,7 +238,7 @@ for relative in $ADDED; do
     fi
 done
 
-echo '========== EDUMIA GITHUB CLI COURSE SYNC =========='
+echo '========== EDUMIA GITHUB CLI INSTRUCTOR SYNC =========='
 echo "Mode:             $MODE"
 echo "Repository:       $REPOSITORY"
 echo "Pinned commit:    $SHA"

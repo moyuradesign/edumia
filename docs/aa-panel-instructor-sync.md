@@ -31,8 +31,8 @@ bash "$SOURCE/scripts/aa-panel-instructor-sync.sh" --check --sha "$SHA"
 
 The sync rejects live files differing from the approved pre-upgrade baseline.
 It validates effective release-local Blade cache permissions as the PHP-FPM
-user, then creates a private backup of five original files and records which
-of the two new files were actually created. It updates nothing when checking.
+user, then creates a private backup of four original files and records which
+of the three new files were actually created. It updates nothing when checking.
 Apply clears and rebuilds views as `www`, not root.
 
 ## Rollback
@@ -44,7 +44,7 @@ bash /root/edumia-github/scripts/aa-panel-instructor-sync.sh \
   --rollback /root/edumia-instructor-sync-backups/EXACT_BACKUP_NAME
 ~~~
 
-Rollback restores only the five backed-up files and removes only files marked
+Rollback restores only the four backed-up files and removes only files marked
 created by that apply. A failed apply also attempts to restore source files.
 It never touches database tables, `.env`, customer payments, accounts,
 shared storage, uploaded media, or the active release symlink.
@@ -70,3 +70,20 @@ and again after rollback, so new instructor assignment and status endpoints
 are not hidden by a previous release's cached route table. It also checks
 that the new assignment route is visible before reporting deployment success.
 The read-only `--check` mode never clears routes or Blade caches.
+
+## Existing production directory reconciliation (2026-11-06)
+
+The installed release can lack `resources/views/admin/users/instructors.blade.php`
+even though that template exists at the approved GitHub baseline. The live
+`--check` reported this path missing. The synchronizer now explicitly treats
+**only this instructor-directory template** as a potentially created file:
+if missing, the upgrade creates it; if already identical to the pinned version,
+it leaves it unchanged; if a different live version exists, it **blocks** rather
+than overwriting it. The protected backup still includes the four required
+original files, and the `created.txt` rollback manifest records the directory
+template alongside the two new instructor features, removing only files the
+upgrade actually created.
+
+If another required file is missing or differs from the approved baseline,
+`--check` stops without writing to the production application. Do not copy
+unrelated project files to bypass that guard.
