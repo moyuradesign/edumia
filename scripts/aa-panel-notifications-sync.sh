@@ -192,7 +192,17 @@ STEP='installing approved PHP and Blade source'
 for item in $FILES; do
  if [[ -f "$APP/$item" ]] && cmp -s "$APP/$item" "$STAGE/new/$item"; then continue; fi
  dir="$(dirname "$APP/$item")"
- mkdir -p -- "$dir"
+ # umask 077 protects backups, but PHP-FPM must be able to traverse each
+ # newly created application directory. Do not chmod existing directories.
+ current="$APP"
+ for part in $(dirname "$item" | tr '/' ' '); do
+  current="$current/$part"
+  if [[ ! -d "$current" ]]; then
+   mkdir -- "$current"
+   chmod 0755 "$current"
+   chown "$WEB_USER:$WEB_USER" "$current"
+  fi
+ done
  tmp="$(mktemp "$dir/.edumia-notifications.XXXXXXXX")"
  cp "$STAGE/new/$item" "$tmp"
  if [[ -f "$APP/$item" ]]; then chown --reference="$APP/$item" "$tmp";else chown "$WEB_USER:$WEB_USER" "$tmp";fi
