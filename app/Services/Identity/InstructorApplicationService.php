@@ -60,6 +60,7 @@ final class InstructorApplicationService
             }
 
             $applicant = User::query()->lockForUpdate()->findOrFail($application->user_id);
+            $previousRole = $applicant->role;
             if ($decision === 'approved') {
                 if (! $applicant->isActive() || ! in_array($applicant->role, ['student', 'instructor'], true)) {
                     throw ValidationException::withMessages([
@@ -86,8 +87,13 @@ final class InstructorApplicationService
                 'subject_type' => Application::class,
                 'subject_id' => $application->getKey(),
                 'action' => 'instructor_application.reviewed',
-                'previous_values' => ['status' => 'pending'],
-                'new_values' => ['status' => $decision],
+                'previous_values' => ['status' => 'pending', 'applicant_role' => $previousRole],
+                'new_values' => [
+                    'status' => $decision,
+                    'applicant_role' => $applicant->role,
+                    'reviewed_by' => $administrator->getKey(),
+                    'note_recorded' => $note !== null && trim($note) !== '',
+                ],
             ]);
         }, 3);
     }

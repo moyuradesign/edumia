@@ -6,7 +6,7 @@
         <div>
             <span class="admin-eyebrow">PEOPLE & ACCESS</span>
             <h1 id="faculty-heading">Instructor directory</h1>
-            <p>Find approved teaching accounts and review their real course activity.</p>
+            <p>Manage active teaching accounts, review course assignments, and record accountable access decisions.</p>
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-secondary" href="{{ route('admin.instructor-applications.index', ['status' => 'pending']) }}">Pending applications</a>
@@ -21,7 +21,7 @@
     <section class="admin-widget" aria-labelledby="faculty-list-heading">
         <div class="admin-widget-heading">
             <div><span class="admin-widget-kicker">TEACHING DIRECTORY</span>
-                <h2 id="faculty-list-heading">Instructor accounts</h2>
+                <h2 id="faculty-list-heading">Instructor accounts and assignments</h2>
                 <p>Showing {{ $instructors->firstItem() ?? 0 }}–{{ $instructors->lastItem() ?? 0 }} of {{ number_format($instructors->total()) }} matching instructors.</p>
             </div>
         </div>
@@ -36,12 +36,28 @@
                     <option value="suspended" @selected($status === 'suspended')>Suspended</option>
                 </select>
             </div>
+            <div><label class="sr-only" for="faculty-activity">Course assignments</label>
+                <select id="faculty-activity" name="activity">
+                    <option value="all" @selected($activity === 'all')>All instructors</option>
+                    <option value="with_courses" @selected($activity === 'with_courses')>Assigned courses</option>
+                    <option value="without_courses" @selected($activity === 'without_courses')>No courses</option>
+                </select>
+            </div>
+            <div><label class="sr-only" for="faculty-sort">Sort instructors</label>
+                <select id="faculty-sort" name="sort">
+                    <option value="name" @selected($sort === 'name')>Name A–Z</option>
+                    <option value="newest" @selected($sort === 'newest')>Newest accounts</option>
+                    <option value="most_courses" @selected($sort === 'most_courses')>Most courses</option>
+                </select>
+            </div>
             <button class="admin-action-primary" type="submit">Filter instructors</button>
-            @if($search !== '' || $status !== 'all')<a class="admin-action-secondary" href="{{ route('admin.instructors.index') }}">Clear</a>@endif
+            @if($search !== '' || $status !== 'all' || $activity !== 'all' || $sort !== 'name')
+                <a class="admin-action-secondary" href="{{ route('admin.instructors.index') }}">Clear</a>
+            @endif
         </form>
         <div class="table-scroll">
             <table class="admin-table">
-                <thead><tr><th scope="col">Instructor</th><th scope="col">Status</th><th scope="col">Courses</th><th scope="col">Published</th><th scope="col">Actions</th></tr></thead>
+                <thead><tr><th scope="col">Instructor</th><th scope="col">Status</th><th scope="col">Courses</th><th scope="col">Published</th><th scope="col">Pending</th><th scope="col">Assignments</th><th scope="col">Account access</th></tr></thead>
                 <tbody>
                     @forelse($instructors as $teacher)
                         <tr>
@@ -49,15 +65,39 @@
                             <td><span class="admin-status admin-status--{{ $teacher->status === 'active' ? 'success' : 'neutral' }}">{{ ucfirst($teacher->status) }}</span></td>
                             <td>{{ number_format($teacher->courses_count) }}</td>
                             <td>{{ number_format($teacher->published_courses_count) }}</td>
-                            <td><a class="admin-table-action" href="{{ route('admin.courses.index', ['instructor' => $teacher->id]) }}">View courses</a></td>
+                            <td>{{ number_format($teacher->pending_courses_count) }}</td>
+                            <td>
+                                <a class="admin-table-action" href="{{ route('admin.instructors.assignments', $teacher) }}">Manage assignments</a>
+                                <a class="admin-table-action admin-table-action--quiet" href="{{ route('admin.courses.index', ['instructor' => $teacher->id]) }}">View courses</a>
+                            </td>
+                            <td>
+                                <form class="admin-instructor-decision" method="post"
+                                      action="{{ route('admin.instructors.status', $teacher) }}"
+                                      data-confirm="Confirm changing teaching access for {{ $teacher->name }}?">
+                                    @csrf @method('PATCH')
+                                    <label class="sr-only" for="faculty-access-reason-{{ $teacher->id }}">Reason for changing {{ $teacher->name }} access</label>
+                                    <textarea id="faculty-access-reason-{{ $teacher->id }}" name="reason" rows="2"
+                                              required minlength="10" maxlength="1000" placeholder="Required reason (10–1000 characters)"></textarea>
+                                    <input type="hidden" name="status" value="{{ $teacher->status === 'active' ? 'suspended' : 'active' }}">
+                                    <button class="admin-action-secondary" type="submit">{{ $teacher->status === 'active' ? 'Suspend access' : 'Restore access' }}</button>
+                                </form>
+                                @if($recentStatusChanges->has($teacher->id))
+                                    @php($change = $recentStatusChanges->get($teacher->id))
+                                    <small>Last changed by {{ $change->actor?->name ?? 'Former administrator' }}
+                                        <time datetime="{{ $change->created_at?->toIso8601String() }}">{{ $change->created_at?->format('M j, Y') }}</time>
+                                    </small>
+                                    <small>{{ $change->new_values['reason'] ?? '' }}</small>
+                                @endif
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5"><div class="admin-empty"><strong>No matching instructors</strong><p>Adjust your search or filters.</p></div></td></tr>
+                        <tr><td colspan="7"><div class="admin-empty"><strong>No matching instructors</strong><p>Adjust your search or filters.</p></div></td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         <div class="admin-course-pagination">{{ $instructors->onEachSide(1)->links() }}</div>
+        <p class="admin-widget-footnote">Status changes require a reason, are audited, and never change administrator privileges. Course ownership moves require separate eligibility checks.</p>
     </section>
 </section>
 @endsection

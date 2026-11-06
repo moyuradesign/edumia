@@ -5,7 +5,7 @@
     <div class="admin-welcome">
         <div><span class="admin-eyebrow">PEOPLE & ACCESS</span>
             <h1 id="instructor-heading">Instructor management</h1>
-            <p>Review teaching applications and grant instructor access through the existing approval workflow.</p>
+            <p>Review teaching applications, filter by reviewer, and keep an auditable record of every approval or rejection.</p>
         </div>
         <div class="admin-welcome-actions">
             <a class="admin-action-primary" href="{{ route('admin.instructors.index') }}">Instructor directory</a>
@@ -44,8 +44,28 @@
                     <option value="rejected" @selected($status === 'rejected')>Rejected</option>
                 </select>
             </div>
+            <div>
+                <label class="sr-only" for="instructor-reviewer">Filter by reviewer</label>
+                <select id="instructor-reviewer" name="reviewer">
+                    <option value="">All reviewers</option>
+                    @foreach($reviewers as $staff)
+                        <option value="{{ $staff->id }}" @selected($reviewer === $staff->id)>{{ $staff->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="sr-only" for="instructor-sort">Sort applications</label>
+                <select id="instructor-sort" name="sort">
+                    <option value="queue" @selected($sort === 'queue')>Pending first</option>
+                    <option value="newest" @selected($sort === 'newest')>Newest submitted</option>
+                    <option value="oldest" @selected($sort === 'oldest')>Oldest submitted</option>
+                    <option value="reviewed" @selected($sort === 'reviewed')>Recently reviewed</option>
+                </select>
+            </div>
             <button class="admin-action-primary" type="submit">Apply filters</button>
-            @if($search !== '' || $status !== 'all')<a href="{{ route('admin.instructor-applications.index') }}" class="admin-action-secondary">Clear</a>@endif
+            @if($search !== '' || $status !== 'all' || $reviewer !== null || $sort !== 'queue')
+                <a href="{{ route('admin.instructor-applications.index') }}" class="admin-action-secondary">Clear</a>
+            @endif
         </form>
 
         <div class="admin-instructor-cards">
@@ -57,6 +77,9 @@
                             <div>
                                 <h3 id="instructor-application-{{ $application->id }}">{{ $application->applicant?->name ?? 'Deleted user' }}</h3>
                                 <p>{{ $application->applicant?->email ?? 'Account no longer available' }}</p>
+                                @if($application->status === 'pending' && $application->applicant?->status !== 'active')
+                                    <small class="admin-status admin-status--neutral">Applicant inactive — cannot approve</small>
+                                @endif
                             </div>
                         </div>
                         <span class="admin-status admin-status--{{ $application->status === 'approved' ? 'success' : 'neutral' }}">{{ ucfirst($application->status) }}</span>
@@ -65,6 +88,11 @@
                         <span><strong>Specialization</strong>{{ $application->details['specialization'] ?? 'Not specified' }}</span>
                         <span><strong>Submitted</strong><time datetime="{{ $application->created_at?->toDateString() }}">{{ $application->created_at?->format('M j, Y') ?? '—' }}</time></span>
                         <span><strong>Application</strong>#{{ $application->id }}</span>
+                        @if($application->reviewed_at)
+                            <span><strong>Decision recorded</strong>
+                                <time datetime="{{ $application->reviewed_at->toIso8601String() }}">{{ $application->reviewed_at->format('M j, Y H:i') }}</time>
+                            </span>
+                        @endif
                     </div>
 
                     <details class="admin-instructor-details" @if($application->status === 'pending') open @endif>
@@ -99,7 +127,7 @@
                         </form>
                     @else
                         <div class="admin-instructor-reviewed">
-                            Reviewed by {{ $application->reviewer?->name ?? 'Administrator' }}
+                            Reviewed by {{ $application->reviewer?->name ?? 'Former administrator' }} (reviewer #{{ $application->reviewed_by ?? 'unknown' }})
                             @if($application->reviewed_at) on <time datetime="{{ $application->reviewed_at->toDateString() }}">{{ $application->reviewed_at->format('M j, Y') }}</time>@endif
                             @if(!empty($application->details['review_note']))
                                 <p><strong>Review note:</strong> {{ $application->details['review_note'] }}</p>

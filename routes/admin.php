@@ -41,6 +41,9 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::post('/roles/{role}/members', [RoleController::class, 'assign'])->name('roles.members');
         Route::get('/instructor-applications', [InstructorApplicationController::class, 'index'])->name('instructor-applications.index');
         Route::get('/instructors', [InstructorApplicationController::class, 'faculty'])->name('instructors.index');
+        Route::get('/instructors/{user}/assignments', [InstructorApplicationController::class, 'assignments'])->name('instructors.assignments');
+        Route::patch('/instructors/{user}/status', [InstructorApplicationController::class, 'changeStatus'])->name('instructors.status');
+        Route::post('/instructors/{user}/assignments/{course}', [InstructorApplicationController::class, 'reassign'])->name('instructors.assignments.reassign');
         Route::patch('/instructor-applications/{application}', [InstructorApplicationController::class, 'review'])->name('instructor-applications.review');
         Route::get('/commerce/refund-reviews', [RefundRequestController::class, 'index'])->name('commerce.refunds.index');
         Route::patch('/commerce/refund-reviews/{refundRequest}', [RefundRequestController::class, 'update'])->name('commerce.refunds.update');
