@@ -10,6 +10,7 @@ use App\Models\NotificationSetting;
 use App\Models\User;
 use App\Notifications\OperationalNotice;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 final class NotificationService
@@ -54,9 +55,10 @@ final class NotificationService
         }
 
         $notice = new OperationalNotice($event, $headline, $summary, $path);
-        // Database notifications share the current DB transaction; rollback
-        // removes them if the triggering approval/ticket change fails.
-        if ($this->enabled($recipient, $event, 'database')) {
+        // Visible in-app messages share the business transaction. Opting
+        // out leaves no database notification behind.
+        $visible = $this->enabled($recipient, $event, 'database');
+        if ($visible) {
             $recipient->notify($notice);
         }
 
@@ -64,16 +66,13 @@ final class NotificationService
             return;
         }
 
-        // Explicitly create a database notification for the mail job even
-        // when the recipient disabled the visible in-app channel.
-        if ($notice->id === null) {
-            $recipient->notify($notice);
-            $recipient->notifications()->whereKey($notice->id)->delete();
-        }
+        // When in-app messages are off, queue a minimal event summary
+        // rather than creating (then deleting) a private inbox record.
         $userId = $recipient->getKey();
-        $notificationId = $notice->id;
-        $queue = static function () use ($userId, $notificationId): void {
-            SendOperationalMail::dispatch($userId, $notificationId)
+        $notificationId = $visible ? $notice->id : (string) Str::uuid();
+        $mailSnapshot = $visible ? null : $notice->toDatabase($recipient);
+        $queue = static function () use ($userId, $notificationId, $mailSnapshot): void {
+            SendOperationalMail::dispatch($userId, $notificationId, $mailSnapshot)
                 ->onQueue((string) config('notifications.queue_name', 'notifications'));
             AuditEvent::create([
                 'actor_id' => null, 'subject_type' => User::class,

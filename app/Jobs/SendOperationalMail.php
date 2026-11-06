@@ -26,6 +26,7 @@ final class SendOperationalMail implements ShouldQueue
     public function __construct(
         public readonly int $userId,
         public readonly string $notificationId,
+        public readonly ?array $snapshot = null,
     ) {}
 
     public function backoff(): array
@@ -45,10 +46,11 @@ final class SendOperationalMail implements ShouldQueue
         }
 
         $notice = $user->notifications()->whereKey($this->notificationId)->first();
-        if (! $notice) {
+        if (! $notice && $this->snapshot === null) {
             return;
         }
-        $event = data_get($notice->data, 'event');
+        $data = $notice?->data ?? $this->snapshot;
+        $event = data_get($data, 'event');
         if (! is_string($event) || ! array_key_exists($event, NotificationService::EVENTS)
             || ! $notifications->enabled($user, $event, 'mail')) {
             return;
@@ -63,7 +65,6 @@ final class SendOperationalMail implements ShouldQueue
             return;
         }
 
-        $data = $notice->data;
         $relative = (string) data_get($data, 'path', '/dashboard');
         if (! str_starts_with($relative, '/') || str_starts_with($relative, '//')
             || str_contains($relative, "\r") || str_contains($relative, "\n")) {
