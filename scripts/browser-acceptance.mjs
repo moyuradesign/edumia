@@ -113,6 +113,20 @@ async function install() {
     verify((await page.locator('#role-audit-title').isVisible()),
       'Created role did not expose governance audit history');
     console.log('EDUMIA_SETTINGS_ROLE_GOVERNANCE_UI=PASS');
+    // Provider remains disabled by default in the independent customer install.
+    await navigate(page, '/account/notifications/preferences');
+    verify(await page.getByRole('heading', { name: 'Notification preferences' }).isVisible(),
+      'Account notification preferences missing');
+    verify(await page.locator('input[name="preferences[account_security][database]"]').isDisabled(),
+      'Security in-app notifications must be mandatory');
+    await navigate(page, '/admin/notifications/delivery');
+    verify(await page.getByRole('heading', { name: 'Email delivery' }).isVisible(),
+      'Admin mail delivery readiness missing');
+    verify(await page.getByRole('button', { name: 'Send SMTP test to my account' }).isDisabled(),
+      'SMTP test must remain disabled until operator opt-in');
+    verify((await page.locator('body').innerText()).includes('Transactional email'),
+      'Mail readiness must expose separate transactional mail gate');
+    console.log('EDUMIA_NOTIFICATIONS_PROVIDER_GATE=PASS');
 
     // Inspect admin workspaces, including read-only release readiness, in the fresh customer copy.
     for (const module of adminModules) {
@@ -352,6 +366,8 @@ const adminModules = [
   { slug: 'media', url: '/admin/media', heading: 'Media library', container: '.admin-media-workspace' },
   { slug: 'settings', url: '/admin/settings/general', heading: 'General settings', container: '.admin-settings-workspace' },
   { slug: 'roles', url: '/admin/roles', heading: 'Roles & permissions', container: '.admin-roles-workspace' },
+  { slug: 'notifications', url: '/account/notifications', heading: 'Notifications', container: '.admin-settings-workspace' },
+  { slug: 'mail-delivery', url: '/admin/notifications/delivery', heading: 'Email delivery', container: '.admin-settings-workspace' },
   { slug: 'instructors', url: '/admin/instructor-applications', heading: 'Instructor management', container: '.admin-instructor-workspace' },
   { slug: 'readiness', url: '/admin/release-readiness', heading: 'Release readiness', container: '.admin-readiness-workspace' },
 ];
