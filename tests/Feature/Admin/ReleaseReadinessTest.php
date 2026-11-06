@@ -75,7 +75,7 @@ final class ReleaseReadinessTest extends TestCase
         $this->assertNotContains('PASS', $states);
         $this->assertContains('NOT VERIFIED', $states);
         $this->assertContains('INCOMPLETE', $states);
-        $this->assertCount(8, $service->localChecks());
+        $this->assertCount(9, $service->localChecks());
     }
 
     public function test_readiness_is_linked_from_admin_dashboard(): void

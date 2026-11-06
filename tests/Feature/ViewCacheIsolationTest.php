@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Services\System\ReleaseReadinessService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 final class ViewCacheIsolationTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_blade_cache_is_always_scoped_to_this_release(): void
     {
         $expected = base_path('bootstrap/cache/views');
