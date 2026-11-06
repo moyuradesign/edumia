@@ -214,4 +214,36 @@ final class OperationalNotificationTest extends TestCase
             json_encode($event->toArray(), JSON_THROW_ON_ERROR));
     }
 
+    public function test_mail_only_preference_queues_without_exposing_an_in_app_message(): void
+    {
+        Queue::fake();
+        Mail::fake();
+        $owner = $this->member('student', 'mail-only@edumia.test');
+        config()->set('mail.default', 'smtp');
+        config()->set('queue.default', 'database');
+        config()->set('notifications.provider_verified', true);
+        config()->set('notifications.transactional_mail_enabled', true);
+        $this->actingAs($owner)->put('/account/notifications/preferences', [
+            'preferences' => [
+                'support_reply' => ['database' => '0', 'mail' => '1'],
+                'support_status' => ['database' => '1', 'mail' => '0'],
+                'instructor_decision' => ['database' => '1', 'mail' => '0'],
+                'account_security' => ['database' => '1', 'mail' => '0'],
+            ],
+        ])->assertRedirect();
+
+        app(NotificationService::class)->deliver($owner, 'support_reply',
+            'Email-only ticket reply', 'Sign in to view the update.', '/support/tickets/4');
+
+        $this->assertDatabaseCount('notifications', 0);
+        Queue::assertPushed(SendOperationalMail::class, function (SendOperationalMail $job) use ($owner) {
+            $this->assertSame($owner->id, $job->userId);
+            $this->assertSame('support_reply', $job->snapshot['event']);
+            $job->handle(app(NotificationService::class));
+
+            return true;
+        });
+        Mail::assertSent(OperationalMail::class, 1);
+    }
+
 }
