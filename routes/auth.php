@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Account\NotificationController;
+use App\Http\Controllers\Admin\System\MailDeliveryController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -40,4 +41,8 @@ Route::middleware(['auth', 'active'])->group(function (): void {
         ->name('account.notifications.preferences.edit');
     Route::put('/account/notifications/preferences', [NotificationController::class, 'updatePreferences'])
         ->middleware('throttle:10,1')->name('account.notifications.preferences.update');
+    Route::get('/admin/notifications/delivery', [MailDeliveryController::class, 'index'])
+        ->middleware('role:admin')->name('admin.notifications.delivery');
+    Route::post('/admin/notifications/delivery/test', [MailDeliveryController::class, 'test'])
+        ->middleware(['role:admin', 'throttle:2,1'])->name('admin.notifications.delivery.test');
 });

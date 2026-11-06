@@ -73,7 +73,13 @@ final class NotificationService
         $userId = $recipient->getKey();
         $notificationId = $notice->id;
         $queue = static function () use ($userId, $notificationId): void {
-            SendOperationalMail::dispatch($userId, $notificationId)->onQueue('notifications');
+            SendOperationalMail::dispatch($userId, $notificationId)
+                ->onQueue((string) config('notifications.queue_name', 'notifications'));
+            AuditEvent::create([
+                'actor_id' => null, 'subject_type' => User::class,
+                'subject_id' => $userId, 'action' => 'notifications.mail_queued',
+                'new_values' => ['notification_id' => $notificationId],
+            ]);
         };
 
         if (DB::transactionLevel() > 0) {
@@ -89,6 +95,7 @@ final class NotificationService
         // Never read, log or display MAIL_PASSWORD in the web interface.
         return (bool) config('notifications.transactional_mail_enabled', false)
             && (bool) config('notifications.provider_verified', false)
+            && config('queue.default') === 'database'
             && config('mail.default') === 'smtp'
             && filled(config('mail.mailers.smtp.host'))
             && filled(config('mail.from.address'));
