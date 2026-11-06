@@ -117,7 +117,7 @@ async function install() {
     await navigate(page, '/account/notifications/preferences');
     verify(await page.getByRole('heading', { name: 'Notification preferences' }).isVisible(),
       'Account notification preferences missing');
-    verify(await page.locator('input[name="preferences[account_security][database]"]').isDisabled(),
+    verify(await page.locator('input[type="checkbox"][name="preferences[account_security][database]"]').isDisabled(),
       'Security in-app notifications must be mandatory');
     await navigate(page, '/admin/notifications/delivery');
     verify(await page.getByRole('heading', { name: 'Email delivery' }).isVisible(),
