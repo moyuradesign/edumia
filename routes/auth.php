@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -30,4 +31,13 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('/account/password', [PasswordController::class, 'update'])->middleware('throttle:5,1')->name('password.update');
+    Route::get('/account/notifications', [NotificationController::class, 'index'])->name('account.notifications.index');
+    Route::patch('/account/notifications/read-all', [NotificationController::class, 'readAll'])
+        ->middleware('throttle:20,1')->name('account.notifications.read-all');
+    Route::patch('/account/notifications/{notification}/read', [NotificationController::class, 'read'])
+        ->middleware('throttle:30,1')->name('account.notifications.read');
+    Route::get('/account/notifications/preferences', [NotificationController::class, 'preferences'])
+        ->name('account.notifications.preferences.edit');
+    Route::put('/account/notifications/preferences', [NotificationController::class, 'updatePreferences'])
+        ->middleware('throttle:10,1')->name('account.notifications.preferences.update');
 });

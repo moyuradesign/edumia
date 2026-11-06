@@ -17,6 +17,13 @@
             <kbd>/</kbd>
         </div>
         <div class="admin-topbar-actions">
+            <a class="admin-topbar-icon" href="{{ route('account.notifications.index') }}"
+               aria-label="Notifications" title="Notifications">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75"
+                     stroke-linejoin="round" stroke-linecap="round">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/>
+                </svg>
+            </a>
             <a class="admin-topbar-icon" href="{{ route('admin.tickets.index') }}" aria-label="Support tickets" title="Support tickets">
                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v13H8l-4 4V4Z"/><path d="M8 9h8M8 13h5"/></svg>
             </a>
@@ -32,6 +39,7 @@
                 <div class="admin-user-dropdown">
                     <p class="admin-user-email">{{ auth()->user()->email }}</p>
                     <a href="{{ route('account.preferences.edit') }}">Account preferences</a>
+                    <a href="{{ route('account.notifications.index') }}">Notifications</a>
                     <a href="{{ route('password.edit') }}">Password & security</a>
                     <a href="{{ route('home') }}">View website</a>
                     <form action="{{ route('logout') }}" method="post">
