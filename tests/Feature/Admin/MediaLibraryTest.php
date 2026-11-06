@@ -94,4 +94,57 @@ final class MediaLibraryTest extends TestCase
         $this->get('/admin/media?type[]=image&q[]=bad')->assertOk();
     }
 
+    public function test_media_description_preview_and_missing_description_filter_are_private(): void
+    {
+        Storage::fake('local');
+        $admin = $this->account('admin', 'alt-admin@edumia.test');
+        $student = $this->account('student', 'alt-student@edumia.test');
+        $path = 'edumia/media/private.png';
+        Storage::disk('local')->put($path, base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8HCnQAAAAASUVORK5CYII='
+        ));
+        $image = MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local', 'path' => $path,
+            'original_name' => 'private.png', 'mime_type' => 'image/png',
+            'size_bytes' => 68, 'visibility' => 'private',
+        ]);
+        $this->actingAs($admin)->get('/admin/media?description=missing')->assertOk()
+            ->assertSee('private.png')->assertSee('admin-media-description');
+        $this->get('/admin/media/'.$image->id.'/preview')->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Content-Type', 'image/png');
+        $this->put('/admin/media/'.$image->id, ['alt_text' => '  Private product cover  '])
+            ->assertRedirect(route('admin.media.index'));
+        $this->assertSame('Private product cover', $image->fresh()->alt_text);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $admin->id, 'subject_id' => $image->id,
+            'action' => 'media.description_updated',
+        ]);
+        $this->get('/admin/media?description=missing')->assertOk()->assertDontSee('private.png');
+        $this->put('/admin/media/'.$image->id, ['alt_text' => str_repeat('a', 256)])
+            ->assertSessionHasErrors('alt_text');
+
+        $this->actingAs($student)->get('/admin/media/'.$image->id.'/preview')->assertForbidden();
+        $this->put('/admin/media/'.$image->id, ['alt_text' => 'Unauthorized'])->assertForbidden();
+        $this->assertSame('Private product cover', $image->fresh()->alt_text);
+    }
+
+    public function test_media_preview_rejects_documents_and_missing_files(): void
+    {
+        $admin = $this->account('admin', 'preview-admin@edumia.test');
+        Storage::fake('local');
+        $pdf = MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local',
+            'path' => 'edumia/media/guide.pdf', 'original_name' => 'guide.pdf',
+            'mime_type' => 'application/pdf', 'size_bytes' => 100, 'visibility' => 'private',
+        ]);
+        $this->actingAs($admin)->get('/admin/media/'.$pdf->id.'/preview')->assertNotFound();
+        $missing = MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local',
+            'path' => 'edumia/media/gone.png', 'original_name' => 'gone.png',
+            'mime_type' => 'image/png', 'size_bytes' => 100, 'visibility' => 'private',
+        ]);
+        $this->get('/admin/media/'.$missing->id.'/preview')->assertNotFound();
+    }
+
 }

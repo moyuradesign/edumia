@@ -45,8 +45,15 @@
                         <option value="document" @selected($type === 'document')>PDF documents</option>
                     </select>
                 </div>
+                <div>
+                    <label class="sr-only" for="admin-media-description">Description coverage</label>
+                    <select id="admin-media-description" name="description">
+                        <option value="all" @selected($description === 'all')>All descriptions</option>
+                        <option value="missing" @selected($description === 'missing')>Missing description</option>
+                    </select>
+                </div>
                 <button class="admin-action-primary" type="submit">Apply filters</button>
-                @if($search !== '' || $type !== 'all')<a class="admin-action-secondary" href="{{ route('admin.media.index') }}">Clear</a>@endif
+                @if($search !== '' || $type !== 'all' || $description !== 'all')<a class="admin-action-secondary" href="{{ route('admin.media.index') }}">Clear</a>@endif
             </form>
 
             <div class="table-scroll"><table class="admin-table admin-media-table">
@@ -56,7 +63,12 @@
                     <tr>
                         <td>
                             <div class="admin-media-file">
-                                <span class="admin-media-file-icon" aria-hidden="true">{{ str_starts_with($item->mime_type, 'image/') ? '▧' : '▤' }}</span>
+                                @if(in_array($item->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true))
+                                    <img class="admin-media-thumbnail" src="{{ route('admin.media.preview', $item) }}"
+                                        alt="" loading="lazy" width="48" height="48">
+                                @else
+                                    <span class="admin-media-file-icon" aria-hidden="true">▤</span>
+                                @endif
                                 <div><strong>{{ $item->original_name }}</strong>
                                     @if($item->alt_text)<small>{{ $item->alt_text }}</small>@endif
                                     <small>Private file #{{ $item->id }}</small>
@@ -68,6 +80,16 @@
                         <td>{{ $item->uploader?->name ?? 'System' }}</td>
                         <td><div class="admin-media-actions">
                             <a class="admin-table-action admin-table-action--quiet" href="{{ route('admin.media.download', $item) }}">Download</a>
+                            <details class="admin-media-edit">
+                                <summary class="admin-table-action admin-table-action--quiet">Edit details</summary>
+                                <form method="post" action="{{ route('admin.media.update', $item) }}">
+                                    @csrf @method('PUT')
+                                    <label for="admin-media-alt-{{ $item->id }}">Description / alternative text</label>
+                                    <input id="admin-media-alt-{{ $item->id }}" name="alt_text" maxlength="255"
+                                        value="{{ $item->alt_text }}" placeholder="Describe this file">
+                                    <button class="admin-table-action" type="submit">Save details</button>
+                                </form>
+                            </details>
                             <form method="post" action="{{ route('admin.media.destroy', $item) }}"
                                   data-confirm="Permanently delete this file?">
                                 @csrf @method('DELETE')

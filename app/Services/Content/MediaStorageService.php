@@ -9,6 +9,7 @@ use App\Models\MediaFile;
 use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -52,6 +53,31 @@ final class MediaStorageService
             $disk->delete($path);
             throw $exception;
         }
+    }
+
+    public function updateDescription(User $actor, MediaFile $media, ?string $altText): void
+    {
+        abort_unless($actor->hasPermission('media.manage'), 403);
+
+        DB::transaction(function () use ($actor, $media, $altText): void {
+            $media = MediaFile::query()->lockForUpdate()->findOrFail($media->getKey());
+            $before = $media->alt_text;
+            $description = trim((string) $altText);
+            $after = $description === '' ? null : $description;
+            if ($before === $after) {
+                return;
+            }
+
+            $media->forceFill(['alt_text' => $after])->save();
+            AuditEvent::create([
+                'actor_id' => $actor->getKey(),
+                'subject_type' => MediaFile::class,
+                'subject_id' => $media->getKey(),
+                'action' => 'media.description_updated',
+                'previous_values' => ['alt_text' => $before],
+                'new_values' => ['alt_text' => $after],
+            ]);
+        }, 3);
     }
 
     public function delete(User $actor, MediaFile $media): void

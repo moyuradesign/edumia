@@ -156,4 +156,27 @@ final class AccountWorkspacesTest extends TestCase
             ->assertOk()->assertDontSee('Back to overview');
     }
 
+    public function test_account_preferences_show_own_activity_and_audit_name_changes(): void
+    {
+        $member = $this->member('student', 'account-member@edumia.test');
+        $this->actingAs($member)->get('/account/preferences')->assertOk()
+            ->assertSee('My enrollments')
+            ->assertSee('Support tickets')
+            ->assertSee('account-member@edumia.test')
+            ->assertSee('form="account-preferences-form"', false);
+        $this->put('/account/preferences', ['name' => '  Updated Learner  ', 'locale' => 'km'])
+            ->assertRedirect(route('account.preferences.edit'));
+        $this->assertSame('Updated Learner', $member->fresh()->name);
+        $this->assertSame('km', $member->fresh()->locale);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $member->id, 'action' => 'account.name_updated',
+        ]);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $member->id, 'action' => 'account.locale_updated',
+        ]);
+        $this->put('/account/preferences', ['name' => '    ', 'locale' => 'en'])
+            ->assertSessionHasErrors('name');
+        $this->assertSame('Updated Learner', $member->fresh()->name);
+    }
+
 }
