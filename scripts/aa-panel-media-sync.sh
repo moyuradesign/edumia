@@ -13,9 +13,12 @@ WEB_USER='www'
 SOURCE='/root/edumia-github'
 BACKUPS='/root/edumia-media-sync-backups'
 BASE_SHA='c9743af64b7410b61f8bff1eacfa3cad93fcd841'
-# Exact Git blob hashes from the 2026-11-06 read-only live reconciliation.
-# They permit ONLY known missing/altered instructor and routing source.
+# The installed instructor release has audited routing omissions. The
+# pre-media Media Controller and view also omit preview/metadata features.
+# Accept ONLY the exact hashes from the user's read-only aaPanel audit.
 APPROVED_LIVE_ROUTES='cf6c635c9e59620b4b45322fc9f93e574ba50f96'
+APPROVED_LIVE_MEDIA_CONTROLLER='9badae20a75dae9ef6e3c1022a9cee1bbbddfab9'
+APPROVED_LIVE_MEDIA_VIEW='45f83e9538358e62447eaf3f7164d6660a56be1d'
 # Approved six-file Media Library source scope.
 EXISTING='app/Http/Controllers/Admin/Content/MediaController.php app/Http/Controllers/Admin/Content/BlogController.php app/Services/Content/BlogPublishingService.php resources/views/admin/content/media/index.blade.php resources/views/admin/content/blog/form.blade.php routes/admin.php'
 ADDED=''
@@ -155,7 +158,7 @@ validate_archive() {
 refresh_views() {
     (
         cd "$APP"
-        # New instructor routes must not be hidden by a previous release's cache.
+        # New private media routes must not be hidden by a previous release's cache.
         # Do not run these commands as root.
         runuser -u "$WEB_USER" -- "$PHP" artisan route:clear
         runuser -u "$WEB_USER" -- "$PHP" artisan view:clear
@@ -249,7 +252,7 @@ git -C "$SOURCE" cat-file -e "$BASE_SHA^{commit}" || {
     echo 'Approved pre-upgrade baseline is missing.' >&2; exit 1;
 }
 git -C "$SOURCE" merge-base --is-ancestor "$BASE_SHA" "$SHA" || {
-    echo 'Pinned commit does not descend from approved instructor baseline.' >&2; exit 1;
+    echo 'Pinned commit does not descend from approved post-instructor baseline.' >&2; exit 1;
 }
 git -C "$SOURCE" merge-base --is-ancestor "$SHA" refs/remotes/origin/main || {
     echo 'Pinned commit is not an ancestor of origin/main.' >&2; exit 1;
@@ -314,8 +317,22 @@ for relative in $EXISTING; do
             drift=1
         fi
     elif [[ "$live_hash" != "$baseline_hash" && "$live_hash" != "$target_hash" ]]; then
-        echo "DRIFT: $relative: $live_hash"
-        drift=1
+        # Only these two missing-feature production variants were audited.
+        # No unknown edits are permitted. The full upgraded version from the
+        # pinned Git commit restores the omitted preview and edit features.
+        approved_hash=''
+        case "$relative" in
+            app/Http/Controllers/Admin/Content/MediaController.php)
+                approved_hash="$APPROVED_LIVE_MEDIA_CONTROLLER" ;;
+            resources/views/admin/content/media/index.blade.php)
+                approved_hash="$APPROVED_LIVE_MEDIA_VIEW" ;;
+        esac
+        if [[ -n "$approved_hash" && "$live_hash" == "$approved_hash" ]]; then
+            echo "AUDITED VARIANT:  $relative (known missing media features)"
+        else
+            echo "DRIFT: $relative: $live_hash"
+            drift=1
+        fi
     fi
 done
 echo "Route profile: $route_mode"
@@ -371,7 +388,7 @@ printf 'Source commit: %s\nApp: %s\n' "$SHA" "$APP" > "$BACKUP/source.txt"
 echo "Protected backup: $BACKUP"
 
 APPLY_STARTED=1
-STEP='installing instructor source files'
+STEP='installing approved media source files'
 for relative in $FILES; do
     if cmp -s "$STAGE/new/$relative" "$APP/$relative"; then
         continue

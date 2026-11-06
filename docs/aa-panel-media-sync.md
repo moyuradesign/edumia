@@ -45,3 +45,32 @@ changes and deleted file references with actor identity and timestamps.
 Media and audit listings use separate `page` and `audit_page` parameters,
 so reviewing history does not disturb the active media filters. No schema
 changes are required.
+
+## Audited live Media Library source reconciliation (2026-11-06)
+
+The first production precheck for Media Library revision
+`8d2f426a9e44b5bfc7ade862ba10d3adc79c48b5` safely stopped because two
+installed files differ from the approved post-instructor GitHub baseline.
+Their exact production blobs were retrieved by SHA from the Edumia GitHub
+repository and compared with both baseline and target content:
+
+- `app/Http/Controllers/Admin/Content/MediaController.php` —
+  Git blob `9badae20a75dae9ef6e3c1022a9cee1bbbddfab9`. Its only differences
+  from the baseline were removal of the description filter, authorized
+  private image preview method, and metadata-update method.
+- `resources/views/admin/content/media/index.blade.php` —
+  Git blob `45f83e9538358e62447eaf3f7164d6660a56be1d`. Its only differences
+  from the baseline were removal of description filtering, thumbnails and
+  authorized metadata-editing controls, with the associated Clear filter
+  condition adjusted.
+
+The guarded synchronizer explicitly accepts **only these exact two old
+production hashes** as additional pre-upgrade inputs. It still blocks
+unknown controller or view edits and all unexpected differences in the other
+four approved files. The new Media Library code restores only the intended
+removed functions, while the route reconciler preserves the separate
+production-specific admin redirect omission. All six original files are
+backed up for rollback before any source is replaced.
+
+Re-run `--check` using the new pinned commit and do not bypass a DRIFT
+error or deploy without both PHP and integrated QA passing for that commit.
