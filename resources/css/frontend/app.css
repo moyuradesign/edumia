@@ -2029,3 +2029,25 @@ body:has(.site-error-page) > main#content {
  border:1px solid var(--border); background:var(--surface-alt); }
 .blog-markdown blockquote { margin:18px 0; padding:5px 0 5px 18px; border-left:3px solid var(--accent); color:var(--muted); }
 .blog-markdown a { color:var(--accent); text-decoration:underline; }
+
+/* Edumia brand imagery: same crisp artwork at phone, tablet, and desktop widths. */
+.edumia-brand-lockup {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: clamp(132px, 16vw, 190px);
+  aspect-ratio: 1894 / 467;
+  max-width: 100%;
+}
+.edumia-brand-image { display: block; width: 100%; height: 100%; object-fit: contain; }
+.edumia-brand-image--dark { display: none; }
+html[data-theme='dark'] .edumia-brand-image--light { display: none; }
+html[data-theme='dark'] .edumia-brand-image--dark { display: block; }
+.premium-header .premium-brand { min-width: 0; }
+.premium-header .premium-brand .edumia-brand-lockup { width: clamp(132px, 16vw, 190px); }
+.premium-footer .premium-footer-logo .edumia-brand-lockup { width: min(188px, 100%); }
+.premium-footer .edumia-brand-image--light { display: none !important; }
+.premium-footer .edumia-brand-image--dark { display: block !important; }
+@media (max-width: 360px) {
+  .premium-header .premium-brand .edumia-brand-lockup { width: 130px; }
+}

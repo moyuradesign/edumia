@@ -69,10 +69,10 @@
 <aside class="admin-sidebar" id="panel-navigation" data-admin-sidebar aria-label="{{ $staffWorkspace ? 'Staff tools' : ($teaching ? 'Instructor' : 'Student') }} navigation">
     <div class="admin-sidebar-brand">
         <a class="admin-sidebar-logo" href="{{ route($homeRoute) }}" aria-label="{{ $siteName }} workspace">
-            <span class="admin-logo-mark" aria-hidden="true">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14 20 6l15 8-15 8L5 14Z"/><path d="M11 19v10c6 4 12 4 18 0V19"/><path d="M35 14v12"/></svg>
+            <span class="admin-brand-text">
+                @include('partials.brand-logo')
+                <small>{{ $staffWorkspace ? 'STAFF TOOLS' : ($teaching ? 'INSTRUCTOR STUDIO' : 'STUDENT ACCOUNT') }}</small>
             </span>
-            <span class="admin-brand-text"><strong>{{ $siteName }}</strong><small>{{ $staffWorkspace ? 'STAFF TOOLS' : ($teaching ? 'INSTRUCTOR STUDIO' : 'STUDENT ACCOUNT') }}</small></span>
         </a>
         <button type="button" class="admin-sidebar-close" data-admin-close aria-label="Close sidebar">
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 5 14 14M19 5 5 19"/></svg>

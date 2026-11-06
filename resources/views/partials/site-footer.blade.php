@@ -25,8 +25,7 @@
     <div class="container premium-footer-main">
         <div class="premium-footer-about">
             <a class="premium-footer-logo" href="{{ \App\Helpers\Localization::url($locale) }}" aria-label="{{ $siteName }} home">
-                <span class="premium-footer-logo-symbol" aria-hidden="true">✦</span>
-                <span>{{ $siteName }}<span class="brand-dot">.</span></span>
+                @include('partials.brand-logo')
             </a>
             <p>{{ \App\Helpers\Localization::label('about_copy', $locale) }}</p>
             @if($publicSettings['support_email'] !== '')

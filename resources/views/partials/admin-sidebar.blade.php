@@ -58,12 +58,10 @@
 <aside class="admin-sidebar" id="panel-navigation" data-admin-sidebar aria-label="Administration sidebar">
     <div class="admin-sidebar-brand">
         <a class="admin-sidebar-logo" href="{{ route('dashboard') }}" aria-label="{{ $siteName }} administration">
-            <span class="admin-logo-mark" aria-hidden="true">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 14 20 6l15 8-15 8L5 14Z"/><path d="M11 19v10c6 4 12 4 18 0V19"/><path d="M35 14v12"/>
-                </svg>
+            <span class="admin-brand-text">
+                @include('partials.brand-logo')
+                <small>ADMIN CONSOLE</small>
             </span>
-            <span class="admin-brand-text"><strong>{{ $siteName }}</strong><small>ADMIN CONSOLE</small></span>
         </a>
         <button type="button" class="admin-sidebar-close" data-admin-close aria-label="Close sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m5 5 14 14M19 5 5 19"/></svg>

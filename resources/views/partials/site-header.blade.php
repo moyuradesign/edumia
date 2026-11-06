@@ -11,14 +11,7 @@
 <header class="site-header premium-header" data-premium-header>
     <div class="container header-inner premium-header-layout">
         <a class="brand premium-brand" href="{{ \App\Helpers\Localization::url($locale) }}" aria-label="{{ $siteName }} home">
-            <span class="brand-mark premium-brand-symbol" aria-hidden="true">
-                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m5 15 15-8 15 8-15 8-15-8Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
-                    <path d="M10 19v10c7 5 13 5 20 0V19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M35 15v11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-                </svg>
-            </span>
-            <span class="premium-brand-name">{{ $siteName }}<span class="brand-dot">.</span></span>
+            @include('partials.brand-logo')
         </a>
 
         <form class="premium-header-search" action="{{ $courseLink }}" method="get" role="search">

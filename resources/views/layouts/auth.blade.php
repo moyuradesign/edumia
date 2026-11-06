@@ -8,6 +8,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @include('partials.favicons')
     <meta name="color-scheme" content="light dark">
     <meta name="description" content="{{ $siteName }} — Secure account access">
     <title>@yield('title') · {{ $siteName }}</title>
@@ -19,14 +20,7 @@
     <section class="auth-card" aria-labelledby="auth-heading">
         <div class="auth-identity">
             <a class="auth-logo" href="{{ route('home') }}" aria-label="{{ $siteName }} home">
-                <span class="auth-logo-icon" aria-hidden="true">
-                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="2" y="2" width="36" height="36" rx="12" fill="currentColor"/>
-                        <path d="M9 16.2 20 10l11 6.2-11 6.1L9 16.2Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M13 20v7.2c4.6 3.4 9.5 3.4 14 0V20" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-                <span class="auth-logo-name">{{ $siteName }}</span>
+                @include('partials.brand-logo')
             </a>
             <button class="theme-toggle auth-theme" type="button" aria-label="Toggle color theme" title="Toggle color theme">
                 <span class="theme-icon" aria-hidden="true">◐</span>

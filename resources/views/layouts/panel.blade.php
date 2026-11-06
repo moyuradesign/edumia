@@ -28,6 +28,7 @@
 @endphp
 <!doctype html>
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+@include('partials.favicons')
 <meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title','Dashboard') · {{ $siteName }}</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('edumia-theme')||'light'}catch(e){}</script>
 @vite(['resources/css/frontend/app.css', 'resources/css/admin/app.css', 'resources/js/frontend/app.js', 'resources/js/admin/app.js'])

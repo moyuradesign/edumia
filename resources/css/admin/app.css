@@ -1540,3 +1540,17 @@ progress {
 .account-profile-facts dt { color:var(--muted); font-size:12px; }
 .account-profile-facts dd { margin:0; font-size:12px; font-weight:760; color:var(--ink); overflow-wrap:anywhere; text-align:right; }
 @media(max-width:900px) { .account-preferences-grid { grid-template-columns:1fr; } }
+
+/* One logo system across authentication, admin, instructor and learner workspaces. */
+.auth-page .auth-logo .edumia-brand-lockup { width: clamp(145px, 21vw, 192px); }
+.admin-sidebar-logo { min-width: 0; }
+.admin-sidebar .admin-brand-text { gap: 4px; }
+.admin-sidebar .admin-brand-text .edumia-brand-lockup { width: 184px; max-width: 100%; }
+.admin-sidebar .edumia-brand-image--light { display: none !important; }
+.admin-sidebar .edumia-brand-image--dark { display: block !important; }
+@media (max-width: 1024px) {
+  .admin-sidebar .admin-brand-text .edumia-brand-lockup { width: 178px; }
+}
+@media (max-width: 380px) {
+  .auth-page .auth-logo .edumia-brand-lockup { width: 148px; }
+}
