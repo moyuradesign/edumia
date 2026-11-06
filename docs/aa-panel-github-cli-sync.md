@@ -74,3 +74,20 @@ Extend the script's explicit file allowlist only after feature-specific
 dependency, migration and rollback reviews. Do not blindly copy every
 file from Main into production, since Main can contain features that have
 not yet passed live upgrade acceptance.
+
+## Cache-hardening compatibility fix
+
+The aaPanel view-cache hardening installer verified the effective Blade cache
+path but did not necessarily copy `scripts/view-cache-preflight.php` into the
+active production release. Earlier Course Management sync versions refused to
+run based only on that missing diagnostic file, despite a healthy cache.
+
+This script now runs a **read-only inline Laravel boot and effective-config
+check as the `www` user**. It verifies the exact compiled-view directory,
+rejects symlinks and unreadable compiled views, and checks write permissions.
+It does **not** copy optional scripts into production, clear caches in
+`--check`, or change installed `.env`, media, or database.
+
+Keep the repository checkout current with `git pull --ff-only` before
+running the script. If the new check fails, investigate the actual runtime
+path or PHP-FPM permissions rather than bypassing the guard.

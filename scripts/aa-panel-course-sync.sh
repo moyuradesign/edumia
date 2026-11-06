@@ -55,13 +55,40 @@ id "$WEB_USER" >/dev/null || { echo 'PHP-FPM web user is missing.' >&2; exit 1; 
 [ -f "$APP/vendor/autoload.php" ] && [ -f "$APP/artisan" ] || {
     echo 'Not an installed Laravel application.' >&2; exit 1;
 }
-[ -f "$APP/config/view.php" ] && [ -f "$APP/scripts/view-cache-preflight.php" ] || {
-    echo 'Release-local Blade cache hardening must be installed first.' >&2; exit 1;
+# Verify the *effective* runtime configuration as PHP-FPM, not the presence
+# of any optional source diagnostic file. The prior guarded cache hardening
+# installs a working config and release-local view path but may omit scripts/.
+# This check is read-only and works with either source or cached configuration.
+verify_release_view_cache() {
+    (
+        cd "$APP"
+        runuser -u "$WEB_USER" -- "$PHP" -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $expected = base_path("bootstrap/cache/views");
+            $actual = config("view.compiled");
+            $fail = static function (string $message): void {
+                fwrite(STDERR, "EDUMIA_VIEW_CACHE=FAIL ".$message.PHP_EOL);
+                exit(1);
+            };
+            if (! is_string($actual) || $actual !== $expected) {
+                $fail("Compiled views are not configured for the active release.");
+            }
+            if (! is_dir($expected) || is_link($expected)
+                || realpath($expected) !== $expected || ! is_writable($expected)) {
+                $fail("Release-local compiled views must be a real, writable directory.");
+            }
+            foreach (glob($expected."/*.php") ?: [] as $file) {
+                if (! is_readable($file)) {
+                    $fail("Compiled Blade file cannot be read by PHP-FPM.");
+                }
+            }
+            echo "EDUMIA_VIEW_CACHE=PASS".PHP_EOL;
+        '
+    )
 }
-[ ! -L "$APP/bootstrap/cache/views" ] || { echo 'View cache must not be a symlink.' >&2; exit 1; }
-runuser -u "$WEB_USER" -- "$PHP" "$APP/scripts/view-cache-preflight.php" --root="$APP" >/dev/null || {
-    echo 'View cache permissions/preflight failed; no files changed.' >&2; exit 1;
-}
+verify_release_view_cache
 for relative in $FILES; do
     [ -f "$APP/$relative" ] && [ ! -L "$APP/$relative" ] || {
         echo "Missing or symlinked live file: $relative" >&2; exit 1;
@@ -102,7 +129,7 @@ refresh_views() {
         cd "$APP"
         runuser -u "$WEB_USER" -- "$PHP" artisan view:clear
         runuser -u "$WEB_USER" -- "$PHP" artisan view:cache
-        runuser -u "$WEB_USER" -- "$PHP" scripts/view-cache-preflight.php --root="$APP"
+        verify_release_view_cache
     )
 }
 
