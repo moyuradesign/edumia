@@ -57,7 +57,7 @@ final class NotificationController extends Controller
     {
         $data = $request->validate([
             'preferences' => ['required', 'array'],
-            'preferences.*' => ['array'],
+            'preferences.*' => ['array:database,mail'],
             'preferences.*.database' => ['sometimes', 'boolean'],
             'preferences.*.mail' => ['sometimes', 'boolean'],
         ]);

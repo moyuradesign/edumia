@@ -91,6 +91,9 @@ final class OperationalNotificationTest extends TestCase
         $this->put('/account/notifications/preferences', [
             'preferences' => ['admin_access' => ['database' => '1']],
         ])->assertSessionHasErrors('preferences');
+        $this->put('/account/notifications/preferences', [
+            'preferences' => ['support_reply' => ['database' => '1', 'webhook' => '1']],
+        ])->assertSessionHasErrors('preferences.support_reply');
     }
 
     public function test_instructor_decision_support_messages_and_password_change_generate_safe_alerts(): void

@@ -40,6 +40,7 @@
                     <p class="admin-user-email">{{ auth()->user()->email }}</p>
                     <a href="{{ route('account.preferences.edit') }}">Account preferences</a>
                     <a href="{{ route('account.notifications.index') }}">Notifications</a>
+                    <a href="{{ route('admin.notifications.delivery') }}">Email delivery status</a>
                     <a href="{{ route('password.edit') }}">Password & security</a>
                     <a href="{{ route('home') }}">View website</a>
                     <form action="{{ route('logout') }}" method="post">
