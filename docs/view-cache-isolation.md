@@ -42,3 +42,7 @@ GitHub code changes alone cannot correct a running PHP-FPM worker with a stale
 cached configuration. A separate, backup-backed aaPanel repair script checks
 the active Nginx document root and effective PHP-FPM access before making
 any production file changes. The operator should check its output first.
+
+## Customer package protections
+
+The build excludes generated compiled Blade and cached Laravel configuration PHP from both isolated QA installs and customer archives. Archive creation and independently received-archive checks reject these files, while retaining the tracked release-local `bootstrap/cache/views/.gitignore` directory marker.

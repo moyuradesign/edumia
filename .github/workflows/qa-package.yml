@@ -155,7 +155,9 @@ jobs:
           QA_ROOT="/tmp/edumia-customer-${GITHUB_RUN_ID}"
           mkdir -p "$QA_ROOT"
           tar -cf - --exclude='./.git' --exclude='./.env' --exclude='./node_modules' \
-            --exclude='./dist' --exclude='./qa-browser-evidence' --exclude='./.phpunit.cache' . \
+            --exclude='./dist' --exclude='./qa-browser-evidence' --exclude='./.phpunit.cache' \
+            --exclude='./bootstrap/cache/*.php' --exclude='./bootstrap/cache/views/*.php' \
+            --exclude='./storage/framework/views/*.php' . \
             | tar -xf - -C "$QA_ROOT"
           test ! -e "$QA_ROOT/.env"
           test ! -e "$QA_ROOT/storage/app/edumia-installed.lock"
@@ -300,6 +302,8 @@ jobs:
           test ! -f installer/authorize.txt
           rm -f .env
           find bootstrap/cache -maxdepth 1 -type f -name '*.php' -delete
+          find bootstrap/cache/views -maxdepth 1 -type f -name '*.php' -delete
+          find storage/framework/views -maxdepth 1 -type f -name '*.php' -delete
           find storage/logs -maxdepth 1 -type f -name '*.log' -delete
           printf 'EDUMIA QA SNAPSHOT\nSOURCE_SHA=%s\nSTATUS=DEVELOPMENT_ONLY\nNOT_A_CUSTOMER_RELEASE=YES\n' "${GITHUB_SHA}" > QA_BUILD.txt
           mkdir -p dist
@@ -312,6 +316,12 @@ jobs:
             phpunit.xml vite.config.js .env.example README.md QA_BUILD.txt
           tar -tzf dist/edumia-integrated-qa.tar.gz > /tmp/edumia-qa-archive-contents.txt
           grep -Fxq 'public/build/manifest.json' /tmp/edumia-qa-archive-contents.txt
+          grep -Fxq 'bootstrap/cache/views/.gitignore' /tmp/edumia-qa-archive-contents.txt
+          grep -Fxq 'config/view.php' /tmp/edumia-qa-archive-contents.txt
+          if grep -E '^(bootstrap/cache/[^/]+[.]php|bootstrap/cache/views/[^/]+[.]php|storage/framework/views/[^/]+[.]php)$' /tmp/edumia-qa-archive-contents.txt; then
+            echo 'FAIL: Archive contains generated Laravel caches'
+            exit 1
+          fi
           for required in \
             app/Models/Assignment.php \
             app/Models/SubmittedAssignment.php \
@@ -416,6 +426,10 @@ jobs:
           target="$RUNNER_TEMP/edumia-independent-customer"
           test -s "$archive"
           tar -tzf "$archive" > "$RUNNER_TEMP/archive-file-list.txt"
+          if grep -E '^(bootstrap/cache/[^/]+[.]php|bootstrap/cache/views/[^/]+[.]php|storage/framework/views/[^/]+[.]php)$' "$RUNNER_TEMP/archive-file-list.txt"; then
+            echo 'FAIL: Received archive contains generated Laravel caches'
+            exit 1
+          fi
           for required in public/index.php public/build/manifest.json artisan vendor/autoload.php \
             scripts/browser-acceptance.mjs QA_BUILD.txt; do
             grep -Fxq "$required" "$RUNNER_TEMP/archive-file-list.txt"
