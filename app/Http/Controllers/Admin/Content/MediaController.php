@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Content;
 
 use App\Http\Requests\Admin\StoreMediaRequest;
 use App\Models\MediaFile;
+use App\Models\AuditEvent;
 use App\Services\Content\MediaStorageService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -50,8 +51,20 @@ final class MediaController extends Controller
             $files->where('mime_type', 'application/pdf');
         }
 
+        $page = $files->paginate(20)->withQueryString();
+        $ids = $page->getCollection()->modelKeys();
+        // Render the existing audit trail with the current page, avoiding
+        // per-file queries and without exposing records in a public endpoint.
+        $lastChanges = $ids === [] ? collect() : AuditEvent::query()
+            ->with('actor')
+            ->where('subject_type', MediaFile::class)
+            ->whereIn('subject_id', $ids)
+            ->whereIn('action', ['media.uploaded', 'media.description_updated'])
+            ->latest('id')->get()->unique('subject_id')->keyBy('subject_id');
+
         return view('admin.content.media.index', [
-            'media' => $files->paginate(20)->withQueryString(),
+            'media' => $page,
+            'lastChanges' => $lastChanges,
             'search' => $search,
             'type' => $type,
             'description' => $description,
@@ -75,7 +88,8 @@ final class MediaController extends Controller
 
     public function download(MediaFile $media): StreamedResponse
     {
-        abort_unless($media->disk === 'local', 404);
+        abort_unless($media->disk === 'local' && $media->visibility === 'private'
+            && $this->isStoredMediaPath($media->path), 404);
         abort_unless(Storage::disk('local')->exists($media->path), 404);
 
         return Storage::disk('local')->download(
@@ -88,6 +102,7 @@ final class MediaController extends Controller
     {
         abort_unless(
             $media->disk === 'local' && $media->visibility === 'private'
+                && $this->isStoredMediaPath($media->path)
                 && in_array($media->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true),
             404
         );
@@ -118,5 +133,13 @@ final class MediaController extends Controller
         $storage->delete($request->user(), $media);
 
         return to_route('admin.media.index')->with('success', 'Media deleted.');
+    }
+
+    private function isStoredMediaPath(string $path): bool
+    {
+        return str_starts_with($path, 'edumia/media/')
+            && ! str_contains($path, '..')
+            && ! str_contains($path, '\\')
+            && ! str_contains($path, '//');
     }
 }

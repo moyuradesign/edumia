@@ -31,7 +31,10 @@ final class BlogPublishingService
             $available = MediaFile::query()->whereIn('id', $ids)->where('disk', 'local')
                 ->whereIn('mime_type', ['image/jpeg', 'image/png', 'image/webp'])->get();
             if ($available->count() !== count($ids) ||
-                $available->contains(fn (MediaFile $image) => ! Storage::disk('local')->exists($image->path))) {
+                $available->contains(fn (MediaFile $image) => $image->visibility !== 'private'
+                    || ! str_starts_with($image->path, 'edumia/media/')
+                    || str_contains($image->path, '..')
+                    || ! Storage::disk('local')->exists($image->path))) {
                 throw ValidationException::withMessages(['featured_media_id' => 'Select available image files from the Media Library.']);
             }
         }
@@ -59,7 +62,7 @@ final class BlogPublishingService
                 'subject_id' => $blog->getKey(),
                 'action' => $before === null ? 'blogs.created' : 'blogs.updated',
                 'previous_values' => $before,
-                'new_values' => $blog->only(['title', 'slug', 'status', 'published_at']),
+                'new_values' => $blog->only(['title', 'slug', 'status', 'published_at', 'category_id', 'featured_media_id']),
             ]);
 
             return $blog;

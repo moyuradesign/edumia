@@ -46,12 +46,19 @@ final class BlogController extends Controller
     private function form(Blog $blog): View
     {
         $images = MediaFile::query()->where('disk', 'local')
+            ->where('visibility', 'private')
             ->whereIn('mime_type', self::IMAGE_MIMES)
             ->latest('id')->limit(24)->get();
 
-        $selected = $blog->featured_media_id
-            ? MediaFile::query()->whereKey($blog->featured_media_id)
-                ->where('disk', 'local')->whereIn('mime_type', self::IMAGE_MIMES)->first()
+        // A validation redirect retains the user's latest choice, not the
+        // previously saved featured image. The body image editor is separate.
+        $rawSelection = old('featured_media_id', $blog->featured_media_id);
+        $selection = is_scalar($rawSelection) && ctype_digit((string) $rawSelection)
+            ? (int) $rawSelection : null;
+        $selected = $selection
+            ? MediaFile::query()->whereKey($selection)->where('disk', 'local')
+                ->where('visibility', 'private')
+                ->whereIn('mime_type', self::IMAGE_MIMES)->first()
             : null;
 
         return view('admin.content.blog.form', [
@@ -120,7 +127,7 @@ final class BlogController extends Controller
         $page = is_string($page) && ctype_digit($page) ? max(1, min(1000, (int) $page)) : 1;
 
         $query = MediaFile::query()->where('disk', 'local')
-            ->whereIn('mime_type', self::IMAGE_MIMES);
+            ->where('visibility', 'private')->whereIn('mime_type', self::IMAGE_MIMES);
         if ($search !== '') {
             $escaped = addcslashes($search, '%_\\');
             $query->where(fn ($q) => $q->where('original_name', 'like', '%'.$escaped.'%')
@@ -157,6 +164,10 @@ final class BlogController extends Controller
     public function image(MediaFile $media): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         abort_unless($media->disk === 'local'
+            && $media->visibility === 'private'
+            && str_starts_with($media->path, 'edumia/media/')
+            && ! str_contains($media->path, '..')
+            && ! str_contains($media->path, '\\')
             && in_array($media->mime_type, self::IMAGE_MIMES, true)
             && Storage::disk('local')->exists($media->path), 404);
 
@@ -164,6 +175,7 @@ final class BlogController extends Controller
             'Content-Type' => $media->mime_type,
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, no-store',
+            'Content-Security-Policy' => "default-src 'none'; sandbox",
         ]);
     }
 }

@@ -64,26 +64,41 @@
                         <td>
                             <div class="admin-media-file">
                                 @if(in_array($item->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true))
-                                    <img class="admin-media-thumbnail" src="{{ route('admin.media.preview', $item) }}"
-                                        alt="" loading="lazy" width="48" height="48">
+                                    <a href="{{ route('admin.media.preview', $item) }}" target="_blank"
+                                       rel="noopener noreferrer" aria-label="Preview {{ $item->original_name }}">
+                                        <img class="admin-media-thumbnail" src="{{ route('admin.media.preview', $item) }}"
+                                            alt="{{ $item->alt_text ?: $item->original_name }}" loading="lazy" width="48" height="48">
+                                    </a>
                                 @else
                                     <span class="admin-media-file-icon" aria-hidden="true">▤</span>
                                 @endif
                                 <div><strong>{{ $item->original_name }}</strong>
                                     @if($item->alt_text)<small>{{ $item->alt_text }}</small>@endif
-                                    <small>Private file #{{ $item->id }}</small>
+                                    <small>Private file #{{ $item->id }} · Uploaded {{ $item->created_at?->format('M j, Y · H:i') ?? 'date unknown' }}</small>
+                                    @if($lastChanges->has($item->id))
+                                        @php($change = $lastChanges->get($item->id))
+                                        <small>Last activity: {{ str_replace('media.', '', str_replace('_', ' ', $change->action)) }}
+                                            · {{ $change->actor?->name ?? 'Former team member' }}
+                                            · {{ $change->created_at?->format('M j, Y · H:i') }}
+                                        </small>
+                                    @endif
                                 </div>
                             </div>
                         </td>
                         <td><span class="admin-status">{{ $item->mime_type === 'application/pdf' ? 'PDF' : strtoupper(str_replace('image/', '', $item->mime_type)) }}</span></td>
                         <td>{{ number_format($item->size_bytes / 1024, 1) }} KB</td>
-                        <td>{{ $item->uploader?->name ?? 'System' }}</td>
+                        <td>{{ $item->uploader?->name ?? 'System' }}<small>Uploaded {{ $item->created_at?->format('M j, Y') ?? '—' }}</small></td>
                         <td><div class="admin-media-actions">
+                            @if(in_array($item->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true))
+                                <a class="admin-table-action" href="{{ route('admin.media.preview', $item) }}"
+                                   target="_blank" rel="noopener noreferrer">Preview image</a>
+                            @endif
                             <a class="admin-table-action admin-table-action--quiet" href="{{ route('admin.media.download', $item) }}">Download</a>
                             <details class="admin-media-edit">
                                 <summary class="admin-table-action admin-table-action--quiet">Edit details</summary>
                                 <form method="post" action="{{ route('admin.media.update', $item) }}">
                                     @csrf @method('PUT')
+                                    <p>File type: {{ $item->mime_type }} · {{ number_format($item->size_bytes) }} bytes</p>
                                     <label for="admin-media-alt-{{ $item->id }}">Description / alternative text</label>
                                     <input id="admin-media-alt-{{ $item->id }}" name="alt_text" maxlength="255"
                                         value="{{ $item->alt_text }}" placeholder="Describe this file">
@@ -118,7 +133,7 @@
                     <input id="media-alt" name="alt_text" maxlength="255" value="{{ old('alt_text') }}"
                            placeholder="Describe the image for accessibility">
                 </label>
-                <p class="admin-media-hint">JPEG, PNG, WebP or PDF · Maximum 10 MB · Private storage only. Files are not published or given public URLs.</p>
+                <p class="admin-media-hint">JPEG, PNG, WebP or PDF · Maximum 10 MB · Private storage only. Staff with media.manage permission can preview, edit details, download, and delete. Publishing an article can expose only the images referenced by that published article.</p>
                 <button class="admin-action-primary" type="submit">Upload file securely</button>
             </form>
         </section>

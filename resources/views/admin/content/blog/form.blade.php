@@ -172,7 +172,7 @@
             <section class="admin-widget blog-side-panel" aria-labelledby="blog-image-heading">
                 <div class="blog-side-panel-header"><span class="blog-side-icon" aria-hidden="true">▧</span><h2 id="blog-image-heading">Featured Image</h2></div>
                 <input type="hidden" name="featured_media_id" data-blog-featured-id
-                    value="{{ old('featured_media_id', $blog->featured_media_id) }}">
+                    value="{{ $featured?->getKey() ?? '' }}">
                 <div class="blog-featured-image">
                     <img data-blog-featured-preview alt="Selected featured image"
                         src="{{ $featured ? route('admin.blogs.media.preview', $featured) : '' }}"
@@ -185,7 +185,8 @@
                         <span>No featured image selected</span>
                     </div>
                 </div>
-                <p class="blog-featured-label" data-blog-featured-name>{{ $featured?->original_name }}</p>
+                <p class="blog-featured-label" data-blog-featured-name aria-live="polite">{{ $featured?->original_name }}</p>
+                <small data-blog-featured-status role="status">{{ $featured ? 'Featured image selected. It will appear with this article after saving.' : 'Choose an image to set the article cover.' }}</small>
                 <div class="blog-image-actions">
                     <button class="admin-action-secondary" type="button" data-blog-open-images>Choose image</button>
                     <button class="blog-link-button" type="button" data-blog-clear-image>Remove</button>
