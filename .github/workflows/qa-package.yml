@@ -8,6 +8,8 @@ on:
       - 'scripts/shared-host-preflight.php'
       - 'scripts/view-cache-preflight.php'
       - 'scripts/aa-panel-instructor-sync.sh'
+      - 'scripts/aa-panel-media-sync.sh'
+      - 'docs/aa-panel-media-sync.md'
       - 'config/view.php'
       - 'bootstrap/cache/views/.gitignore'
       - 'tests/Feature/ViewCacheIsolationTest.php'
