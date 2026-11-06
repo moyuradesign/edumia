@@ -113,7 +113,7 @@ final class MediaLibraryTest extends TestCase
         $this->get('/admin/media/'.$image->id.'/preview')->assertOk()
             ->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertHeader('Content-Type', 'image/png')
-            ->assertHeader('Cache-Control', 'private, no-store');
+            ->assertHeader('Cache-Control', 'no-store, private');
         $this->put('/admin/media/'.$image->id, ['alt_text' => '  Private product cover  '])
             ->assertRedirect(route('admin.media.index'));
         $this->assertSame('Private product cover', $image->fresh()->alt_text);
