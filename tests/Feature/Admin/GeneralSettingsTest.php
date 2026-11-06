@@ -155,7 +155,10 @@ final class GeneralSettingsTest extends TestCase
 
         $this->get('/admin/settings/general?history_page=1')->assertOk()
             ->assertSee('Settings change history')
-            ->assertSee('settings-admin');
+            ->assertSee('Edumia Audit Center');
+        $this->assertDatabaseHas('audit_events', [
+            'actor_id' => $admin->id, 'action' => 'settings.updated',
+        ]);
 
         $this->actingAs($student)->get('/admin/settings/general?history_page=1')
             ->assertForbidden();
