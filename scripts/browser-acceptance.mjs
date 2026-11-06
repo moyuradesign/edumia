@@ -122,7 +122,7 @@ async function install() {
       'Featured-image picker did not open');
     await page.locator('[data-blog-image-select][data-name="qa-featured.png"]').first().click();
     const featuredId = await page.locator('[data-blog-featured-id]').inputValue();
-    verify(/^\\d+$/.test(featuredId), 'Featured image ID was not assigned');
+    verify(/^\d+$/.test(featuredId), 'Featured image ID was not assigned');
     verify(await page.locator('[data-blog-featured-preview]').isVisible(),
       'Featured image preview did not appear after selection');
     verify(await page.locator('[data-blog-featured-name]').innerText() === 'qa-featured.png',
