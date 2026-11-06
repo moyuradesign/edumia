@@ -9,6 +9,8 @@ on:
       - 'scripts/view-cache-preflight.php'
       - 'scripts/aa-panel-instructor-sync.sh'
       - 'scripts/aa-panel-media-sync.sh'
+      - 'scripts/aa-panel-governance-sync.sh'
+      - 'docs/aa-panel-governance-sync.md'
       - 'docs/aa-panel-media-sync.md'
       - 'config/view.php'
       - 'bootstrap/cache/views/.gitignore'
