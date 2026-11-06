@@ -6,19 +6,22 @@
         <div>
             <span class="admin-eyebrow">LEARNING MANAGEMENT</span>
             <h1 id="admin-course-heading">Course management</h1>
-            <p>Review public, pending, and draft courses across all instructors.</p>
+            <p>Review publishing status, curriculum readiness, and learner engagement across all instructors.</p>
         </div>
     </div>
 
     <nav class="admin-course-summary" aria-label="Course status filters">
         @foreach(['all' => 'All courses', 'pending' => 'Pending review', 'published' => 'Published', 'draft' => 'Drafts'] as $key => $label)
             <a class="admin-course-summary-link {{ $status === $key ? 'is-selected' : '' }}"
-                href="{{ route('admin.courses.index', array_filter(['status' => $key, 'q' => $search, 'instructor' => $instructor, 'sort' => $sort !== 'newest' ? $sort : null], fn ($value) => $value !== null && $value !== '')) }}"
+                href="{{ route('admin.courses.index', array_filter(['status' => $key, 'q' => $search, 'instructor' => $instructor, 'category' => $category, 'content' => $content !== 'all' ? $content : null, 'sort' => $sort !== 'newest' ? $sort : null], fn ($value) => $value !== null && $value !== '')) }}"
                 @if($status === $key) aria-current="page" @endif>
                 <span>{{ $label }}</span><strong>{{ number_format($courseCounts[$key]) }}</strong>
             </a>
         @endforeach
     </nav>
+    @if($hasActiveFilters)
+        <p class="admin-course-results">Status totals above reflect the current search, instructor, category and curriculum filters.</p>
+    @endif
 
     <div class="admin-widget admin-course-index-widget">
         <form class="admin-course-filters" action="{{ route('admin.courses.index') }}" method="get">
@@ -45,15 +48,34 @@
                 </select>
             </div>
             <div>
+                <label class="sr-only" for="admin-course-category">Filter by category</label>
+                <select name="category" id="admin-course-category">
+                    <option value="">All categories</option>
+                    @foreach($categories as $courseCategory)
+                        <option value="{{ $courseCategory->id }}" @selected($category === $courseCategory->id)>{{ $courseCategory->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="sr-only" for="admin-course-content">Curriculum readiness</label>
+                <select name="content" id="admin-course-content">
+                    <option value="all" @selected($content === 'all')>All curriculum</option>
+                    <option value="with_lessons" @selected($content === 'with_lessons')>Has lessons</option>
+                    <option value="no_lessons" @selected($content === 'no_lessons')>Needs lessons</option>
+                </select>
+            </div>
+            <div>
                 <label class="sr-only" for="admin-course-sort">Sort courses</label>
                 <select name="sort" id="admin-course-sort">
                     <option value="newest" @selected($sort === 'newest')>Newest first</option>
                     <option value="oldest" @selected($sort === 'oldest')>Oldest first</option>
                     <option value="title" @selected($sort === 'title')>Course title</option>
+                    <option value="most_enrolled" @selected($sort === 'most_enrolled')>Most enrollments</option>
+                    <option value="most_lessons" @selected($sort === 'most_lessons')>Most lessons</option>
                 </select>
             </div>
             <button class="admin-action-primary" type="submit">Filter courses</button>
-            @if($search !== '' || $status !== 'all' || $instructor !== null || $sort !== 'newest')<a class="admin-action-secondary" href="{{ route('admin.courses.index') }}">Clear</a>@endif
+            @if($hasActiveFilters || $status !== 'all' || $sort !== 'newest')<a class="admin-action-secondary" href="{{ route('admin.courses.index') }}">Clear</a>@endif
         </form>
 
         <p class="admin-course-results">Showing {{ $courses->firstItem() ?? 0 }}–{{ $courses->lastItem() ?? 0 }} of {{ number_format($courses->total()) }} matching courses</p>
@@ -65,7 +87,12 @@
                     <tr>
                         <td><strong>{{ $course->title }}</strong><small>{{ $course->category?->name ?? 'Uncategorized' }}</small></td>
                         <td><a class="admin-course-instructor-link" href="{{ route('admin.courses.index', ['instructor' => $course->instructor_id]) }}">{{ $course->instructor?->name ?? 'Unknown' }}</a></td>
-                        <td>{{ $course->lessons_count }} lessons<small>{{ number_format($course->enrollments_count) }} enrollments</small></td>
+                        <td>{{ number_format($course->lessons_count) }} lessons
+                            <small>{{ number_format($course->enrollments_count) }} enrollments</small>
+                            @if($course->lessons_count === 0)
+                                <small class="admin-course-readiness-note">Needs curriculum</small>
+                            @endif
+                        </td>
                         <td><span class="admin-status admin-status--{{ $course->status === 'published' ? 'success' : 'neutral' }}">{{ ucfirst($course->status) }}</span></td>
                         <td><div class="admin-course-actions">
                             <a class="admin-table-action admin-table-action--quiet" href="{{ route('instructor.courses.edit', $course) }}">Edit</a>

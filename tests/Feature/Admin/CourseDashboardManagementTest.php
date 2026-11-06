@@ -94,4 +94,67 @@ final class CourseDashboardManagementTest extends TestCase
         $this->actingAs($b)->get('/admin/courses')->assertForbidden();
     }
 
+    public function test_category_curriculum_and_status_totals_share_the_same_filter_scope(): void
+    {
+        $admin = $this->member('admin', 'category-filters-admin@edumia.test');
+        $teacher = $this->member('instructor', 'category-filters-teacher@edumia.test');
+        $design = \App\Models\Category::query()->create(['name' => 'Design', 'slug' => 'qa-design', 'status' => 'active']);
+        $science = \App\Models\Category::query()->create(['name' => 'Science', 'slug' => 'qa-science', 'status' => 'active']);
+
+        $pending = Course::query()->create([
+            'instructor_id' => $teacher->id, 'category_id' => $design->id,
+            'title' => 'Design Queue Course', 'slug' => 'design-queue-course',
+            'status' => 'pending', 'visibility' => 'private',
+        ]);
+        Course::query()->create([
+            'instructor_id' => $teacher->id, 'category_id' => $design->id,
+            'title' => 'Design Draft Course', 'slug' => 'design-draft-course',
+            'status' => 'draft', 'visibility' => 'private',
+        ]);
+        Course::query()->create([
+            'instructor_id' => $teacher->id, 'category_id' => $science->id,
+            'title' => 'Science Published Course', 'slug' => 'science-published-course',
+            'status' => 'published', 'visibility' => 'public', 'published_at' => now(),
+        ]);
+        \App\Models\Lesson::query()->create([
+            'course_id' => $pending->id, 'title' => 'First lesson',
+            'slug' => 'first-design-lesson', 'content' => 'Introduction',
+        ]);
+
+        $this->actingAs($admin)->get('/admin/courses?category='.$design->id.'&content=with_lessons')
+            ->assertOk()->assertSee('Design Queue Course')
+            ->assertDontSee('Design Draft Course')->assertDontSee('Science Published Course')
+            ->assertSee('admin-course-category')->assertSee('admin-course-content')
+            ->assertSee('Status totals above reflect the current search')
+            ->assertSee('href="'.route('admin.courses.index', [
+                'status' => 'pending', 'instructor' => null, 'category' => $design->id,
+                'content' => 'with_lessons', 'sort' => null,
+            ]).'"', false);
+
+        $this->get('/admin/courses?category='.$design->id.'&content=no_lessons')
+            ->assertOk()->assertSee('Design Draft Course')->assertDontSee('Design Queue Course');
+
+        $this->get('/admin/courses?status[]=invalid&category[]=999&content[]=no_lessons&sort[]=most_lessons')
+            ->assertOk()->assertSee('Design Queue Course')->assertSee('Science Published Course');
+    }
+
+    public function test_sort_by_course_activity_does_not_change_access_permissions(): void
+    {
+        $admin = $this->member('admin', 'sort-activity-admin@edumia.test');
+        $teacher = $this->member('instructor', 'sort-activity-teacher@edumia.test');
+        $course = Course::query()->create([
+            'instructor_id' => $teacher->id,
+            'title' => 'Activity Ranking Course', 'slug' => 'activity-ranking-course',
+            'status' => 'draft', 'visibility' => 'private',
+        ]);
+
+        $this->actingAs($admin)->get('/admin/courses?sort=most_lessons')->assertOk()
+            ->assertSee('Activity Ranking Course')
+            ->assertSee('value="most_lessons" selected', false)
+            ->assertSee('Needs curriculum');
+        $this->get('/admin/courses?sort=most_enrolled')->assertOk()
+            ->assertSee('Activity Ranking Course');
+        $this->actingAs($teacher)->get('/admin/courses?sort=most_enrolled')->assertForbidden();
+    }
+
 }
