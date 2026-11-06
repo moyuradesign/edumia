@@ -62,3 +62,11 @@ Confirm `/dashboard`, `/instructor`, `/account`, and
 
 Do not use this transfer control for published, purchased, or learner-
 enrolled courses. Those require a separate financial/learner migration review.
+
+## Route cache refresh
+
+The sync clears Laravel's route cache as `www` after a successful file swap
+and again after rollback, so new instructor assignment and status endpoints
+are not hidden by a previous release's cached route table. It also checks
+that the new assignment route is visible before reporting deployment success.
+The read-only `--check` mode never clears routes or Blade caches.

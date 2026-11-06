@@ -135,8 +135,12 @@ validate_archive() {
 refresh_views() {
     (
         cd "$APP"
+        # New instructor routes must not be hidden by a previous release's cache.
+        # Do not run these commands as root.
+        runuser -u "$WEB_USER" -- "$PHP" artisan route:clear
         runuser -u "$WEB_USER" -- "$PHP" artisan view:clear
         runuser -u "$WEB_USER" -- "$PHP" artisan view:cache
+        runuser -u "$WEB_USER" -- "$PHP" artisan route:list --name=admin.instructors             | grep -Fq 'instructors.assignments'
         verify_release_view_cache
     )
 }
