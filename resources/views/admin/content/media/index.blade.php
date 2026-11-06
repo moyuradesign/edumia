@@ -138,5 +138,38 @@
             </form>
         </section>
     </div>
+    <section class="admin-widget admin-media-library" aria-labelledby="media-audit-heading">
+        <div class="admin-widget-heading">
+            <div><span class="admin-widget-kicker">ACCOUNTABILITY</span>
+                <h2 id="media-audit-heading">Media audit history</h2>
+                <p>Private activity log, including files that have been deleted.</p></div>
+        </div>
+        <div class="table-scroll"><table class="admin-table admin-media-table">
+            <thead><tr><th>Date</th><th>Activity</th><th>File</th><th>Actor</th><th>Details</th></tr></thead>
+            <tbody>
+            @forelse($auditHistory as $event)
+                <tr>
+                    <td>{{ $event->created_at?->format('M j, Y · H:i') }}</td>
+                    <td>{{ ucfirst(str_replace(['media.', '_'], ['', ' '], $event->action)) }}</td>
+                    <td>Media #{{ $event->subject_id }}</td>
+                    <td>{{ $event->actor?->name ?? 'Former team member' }}</td>
+                    <td>
+                        @if($event->action === 'media.description_updated')
+                            Before: {{ data_get($event->previous_values, 'alt_text') ?: 'Not set' }}
+                            After: {{ data_get($event->new_values, 'alt_text') ?: 'Not set' }}
+                        @elseif($event->action === 'media.uploaded')
+                            {{ data_get($event->new_values, 'original_name', 'Uploaded file') }}
+                        @elseif($event->action === 'media.deleted')
+                            {{ data_get($event->previous_values, 'original_name', 'Deleted file') }}
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="5"><div class="admin-empty"><strong>No media activity recorded yet</strong></div></td></tr>
+            @endforelse
+            </tbody>
+        </table></div>
+        <div class="admin-course-pagination">{{ $auditHistory->onEachSide(1)->links() }}</div>
+    </section>
 </section>
 @endsection

@@ -49,6 +49,8 @@ final class MediaLibraryTest extends TestCase
             ->assertRedirect(route('admin.media.index'));
         Storage::disk('local')->assertMissing($media->path);
         $this->assertDatabaseCount('media_files', 0);
+        $this->get('/admin/media')->assertOk()->assertSee('Media audit history')
+            ->assertSee('course-guide.pdf')->assertSee('Deleted');
     }
 
     public function test_student_cannot_access_media_routes(): void

@@ -65,6 +65,9 @@ final class MediaController extends Controller
         return view('admin.content.media.index', [
             'media' => $page,
             'lastChanges' => $lastChanges,
+            'auditHistory' => AuditEvent::query()->with('actor')
+                ->where('subject_type', MediaFile::class)->latest('id')
+                ->paginate(20, ['*'], 'audit_page')->withQueryString(),
             'search' => $search,
             'type' => $type,
             'description' => $description,
