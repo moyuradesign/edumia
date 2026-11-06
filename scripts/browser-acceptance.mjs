@@ -90,6 +90,20 @@ async function install() {
     await navigate(page, '/admin/settings/general');
     verify(await page.getByRole('heading', { name: 'General settings' }).isVisible(),
       'Initial administrator cannot access general settings');
+    verify(await page.locator('#settings-audit-heading').isVisible(),
+      'Settings change history is missing from administrator workspace');
+    verify(await page.locator('input[name="allow_registration"][type="hidden"]').inputValue() === '0',
+      'Registration toggle lacks a reliable explicit unchecked value');
+    await navigate(page, '/admin/roles');
+    verify(await page.getByRole('heading', { name: 'Permission matrix' }).isVisible(),
+      'Admin role matrix is missing');
+    verify(await page.locator('#role-member-query').count() === 1,
+      'Admin staff-role lookup is missing');
+    verify(await page.locator('#role-audit-title').isVisible(),
+      'Role grant and revocation history is missing');
+    verify(await page.locator('input[name="user_id"][list="role-eligible-members"]').count() >= 0,
+      'Role assignment input not available');
+    console.log('EDUMIA_SETTINGS_ROLE_GOVERNANCE_UI=PASS');
 
     // Inspect admin workspaces, including read-only release readiness, in the fresh customer copy.
     for (const module of adminModules) {
