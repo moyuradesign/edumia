@@ -101,8 +101,17 @@ async function install() {
       'Admin staff-role lookup is missing');
     verify(await page.locator('#role-audit-title').isVisible(),
       'Role grant and revocation history is missing');
-    verify(await page.locator('input[name="user_id"][list="role-eligible-members"]').count() >= 0,
-      'Role assignment input not available');
+    // Exercise the actual role creation form in an isolated customer
+    // installation, without granting administrator privileges to anyone.
+    await page.locator('#admin-create-role input[name="name"]').fill('QA Governance Reviewer');
+    await page.locator('#admin-create-role input[name="slug"]').fill('qa-governance-reviewer');
+    await page.locator('#admin-create-role input[name="permissions[]"][value="knowledge.manage"]').check();
+    await page.locator('#admin-create-role button[type="submit"]').click();
+    await page.getByRole('heading', { name: 'QA Governance Reviewer' }).waitFor({ state: 'visible' });
+    verify(await page.getByText('Manage Help Center articles').count() >= 1,
+      'Created custom role did not retain its allowlisted permission');
+    verify((await page.locator('#role-audit-title').isVisible()),
+      'Created role did not expose governance audit history');
     console.log('EDUMIA_SETTINGS_ROLE_GOVERNANCE_UI=PASS');
 
     // Inspect admin workspaces, including read-only release readiness, in the fresh customer copy.
