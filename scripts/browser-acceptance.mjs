@@ -563,7 +563,10 @@ async function browse(scenario) {
     await navigate(page, '/login');
     await page.locator('input[name="email"]').fill(adminEmail);
     await page.locator('input[name="password"]').fill(adminPassword);
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await Promise.all([
+      page.waitForURL('**/dashboard', { timeout: 20000 }),
+      page.getByRole('button', { name: 'Sign in', exact: true }).click(),
+    ]);
     verify(new URL(page.url()).pathname === '/dashboard',
       scenario.name + ' administrator login failed');
 
