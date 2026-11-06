@@ -112,7 +112,8 @@ final class MediaLibraryTest extends TestCase
             ->assertSee('private.png')->assertSee('admin-media-description');
         $this->get('/admin/media/'.$image->id.'/preview')->assertOk()
             ->assertHeader('X-Content-Type-Options', 'nosniff')
-            ->assertHeader('Content-Type', 'image/png');
+            ->assertHeader('Content-Type', 'image/png')
+            ->assertHeader('Cache-Control', 'private, no-store');
         $this->put('/admin/media/'.$image->id, ['alt_text' => '  Private product cover  '])
             ->assertRedirect(route('admin.media.index'));
         $this->assertSame('Private product cover', $image->fresh()->alt_text);
@@ -120,6 +121,11 @@ final class MediaLibraryTest extends TestCase
             'actor_id' => $admin->id, 'subject_id' => $image->id,
             'action' => 'media.description_updated',
         ]);
+        $this->get('/admin/media')->assertOk()
+            ->assertSee('Last activity:')
+            ->assertSee('Private product cover')
+            ->assertSee('Preview image')
+            ->assertSee('Uploaded');
         $this->get('/admin/media?description=missing')->assertOk()->assertDontSee('private.png');
         $this->put('/admin/media/'.$image->id, ['alt_text' => str_repeat('a', 256)])
             ->assertSessionHasErrors('alt_text');
@@ -145,6 +151,30 @@ final class MediaLibraryTest extends TestCase
             'mime_type' => 'image/png', 'size_bytes' => 100, 'visibility' => 'private',
         ]);
         $this->get('/admin/media/'.$missing->id.'/preview')->assertNotFound();
+    }
+
+    public function test_private_media_preview_rejects_non_private_records_and_unsafe_paths(): void
+    {
+        Storage::fake('local');
+        $admin = $this->account('admin', 'path-admin@edumia.test');
+
+        Storage::disk('local')->put('edumia/media/valid.png', 'PNG TEST CONTENT');
+        Storage::disk('local')->put('unrelated/private.png', 'UNRELATED');
+        $image = MediaFile::query()->create([
+            'user_id' => $admin->id, 'disk' => 'local',
+            'path' => 'edumia/media/valid.png', 'original_name' => 'valid.png',
+            'mime_type' => 'image/png', 'size_bytes' => 16, 'visibility' => 'private',
+        ]);
+        $this->actingAs($admin)->get(route('admin.media.preview', $image))->assertOk();
+        $this->get(route('admin.media.download', $image))->assertOk();
+
+        $image->forceFill(['path' => 'unrelated/private.png'])->save();
+        $this->get(route('admin.media.preview', $image))->assertNotFound();
+        $this->get(route('admin.media.download', $image))->assertNotFound();
+
+        $image->forceFill(['path' => 'edumia/media/valid.png', 'visibility' => 'public'])->save();
+        $this->get(route('admin.media.preview', $image))->assertNotFound();
+        $this->get(route('admin.media.download', $image))->assertNotFound();
     }
 
 }

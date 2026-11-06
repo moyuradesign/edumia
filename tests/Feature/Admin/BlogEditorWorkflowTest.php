@@ -203,4 +203,28 @@ final class BlogEditorWorkflowTest extends TestCase
 
         $this->assertDatabaseCount('blogs', 0);
     }
+    public function test_failed_article_validation_restores_the_new_featured_image_preview(): void
+    {
+        Storage::fake('local');
+        $admin = $this->member('admin', 'featured-retry@edumia.test');
+        $image = $this->media($admin);
+        $this->actingAs($admin)->post(route('admin.blogs.store'), $this->payload([
+            'title' => '',
+            'featured_media_id' => $image->id,
+        ]))->assertSessionHasErrors('title');
+        $this->get(route('admin.blogs.create'))->assertOk()
+            ->assertSee('value="'.$image->id.'"', false)
+            ->assertSee('data-blog-featured-preview', false)
+            ->assertSee('editor-cover.png')
+            ->assertSee('Featured image selected. It will appear with this article after saving.');
+
+        $this->post(route('admin.blogs.store'), $this->payload([
+            'title' => '',
+            'featured_media_id' => '',
+        ]))->assertSessionHasErrors('title');
+        $this->get(route('admin.blogs.create'))->assertOk()
+            ->assertSee('Choose an image to set the article cover.')
+            ->assertSee('data-blog-featured-empty', false);
+    }
+
 }

@@ -104,6 +104,43 @@ async function install() {
       await page.screenshot({ path: path.join(evidence, 'installed-' + module.slug + '-desktop.png') });
     }
 
+    // Verify two distinct image-picker intents on the real compiled JS bundle.
+    // Choosing a featured image must never insert a token into the article body.
+    await navigate(page, '/admin/media');
+    await page.locator('#media-file').setInputFiles({
+      name: 'qa-featured.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8HCnQAAAAASUVORK5CYII=', 'base64'),
+    });
+    await page.locator('#media-alt').fill('QA featured library image');
+    await page.getByRole('button', { name: 'Upload file securely' }).click();
+    await page.waitForURL('**/admin/media');
+    await navigate(page, '/admin/blogs/create');
+    const featuredBefore = await page.locator('[data-blog-body]').inputValue();
+    await page.locator('[data-blog-open-images]').click();
+    verify(await page.locator('[data-blog-media-dialog]').isVisible(),
+      'Featured-image picker did not open');
+    await page.locator('[data-blog-image-select][data-name="qa-featured.png"]').first().click();
+    const featuredId = await page.locator('[data-blog-featured-id]').inputValue();
+    verify(/^\\d+$/.test(featuredId), 'Featured image ID was not assigned');
+    verify(await page.locator('[data-blog-featured-preview]').isVisible(),
+      'Featured image preview did not appear after selection');
+    verify(await page.locator('[data-blog-featured-name]').innerText() === 'qa-featured.png',
+      'Selected image filename missing from featured panel');
+    verify(await page.locator('[data-blog-body]').inputValue() === featuredBefore,
+      'Featured image selection incorrectly inserted content into the editor');
+
+    // The toolbar image action is a separate, intentionally inline operation.
+    await page.locator('[data-blog-format="image"]').click();
+    verify(await page.locator('[data-blog-media-dialog]').isVisible(),
+      'Inline image picker did not open');
+    await page.locator('[data-blog-image-select][data-name="qa-featured.png"]').first().click();
+    verify((await page.locator('[data-blog-body]').inputValue()).includes('edumia-media:' + featuredId),
+      'Inline selection did not insert an editor token');
+    verify(await page.locator('[data-blog-featured-id]').inputValue() === featuredId,
+      'Inline image selection changed the featured image ID');
+    console.log('EDUMIA_BLOG_FEATURED_IMAGE_SELECTION=PASS');
+
     // Smoke-check every existing admin management listing in the installed MySQL copy.
     // This verifies that protected routes render; it does not certify business feature parity.
     for (const moduleUrl of adminManagementRoutes) {
