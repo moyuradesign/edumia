@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\System;
 
 use App\Http\Requests\Admin\GeneralSettingsRequest;
+use App\Models\AuditEvent;
+use App\Models\Setting;
 use App\Services\System\SettingsRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
@@ -14,7 +16,14 @@ final class GeneralSettingsController extends Controller
 {
     public function edit(SettingsRepository $settings): View
     {
-        return view('admin.system.settings.general', ['settings' => $settings->general()]);
+        return view('admin.system.settings.general', [
+            'settings' => $settings->general(),
+            'settingsHistory' => AuditEvent::query()
+                ->with('actor')
+                ->where('subject_type', Setting::class)
+                ->where('action', 'settings.updated')
+                ->latest('id')->paginate(15, ['*'], 'history_page')->withQueryString(),
+        ]);
     }
 
     public function update(GeneralSettingsRequest $request, SettingsRepository $settings): RedirectResponse

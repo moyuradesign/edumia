@@ -10,6 +10,16 @@
         </div>
     </div>
 
+    @if ($errors->any())
+        <div class="admin-widget" role="alert" aria-labelledby="settings-errors-heading">
+            <strong id="settings-errors-heading">Some settings need attention</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form class="admin-settings-form" method="post" action="{{ route('admin.settings.update') }}">
         @csrf @method('PUT')
         <div class="admin-settings-grid">
@@ -19,6 +29,7 @@
                 <div class="admin-form-fields">
                     <label for="settings-site-name">Platform name
                         <input id="settings-site-name" name="site_name" maxlength="120" required
+                               aria-invalid="{{ $errors->has('site_name') ? 'true' : 'false' }}"
                                value="{{ old('site_name', $settings['site_name']) }}">
                     </label>
                     <label for="settings-homepage-notice">Homepage notice
@@ -61,11 +72,13 @@
                 <div class="admin-form-fields">
                     <label for="settings-support-email">Support email
                         <input id="settings-support-email" name="support_email" type="email" maxlength="190"
+                               autocomplete="email" aria-invalid="{{ $errors->has('support_email') ? 'true' : 'false' }}"
                                value="{{ old('support_email', $settings['support_email']) }}" placeholder="help@example.com">
                     </label>
                     <label class="admin-settings-switch" for="settings-registration">
+                        <input type="hidden" name="allow_registration" value="0">
                         <input id="settings-registration" type="checkbox" name="allow_registration" value="1"
-                               @checked(old('allow_registration', $settings['allow_registration']) == '1')>
+                               @checked((string) old('allow_registration', $settings['allow_registration']) === '1')>
                         <span><strong>Allow new student registrations</strong><small>Disable to close new signups without affecting existing accounts.</small></span>
                     </label>
                     <p class="admin-field-hint">The existing account registration guard enforces this setting on both the signup form and form submission.</p>
@@ -78,5 +91,32 @@
             <button class="admin-action-primary" type="submit">Save general settings</button>
         </div>
     </form>
+
+    <section class="admin-widget" aria-labelledby="settings-audit-heading">
+        <div class="admin-widget-heading">
+            <div>
+                <span class="admin-widget-kicker">ACCOUNTABILITY</span>
+                <h2 id="settings-audit-heading">Settings change history</h2>
+                <p>Only saved changes are logged. Regional settings control display defaults, not historical timestamps.</p>
+            </div>
+        </div>
+        <div class="table-scroll"><table class="admin-table">
+            <thead><tr><th scope="col">When</th><th scope="col">Setting</th><th scope="col">Previous</th><th scope="col">New value</th><th scope="col">Changed by</th></tr></thead>
+            <tbody>
+                @forelse($settingsHistory as $event)
+                    <tr>
+                        <td>{{ $event->created_at?->format('M j, Y · H:i') }}</td>
+                        <td>{{ str_replace('_', ' ', data_get($event->new_values, 'key', 'setting')) }}</td>
+                        <td>{{ data_get($event->previous_values, 'value') === '' ? 'Empty' : data_get($event->previous_values, 'value', 'Default') }}</td>
+                        <td>{{ data_get($event->new_values, 'value') === '' ? 'Empty' : data_get($event->new_values, 'value', 'Default') }}</td>
+                        <td>{{ $event->actor?->name ?? 'Former team member' }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5"><div class="admin-empty"><strong>No settings changes yet</strong><p>Changes will be recorded automatically when saved.</p></div></td></tr>
+                @endforelse
+            </tbody>
+        </table></div>
+        <div class="admin-course-pagination">{{ $settingsHistory->onEachSide(1)->links() }}</div>
+    </section>
 </section>
 @endsection
