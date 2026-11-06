@@ -31,6 +31,12 @@ final class ReleaseReadinessService
             $this->check('assets', 'Compiled frontend and admin assets',
                 $this->hasBuiltAssets(),
                 'All required Vite CSS and JS files must exist in the compiled manifest.'),
+            $this->check('compiled_views', 'Release-isolated compiled Blade views',
+                config('view.compiled') === base_path('bootstrap/cache/views')
+                    && is_dir(base_path('bootstrap/cache/views'))
+                    && ! is_link(base_path('bootstrap/cache/views'))
+                    && is_writable(base_path('bootstrap/cache/views')),
+                'Blade views must compile inside this release in bootstrap/cache/views. Never use a previous release path or root-owned compiled views.'),
             $this->check('runtime_storage', 'Writable runtime directories',
                 is_writable(storage_path('framework'))
                     && is_writable(storage_path('logs'))

@@ -79,6 +79,13 @@ if ($root === false || $public === false) {
         }
     }
 
+    // Blade files are compiled in a release-local directory, not shared storage.
+    // The directory must be shipped with the installer and writable by PHP-FPM.
+    $compiledViews = $root.'/bootstrap/cache/views';
+    $check('compiled_views_release_local',
+        is_dir($compiledViews) && ! is_link($compiledViews) && is_writable($compiledViews),
+        'bootstrap/cache/views must exist, not be a symlink, and be writable for the current PHP user.');
+
     foreach (['storage/app', 'storage/framework/cache', 'storage/framework/sessions',
         'storage/framework/views', 'bootstrap/cache'] as $directory) {
         $check('writable_'.str_replace('/', '_', $directory),
