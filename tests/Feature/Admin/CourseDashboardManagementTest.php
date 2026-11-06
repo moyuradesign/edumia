@@ -131,10 +131,10 @@ final class CourseDashboardManagementTest extends TestCase
             ->assertDontSee('Design Draft Course')->assertDontSee('Science Published Course')
             ->assertSee('admin-course-category')->assertSee('admin-course-content')
             ->assertSee('Status totals above reflect the current search')
-            ->assertSee('href="'.route('admin.courses.index', [
+            ->assertSee('href="'.e(route('admin.courses.index', [
                 'status' => 'pending', 'instructor' => null, 'category' => $design->id,
                 'content' => 'with_lessons', 'sort' => null,
-            ]).'"', false);
+            ])).'"', false);
 
         $this->get('/admin/courses?category='.$design->id.'&content=no_lessons')
             ->assertOk()->assertSee('Design Draft Course')->assertDontSee('Design Queue Course');
