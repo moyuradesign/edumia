@@ -94,6 +94,7 @@ final class NotificationService
         // Never read, log or display MAIL_PASSWORD in the web interface.
         return (bool) config('notifications.transactional_mail_enabled', false)
             && (bool) config('notifications.provider_verified', false)
+            && (bool) config('notifications.queue_worker_verified', false)
             && config('queue.default') === 'database'
             && config('mail.default') === 'smtp'
             && filled(config('mail.mailers.smtp.host'))
