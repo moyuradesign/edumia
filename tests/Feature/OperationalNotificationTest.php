@@ -143,6 +143,19 @@ final class OperationalNotificationTest extends TestCase
             ->assertSee('Account password changed');
     }
 
+    public function test_transactional_gate_requires_verified_worker_separately(): void
+    {
+        config()->set('mail.default', 'smtp');
+        config()->set('queue.default', 'database');
+        config()->set('notifications.provider_verified', true);
+        config()->set('notifications.transactional_mail_enabled', true);
+        config()->set('notifications.queue_worker_verified', false);
+        $this->assertFalse(app(NotificationService::class)->mailReady());
+
+        config()->set('notifications.queue_worker_verified', true);
+        $this->assertTrue(app(NotificationService::class)->mailReady());
+    }
+
     public function test_outbound_email_is_disabled_without_a_verified_provider_and_worker(): void
     {
         Queue::fake();
