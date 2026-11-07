@@ -196,6 +196,7 @@ final class OperationalNotificationTest extends TestCase
         config()->set('mail.default', 'smtp');
         config()->set('queue.default', 'database');
         config()->set('notifications.provider_verified', true);
+        config()->set('notifications.queue_worker_verified', true);
         config()->set('notifications.transactional_mail_enabled', true);
 
         $notice = new \App\Notifications\OperationalNotice(
@@ -234,6 +235,7 @@ final class OperationalNotificationTest extends TestCase
         config()->set('mail.default', 'smtp');
         config()->set('queue.default', 'database');
         config()->set('notifications.provider_verified', true);
+        config()->set('notifications.queue_worker_verified', true);
         config()->set('notifications.transactional_mail_enabled', true);
         $this->actingAs($owner)->put('/account/notifications/preferences', [
             'preferences' => [
