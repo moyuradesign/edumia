@@ -25,6 +25,7 @@ Only after test receipt, sender/domain eligibility and a supervised database
 queue worker are accepted, explicitly enable:
 EDUMIA_MAIL_PROVIDER_VERIFIED=true
 EDUMIA_TRANSACTIONAL_MAIL_ENABLED=true
+EDUMIA_QUEUE_WORKER_VERIFIED=true
 QUEUE_CONNECTION=database
 
 No script automatically enables these or starts a worker. A manual cron-safe
@@ -64,3 +65,49 @@ listed as newly added by the successful installation. Live-browser QA must
 then confirm notification ownership, inbox updates, preferences, security
 alerts, support/instructor events, admin SMTP gating, mobile/light/dark UI.
 Outbound SMTP remains a separate future provider acceptance gate.
+
+## Queue operations acceptance — staging first
+
+Keep `EDUMIA_TRANSACTIONAL_MAIL_ENABLED=false` and
+`EDUMIA_QUEUE_WORKER_VERIFIED=false` until verified independently.
+The admin dashboard provides read-only pending and failed *notification*
+job counts. Counts alone do not establish worker liveness.
+
+For aaPanel, configure an unprivileged process supervisor to launch the
+release's PHP binary with the application's working directory and:
+
+    php artisan queue:work database --queue=notifications --sleep=3 --tries=3 --timeout=30 --max-time=3600
+
+Use automatic restart and environment-specific stdout/stderr log rotation.
+Set database `retry_after` greater than the job timeout (current default:
+120 seconds vs. 30 seconds). Run only one notification worker during
+initial acceptance. Restart workers after every approved code deployment.
+Do not run the worker as root or embed credentials in process arguments.
+
+Shared hosting that allows cron but not persistent processes can execute
+the following command every minute, under the hosting account and from
+the application root (replace PHP with the host's approved PHP binary):
+
+    php artisan queue:work database --queue=notifications --sleep=0 --tries=3 --timeout=30 --stop-when-empty --max-jobs=20
+
+Prevent overlapping cron invocations with a host-supported exclusive lock
+(e.g. `flock -n` where available), or explicitly confirm that the queue
+driver prevents overlapping job claims on that host. If background
+processing is prohibited, do not enable transactional mail.
+
+Verify in staging: one test event queues, one worker processes it,
+the audit reports `notifications.mail_accepted`, a separate recipient
+confirms inbox receipt, and failed attempts appear in `failed_jobs`.
+Inspect failures with `php artisan queue:failed`; replay only known-safe
+jobs with `php artisan queue:retry <id>` after confirming the cause.
+Never run `queue:retry all` blindly or paste exception payloads into
+support chats. The existing audit distinguishes queued, SMTP-accepted,
+and terminal failure states; SMTP acceptance does not prove inbox delivery.
+
+Only after all of the above and verified sender/domain eligibility may an
+operator set `EDUMIA_QUEUE_WORKER_VERIFIED=true` alongside the existing
+provider and transactional-mail gates. Revert the transactional gate to
+false if worker supervision, provider verification, or mail reliability
+degrades. All environment changes remain an operator action, not a
+dashboard action. This milestone does not authorize production deployment
+or real-world outbound messages.
