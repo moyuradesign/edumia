@@ -156,6 +156,18 @@ final class OperationalNotificationTest extends TestCase
         $this->assertDatabaseCount('failed_jobs', 0);
     }
 
+    public function test_admin_delivery_dashboard_reports_read_only_queue_health(): void
+    {
+        $admin = $this->member('admin', 'queue-health-admin@edumia.test');
+        $this->actingAs($admin)->get('/admin/notifications/delivery')
+            ->assertOk()
+            ->assertSee('Pending notification jobs')
+            ->assertSee('Failed notification jobs')
+            ->assertSee('Not independently verified');
+        $this->assertSame('sync', config('queue.default'));
+        $this->assertFalse((bool) config('notifications.queue_worker_verified', false));
+    }
+
     public function test_smtp_probe_requires_operator_opt_in_and_avoids_credentials_in_audit(): void
     {
         Mail::fake();
