@@ -33,7 +33,7 @@ final class MailDeliveryController extends Controller
             'failedNotifications' => DB::table('failed_jobs')->where('queue', 'notifications')->count(),
             'lastTransportAcceptance' => AuditEvent::query()
                 ->where('action', 'notifications.mail_accepted')
-                ->latest('id')->value('created_at'),
+                ->latest('id')->first()?->created_at,
             'workerVerified' => (bool) config('notifications.queue_worker_verified', false),
             'recentActivity' => AuditEvent::query()->with('actor')
                 ->whereIn('action', ['notifications.mail_accepted', 'notifications.mail_failed',
