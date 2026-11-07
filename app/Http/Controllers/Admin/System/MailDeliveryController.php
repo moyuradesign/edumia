@@ -26,6 +26,7 @@ final class MailDeliveryController extends Controller
             'provider' => config('mail.default'),
             'transportReady' => $notices->mailReady(),
             'smtpTestEnabled' => (bool) config('notifications.smtp_test_enabled'),
+            'approvedTestRecipient' => $this->approvedTestRecipient($request),
             'providerVerified' => (bool) config('notifications.provider_verified'),
             'queueDriver' => config('queue.default'),
             // Read-only queue telemetry. Counts do not imply that a worker is running.
@@ -48,6 +49,9 @@ final class MailDeliveryController extends Controller
         abort_unless((bool) config('notifications.smtp_test_enabled')
             && config('mail.default') === 'smtp', 403,
             'SMTP testing is disabled until the operator configures the provider.');
+
+        abort_unless($this->approvedTestRecipient($request), 403,
+            'The administrator address must match the protected sandbox test recipient.');
 
         $actor = $request->user();
         $action = 'notifications.smtp_test_accepted';
@@ -73,5 +77,13 @@ final class MailDeliveryController extends Controller
                 $action === 'notifications.smtp_test_accepted'
                     ? 'SMTP transport accepted the test message. Confirm receipt independently.'
                     : 'SMTP test failed. Check protected server mail settings and provider logs.');
+    }
+    private function approvedTestRecipient(Request $request): bool
+    {
+        $approved = (string) config('notifications.smtp_test_recipient', '');
+        $actorAddress = (string) ($request->user()?->email ?? '');
+
+        return filter_var($approved, FILTER_VALIDATE_EMAIL) !== false
+            && strcasecmp($approved, $actorAddress) === 0;
     }
 }
