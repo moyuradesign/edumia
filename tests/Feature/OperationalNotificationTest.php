@@ -190,7 +190,18 @@ final class OperationalNotificationTest extends TestCase
         config()->set('mail.default', 'smtp');
         config()->set('notifications.smtp_test_enabled', true);
         $this->get('/admin/notifications/delivery')->assertOk()
-            ->assertSee('Send SMTP test to my account');
+            ->assertSee('Send SMTP test to my account')
+            ->assertSee('Not configured for this administrator');
+        $this->post('/admin/notifications/delivery/test')->assertForbidden();
+        Mail::assertNothingSent();
+
+        config()->set('notifications.smtp_test_recipient', 'another-admin@edumia.test');
+        $this->post('/admin/notifications/delivery/test')->assertForbidden();
+        Mail::assertNothingSent();
+
+        config()->set('notifications.smtp_test_recipient', $admin->email);
+        $this->get('/admin/notifications/delivery')->assertOk()
+            ->assertSee('Configured for this administrator');
         $this->post('/admin/notifications/delivery/test')
             ->assertRedirect(route('admin.notifications.delivery'));
 
