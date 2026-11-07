@@ -253,6 +253,35 @@ final class OperationalNotificationTest extends TestCase
             json_encode($event->toArray(), JSON_THROW_ON_ERROR));
     }
 
+    public function test_visible_notification_queues_mail_with_identical_database_uuid(): void
+    {
+        Queue::fake();
+        $owner = $this->member('student', 'visible-queue-uuid@edumia.test');
+        config()->set('mail.default', 'smtp');
+        config()->set('queue.default', 'database');
+        config()->set('notifications.provider_verified', true);
+        config()->set('notifications.queue_worker_verified', true);
+        config()->set('notifications.transactional_mail_enabled', true);
+
+        app(NotificationService::class)->deliver($owner, 'support_reply',
+            'QA notification UUID', 'Sign in to read your reply.', '/support/tickets/42');
+
+        $stored = $owner->notifications()->sole();
+        $this->assertNotEmpty($stored->id);
+        Queue::assertPushed(SendOperationalMail::class, function (SendOperationalMail $job) use ($owner, $stored): bool {
+            return $job->userId === $owner->id
+                && $job->notificationId === $stored->id
+                && $job->snapshot === null;
+        });
+
+        $audit = \\App\\Models\\AuditEvent::query()
+            ->where('subject_type', User::class)
+            ->where('subject_id', $owner->id)
+            ->where('action', 'notifications.mail_queued')
+            ->sole();
+        $this->assertSame($stored->id, $audit->new_values['notification_id']);
+    }
+
     public function test_mail_only_preference_queues_without_exposing_an_in_app_message(): void
     {
         Queue::fake();
