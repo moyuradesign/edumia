@@ -25,10 +25,11 @@
             <div class="admin-widget-heading"><div><span class="admin-widget-kicker">OPERATOR CHECK</span>
                 <h2>Send a private test message</h2>
             </div></div>
-            <p>Test messages are sent only to the signed-in administrator account and only after the separate protected SMTP test gate is enabled.</p>
+            <p>Test messages can only go to the signed-in administrator when their email exactly matches the sandbox recipient approved in protected server configuration. A successful transport response is not proof of inbox delivery.</p>
+            <p>Test recipient approval: <strong>{{ $approvedTestRecipient ? 'Configured for this administrator' : 'Not configured for this administrator' }}</strong></p>
             <form method="post" action="{{ route('admin.notifications.delivery.test') }}">
                 @csrf
-                <button class="admin-action-primary" type="submit" @disabled(!$smtpTestEnabled || $provider !== 'smtp')>Send SMTP test to my account</button>
+                <button class="admin-action-primary" type="submit" @disabled(!$smtpTestEnabled || $provider !== 'smtp' || !$approvedTestRecipient)>Send SMTP test to my account</button>
             </form>
             @if(session('error'))<p class="flash error" role="alert">{{ session('error') }}</p>@endif
         </section>
