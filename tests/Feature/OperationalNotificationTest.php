@@ -274,7 +274,7 @@ final class OperationalNotificationTest extends TestCase
                 && $job->snapshot === null;
         });
 
-        $audit = \\App\\Models\\AuditEvent::query()
+        $audit = \App\Models\AuditEvent::query()
             ->where('subject_type', User::class)
             ->where('subject_id', $owner->id)
             ->where('action', 'notifications.mail_queued')
