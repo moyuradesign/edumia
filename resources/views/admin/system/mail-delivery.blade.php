@@ -13,9 +13,13 @@
             </div></div>
             <p>Mail transport: <strong>{{ $provider === 'smtp' ? 'SMTP' : 'Disabled / log-only' }}</strong></p>
             <p>Queue processing: <strong>{{ $queueDriver === 'database' ? 'Database queue configured' : 'Worker setup required' }}</strong></p>
+            <p>Pending notification jobs: <strong>{{ number_format($pendingNotifications) }}</strong></p>
+            <p>Failed notification jobs: <strong>{{ number_format($failedNotifications) }}</strong></p>
+            <p>Queue worker: <strong>{{ $workerVerified ? 'Operator verified' : 'Not independently verified' }}</strong></p>
+            <p>Last SMTP transport acceptance: <strong>{{ $lastTransportAcceptance ? $lastTransportAcceptance->format('M j, Y · H:i') : 'None recorded' }}</strong></p>
             <p>Provider verification: <strong>{{ $providerVerified ? 'Operator-approved' : 'Not yet approved' }}</strong></p>
             <p>Transactional email: <strong>{{ $transportReady ? 'Enabled by verified server configuration' : 'Disabled' }}</strong></p>
-            <p class="admin-field-hint">SMTP transport acceptance is not proof of inbox delivery. A running queue worker and independent recipient verification are required.</p>
+            <p class="admin-field-hint">SMTP transport acceptance is not proof of inbox delivery. Queue counts do not prove worker health. Check your Supervisor/cron service and independently confirm recipient delivery.</p>
         </section>
         <section class="admin-widget">
             <div class="admin-widget-heading"><div><span class="admin-widget-kicker">OPERATOR CHECK</span>
