@@ -183,6 +183,8 @@ final class OperationalNotificationTest extends TestCase
 
     public function test_smtp_probe_requires_operator_opt_in_and_avoids_credentials_in_audit(): void
     {
+        // This test exercises multiple gate states; throttle coverage is separate.
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
         Mail::fake();
         $admin = $this->member('admin', 'mail-operator@edumia.test');
         $this->actingAs($admin)->post('/admin/notifications/delivery/test')->assertForbidden();
