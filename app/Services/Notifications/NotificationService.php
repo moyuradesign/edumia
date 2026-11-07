@@ -59,6 +59,9 @@ final class NotificationService
         // out leaves no database notification behind.
         $visible = $this->enabled($recipient, $event, 'database');
         if ($visible) {
+            // Laravel sends a cloned notification; assign its ID before dispatch
+            // so the database notice and queued email share the same UUID.
+            $notice->id = (string) Str::uuid();
             $recipient->notify($notice);
         }
 
