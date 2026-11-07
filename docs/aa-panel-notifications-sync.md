@@ -17,8 +17,12 @@ is disabled. Credentials stay exclusively in protected environment files.
 Never copy passwords to GitHub, dashboard inputs, audit rows or screenshots.
 
 First configure and verify SMTP provider onboarding out-of-band. With
-EDUMIA_SMTP_TEST_ENABLED=true only, an administrator can send a throttled
-test exclusively to their own account. A successful SMTP transport response
+EDUMIA_SMTP_TEST_ENABLED=true and EDUMIA_SMTP_TEST_RECIPIENT set to an
+explicitly approved sandbox recipient, an administrator may send a throttled
+test only if their authenticated email matches that exact recipient.
+Without the recipient allowlist, the test endpoint remains disabled.
+Never use an unrestricted production recipient list or live mail credentials
+for sandbox verification. A successful SMTP transport response
 is not proof of final inbox delivery. Confirm receipt separately.
 
 Only after test receipt, sender/domain eligibility and a supervised database
@@ -111,3 +115,13 @@ false if worker supervision, provider verification, or mail reliability
 degrades. All environment changes remain an operator action, not a
 dashboard action. This milestone does not authorize production deployment
 or real-world outbound messages.
+
+### Sandbox recipient approval check
+
+Set `EDUMIA_SMTP_TEST_RECIPIENT` to the exact email of the signed-in
+test administrator *only after* confirming it is an approved recipient
+in the sandbox mail provider. The UI never accepts a recipient address
+from form submissions. Configure `EDUMIA_SMTP_TEST_ENABLED=true` only for
+a controlled operator test; keep `EDUMIA_TRANSACTIONAL_MAIL_ENABLED=false`.
+Use the sandbox provider's inbox to confirm receipt and inspect provider
+logs without exposing credentials. Remove the test gate after acceptance.
