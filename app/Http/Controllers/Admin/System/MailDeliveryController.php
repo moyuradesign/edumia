@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Throwable;
 
@@ -27,6 +28,13 @@ final class MailDeliveryController extends Controller
             'smtpTestEnabled' => (bool) config('notifications.smtp_test_enabled'),
             'providerVerified' => (bool) config('notifications.provider_verified'),
             'queueDriver' => config('queue.default'),
+            // Read-only queue telemetry. Counts do not imply that a worker is running.
+            'pendingNotifications' => DB::table('jobs')->where('queue', 'notifications')->count(),
+            'failedNotifications' => DB::table('failed_jobs')->where('queue', 'notifications')->count(),
+            'lastTransportAcceptance' => AuditEvent::query()
+                ->where('action', 'notifications.mail_accepted')
+                ->latest('id')->value('created_at'),
+            'workerVerified' => (bool) config('notifications.queue_worker_verified', false),
             'recentActivity' => AuditEvent::query()->with('actor')
                 ->whereIn('action', ['notifications.mail_accepted', 'notifications.mail_failed',
                     'notifications.smtp_test_accepted', 'notifications.smtp_test_failed'])
