@@ -19,6 +19,7 @@
             ['label' => 'My earnings', 'route' => 'instructor.earnings.index', 'match' => 'instructor.earnings.*', 'icon' => 'teacher-earnings'],
             ['label' => 'My learning', 'route' => 'account.home', 'match' => 'account.home', 'icon' => 'teacher-learning'],
             ['label' => 'Notifications', 'route' => 'account.notifications.index', 'match' => 'account.notifications.*', 'icon' => 'account-notifications'],
+            ['label' => 'Account activity', 'route' => 'account.activity.index', 'match' => 'account.activity.*', 'icon' => 'account-activity'],
             ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'member-preferences'],
             ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'member-security'],
             ['label' => 'Support tickets', 'route' => 'support.tickets.index', 'match' => 'support.tickets.*', 'icon' => 'member-support'],
@@ -39,6 +40,7 @@
         ]],
         ['label' => 'Account & support', 'items' => [
             ['label' => 'Notifications', 'route' => 'account.notifications.index', 'match' => 'account.notifications.*', 'icon' => 'account-notifications'],
+            ['label' => 'Account activity', 'route' => 'account.activity.index', 'match' => 'account.activity.*', 'icon' => 'account-activity'],
             ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'member-preferences'],
             ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'member-security'],
             ['label' => 'Support tickets', 'route' => 'support.tickets.index', 'match' => 'support.tickets.*', 'icon' => 'member-support'],

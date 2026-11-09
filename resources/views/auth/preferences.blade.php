@@ -82,7 +82,10 @@
                 <h2 id="account-activity-title">Recent preference changes</h2>
                 <p>Only your own account settings changes are displayed here, without private audit values.</p>
             </div>
-            <a href="{{ route('account.notifications.preferences.edit') }}">Notification settings</a>
+            <div class="edumia-account-activity-links">
+                <a href="{{ route('account.activity.index') }}">View all activity</a>
+                <a href="{{ route('account.notifications.preferences.edit') }}">Notification settings</a>
+            </div>
         </div>
         <div class="edumia-account-activity-list">
             @forelse($recentAccountChanges as $change)

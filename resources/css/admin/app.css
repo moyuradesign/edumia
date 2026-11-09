@@ -1667,3 +1667,24 @@ progress {
 @media (max-width: 400px) {
   .edumia-account-bell-panel { right: -118px; }
 }
+/* Private account activity and notification inbox search. */
+.edumia-account-history-filters { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.edumia-account-history-filter { display:flex; flex-direction:column; gap:7px; min-width:0; padding:14px 16px; border:1px solid var(--border); border-radius:13px; background:var(--surface); color:var(--ink); }
+.edumia-account-history-filter span { font-size:12px; font-weight:720; }
+.edumia-account-history-filter strong { color:var(--muted); font-size:20px; font-variant-numeric:tabular-nums; }
+.edumia-account-history-filter:hover,.edumia-account-history-filter.is-active { border-color:var(--accent); background:var(--soft); }
+.edumia-account-history-pagination { display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap; margin-top:15px; }
+.edumia-account-page-jump { display:flex; align-items:center; gap:9px; margin:0; }
+.edumia-account-page-jump label { color:var(--muted); font-size:12px; font-weight:730; }
+.edumia-account-page-jump input { width:76px; min-height:38px; padding:7px 10px; border-radius:9px; border:1px solid var(--border); background:var(--surface); color:var(--ink); }
+.edumia-account-activity-links { display:flex; gap:9px 16px; flex-wrap:wrap; font-size:12px; font-weight:760; }
+.edumia-account-activity-links a { color:var(--accent); }
+.edumia-notification-filters input[type='search'] { flex:1 1 200px; min-width:min(100%,190px); max-width:350px; min-height:42px; padding:9px 12px; border-radius:10px; border:1px solid var(--border); color:var(--ink); background:var(--surface); }
+@media (max-width:850px) { .edumia-account-history-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:480px) {
+ .edumia-account-history-filter { padding:11px; }
+ .edumia-account-history-filter strong { font-size:18px; }
+ .edumia-account-history-pagination { align-items:stretch; }
+ .edumia-account-page-jump { justify-content:space-between; width:100%; }
+ .edumia-notification-filters input[type='search'] { max-width:none; flex-basis:100%; }
+}

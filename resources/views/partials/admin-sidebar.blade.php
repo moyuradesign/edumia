@@ -57,6 +57,7 @@
             'label' => 'My account',
             'items' => [
                 ['label' => 'Notifications', 'route' => 'account.notifications.index', 'match' => 'account.notifications.*', 'icon' => 'account-notifications'],
+                ['label' => 'Account activity', 'route' => 'account.activity.index', 'match' => 'account.activity.*', 'icon' => 'account-activity'],
                 ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'member-preferences'],
                 ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'member-security'],
             ],

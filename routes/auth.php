@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Account\NotificationController;
+use App\Http\Controllers\Account\ActivityController;
 use App\Http\Controllers\Admin\System\MailDeliveryController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/account/preferences', [ProfileController::class, 'edit'])->name('account.preferences.edit');
+    Route::get('/account/activity', [ActivityController::class, 'index'])->name('account.activity.index');
     Route::put('/account/preferences', [ProfileController::class, 'update'])->middleware('throttle:8,1')->name('account.preferences.update');
 
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');

@@ -27,9 +27,16 @@ final class NotificationController extends Controller
         if ($filters['event'] !== 'all') {
             $query->where('data->event', $filters['event']);
         }
+        if (isset($filters['q'])) {
+            $term = '%'.$filters['q'].'%';
+            $query->where(function ($search) use ($term): void {
+                $search->where('data->title', 'like', $term)
+                    ->orWhere('data->message', 'like', $term);
+            });
+        }
 
         return view('account.notifications.index', [
-            'notices' => $query->latest()->paginate(15)->withQueryString(),
+            'notices' => $query->latest()->paginate(15)->appends($filters),
             'unreadCount' => $user->unreadNotifications()->count(),
             'counts' => [
                 'all' => $user->notifications()->count(),
@@ -38,6 +45,7 @@ final class NotificationController extends Controller
             ],
             'status' => $filters['status'],
             'event' => $filters['event'],
+            'search' => $filters['q'] ?? '',
             'events' => NotificationService::EVENTS,
         ]);
     }
@@ -107,6 +115,8 @@ final class NotificationController extends Controller
     {
         $rawStatus = $request->query('status', 'all');
         $rawEvent = $request->query('event', 'all');
+        $rawSearch = $request->query('q', '');
+        $search = is_string($rawSearch) ? mb_substr(trim($rawSearch), 0, 80) : '';
 
         return [
             'status' => is_string($rawStatus) && in_array($rawStatus, ['all', 'unread', 'read'], true)
@@ -114,6 +124,7 @@ final class NotificationController extends Controller
             'event' => is_string($rawEvent) && ($rawEvent === 'all'
                 || array_key_exists($rawEvent, NotificationService::EVENTS))
                 ? $rawEvent : 'all',
+            ...($search !== '' ? ['q' => $search] : []),
         ];
     }
 }
