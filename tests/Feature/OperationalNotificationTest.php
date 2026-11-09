@@ -329,12 +329,19 @@ final class OperationalNotificationTest extends TestCase
             'Another account secret', 'Do not show this.', '/support/tickets/22');
 
         $url = '/account/notifications?status=unread&event=support_reply';
-        $this->actingAs($owner)->get($url)->assertOk()
+        $response = $this->actingAs($owner)->get($url)->assertOk()
             ->assertSee('Filtered support reply')
-            ->assertDontSee('Filtered security alert')
             ->assertDontSee('Another account secret')
             ->assertSee('Activity type')
             ->assertSee('of 1 matching updates');
+        // The global bell deliberately previews all own unread updates,
+        // while the inbox feed itself must honor the event filter.
+        $feed = \Illuminate\Support\Str::between(
+            $response->getContent(),
+            '<div class="edumia-notification-feed">',
+            '<div class="admin-course-pagination">'
+        );
+        $this->assertStringNotContainsString('Filtered security alert', $feed);
 
         $notice = $owner->notifications()->where('data->event', 'support_reply')->firstOrFail();
         $this->patch('/account/notifications/'.$notice->id.'/read?status=unread&event=support_reply')
@@ -344,9 +351,14 @@ final class OperationalNotificationTest extends TestCase
 
         $this->get($url)->assertOk()->assertDontSee('Filtered support reply')
             ->assertSee('You are all caught up');
-        $this->get('/account/notifications?status=read&event=support_reply')
-            ->assertOk()->assertSee('Filtered support reply')
-            ->assertDontSee('Filtered security alert');
+        $readView = $this->get('/account/notifications?status=read&event=support_reply')
+            ->assertOk()->assertSee('Filtered support reply');
+        $readFeed = \Illuminate\Support\Str::between(
+            $readView->getContent(),
+            '<div class="edumia-notification-feed">',
+            '<div class="admin-course-pagination">'
+        );
+        $this->assertStringNotContainsString('Filtered security alert', $readFeed);
         $this->get('/account/notifications?status=invalid&event=invalid')
             ->assertOk()->assertSee('Filtered support reply')
             ->assertSee('Filtered security alert');
