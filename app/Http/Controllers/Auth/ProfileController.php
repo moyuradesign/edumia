@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\Localization;
 use App\Models\AuditEvent;
+use App\Models\User;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +24,16 @@ final class ProfileController extends Controller
             'member' => $member,
             'languages' => Localization::LANGUAGES,
             'supportTicketsCount' => Ticket::query()->where('requester_id', $member->getKey())->count(),
+            'unreadNotificationCount' => $member->unreadNotifications()->count(),
+            // Only show this member's own safe event categories, never audit metadata.
+            'recentAccountChanges' => AuditEvent::query()
+                ->where('actor_id', $member->getKey())
+                ->where('subject_type', User::class)
+                ->where('subject_id', $member->getKey())
+                ->whereIn('action', [
+                    'account.name_updated', 'account.locale_updated',
+                    'notifications.preference_changed',
+                ])->latest('id')->limit(5)->get(['id', 'action', 'created_at']),
         ]);
     }
 

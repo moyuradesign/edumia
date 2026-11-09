@@ -53,6 +53,14 @@
                 ['label' => 'Release readiness', 'route' => 'admin.readiness.index', 'match' => 'admin.readiness.*', 'icon' => 'admin-release'],
             ],
         ],
+        [
+            'label' => 'My account',
+            'items' => [
+                ['label' => 'Notifications', 'route' => 'account.notifications.index', 'match' => 'account.notifications.*', 'icon' => 'account-notifications'],
+                ['label' => 'Account preferences', 'route' => 'account.preferences.edit', 'match' => 'account.preferences.*', 'icon' => 'member-preferences'],
+                ['label' => 'Password & security', 'route' => 'password.edit', 'match' => 'password.*', 'icon' => 'member-security'],
+            ],
+        ],
     ];
 @endphp
 <aside class="admin-sidebar" id="panel-navigation" data-admin-sidebar aria-label="Administration sidebar">

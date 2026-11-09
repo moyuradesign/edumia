@@ -37,6 +37,8 @@ Route::middleware(['auth', 'active'])->group(function (): void {
         ->middleware('throttle:20,1')->name('account.notifications.read-all');
     Route::patch('/account/notifications/{notification}/read', [NotificationController::class, 'read'])
         ->middleware('throttle:30,1')->name('account.notifications.read');
+    Route::patch('/account/notifications/{notification}/unread', [NotificationController::class, 'unread'])
+        ->middleware('throttle:30,1')->name('account.notifications.unread');
     Route::get('/account/notifications/preferences', [NotificationController::class, 'preferences'])
         ->name('account.notifications.preferences.edit');
     Route::put('/account/notifications/preferences', [NotificationController::class, 'updatePreferences'])

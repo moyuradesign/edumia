@@ -78,12 +78,17 @@
                     </div>
                     <div class="edumia-notification-actions">
                         @if($safePath)<a class="admin-action-secondary" href="{{ $noticePath }}">Open related page</a>@endif
-                        @unless($notice->read_at)
+                        @if($notice->read_at)
+                            <form method="post" action="{{ route('account.notifications.unread', ['notification' => $notice->id, 'status' => $status, 'event' => $event]) }}">
+                                @csrf @method('PATCH')
+                                <button class="admin-action-secondary" type="submit">Mark unread</button>
+                            </form>
+                        @else
                             <form method="post" action="{{ route('account.notifications.read', ['notification' => $notice->id, 'status' => $status, 'event' => $event]) }}">
                                 @csrf @method('PATCH')
                                 <button class="admin-action-secondary" type="submit">Mark read</button>
                             </form>
-                        @endunless
+                        @endif
                     </div>
                 </article>
             @empty

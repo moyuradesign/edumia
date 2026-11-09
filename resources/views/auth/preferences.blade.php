@@ -25,6 +25,10 @@
                 <strong>{{ number_format($member->courses_count) }}</strong><small>Instructor course records</small>
             </a>
         @endif
+        <a class="admin-stat" href="{{ route('account.notifications.index', ['status' => 'unread']) }}">
+            <span class="admin-stat-top"><span>Unread notifications</span></span>
+            <strong>{{ number_format($unreadNotificationCount) }}</strong><small>Private account updates</small>
+        </a>
         <a class="admin-stat" href="{{ route('support.tickets.index') }}">
             <span class="admin-stat-top"><span>Support tickets</span></span>
             <strong>{{ number_format($supportTicketsCount) }}</strong><small>Requests created by you</small>
@@ -71,5 +75,30 @@
             <p class="admin-media-hint">Email and access permissions are managed separately for account security.</p>
         </aside>
     </div>
+    <section class="admin-widget edumia-account-activity" aria-labelledby="account-activity-title">
+        <div class="admin-widget-heading">
+            <div>
+                <span class="admin-widget-kicker">ACCOUNT HISTORY</span>
+                <h2 id="account-activity-title">Recent preference changes</h2>
+                <p>Only your own account settings changes are displayed here, without private audit values.</p>
+            </div>
+            <a href="{{ route('account.notifications.preferences.edit') }}">Notification settings</a>
+        </div>
+        <div class="edumia-account-activity-list">
+            @forelse($recentAccountChanges as $change)
+                <div class="edumia-account-activity-row">
+                    <span>{{ match ($change->action) {
+                        'account.name_updated' => 'Display name changed',
+                        'account.locale_updated' => 'Language preference changed',
+                        'notifications.preference_changed' => 'Notification preferences changed',
+                        default => 'Account updated',
+                    } }}</span>
+                    <time datetime="{{ $change->created_at?->toAtomString() }}">{{ $change->created_at?->format('M j, Y · H:i') }}</time>
+                </div>
+            @empty
+                <p class="edumia-account-activity-empty">No recent preference changes. Your account history will appear here.</p>
+            @endforelse
+        </div>
+    </section>
 </section>
 @endsection

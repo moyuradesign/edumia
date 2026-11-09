@@ -1,5 +1,11 @@
 @php
     $siteName = app(\App\Services\System\SettingsRepository::class)->general()['site_name'];
+    // Account-scoped counters and previews are shared by all three workspaces.
+    // Never query platform-wide notifications or disclose private message content.
+    $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
+    $notificationPreview = $unreadNotificationCount > 0
+        ? auth()->user()->unreadNotifications()->latest()->limit(5)->get()
+        : collect();
 
     // The route selects the workspace, not the logged-in user's highest privilege.
     // Keep the existing administrator dashboard and its navigation unchanged.

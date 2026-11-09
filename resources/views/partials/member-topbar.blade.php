@@ -14,13 +14,7 @@
             <input id="member-nav-search" type="search" autocomplete="off" placeholder="Find a page…" data-admin-search aria-controls="panel-navigation"><kbd>/</kbd>
         </div>
         <div class="admin-topbar-actions">
-            <a class="admin-topbar-icon" href="{{ route('account.notifications.index') }}"
-               aria-label="Notifications" title="Notifications">
-                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75"
-                     stroke-linejoin="round" stroke-linecap="round">
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/>
-                </svg>
-            </a>
+            @include('partials.account-notification-bell')
             <a class="admin-topbar-icon" href="{{ route('support.tickets.index') }}" aria-label="Support tickets" title="Support tickets">
                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 4h16v13H8l-4 4V4Z"/><path d="M8 9h8M8 13h5"/></svg>
             </a>

@@ -36,6 +36,7 @@
         'team-workspaces' => '<path d="M5 8h14v12H5zM9 8V5h6v3M5 13h14"/><path d="m8 16 2 2 2-2 2 2 2-2"/>',
         'teacher-earnings' => '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18m-6 4h6v4h-6zM7 3h10"/>',
         'teacher-learning' => '<path d="M4 8h16v12H4zM7 8V5l5-3 5 3v3M9 14h6M12 11v6"/>',
+        'account-notifications' => '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/><circle cx="18" cy="5" r="3"/>',
         'member-preferences' => '<circle cx="9" cy="7" r="3"/><path d="M3 20v-2c0-3 2-5 6-5"/><circle cx="17" cy="16" r="3"/><path d="M17 11v2m0 6v2m-5-5h2m6 0h2m-8-4 1.2 1.2m4.6 4.6L21 20"/>',
         'member-security' => '<circle cx="8" cy="9" r="5"/><path d="M12 12l9 9m-4-4 2-2m-5 0 2-2"/>',
         'member-support' => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="m5.5 5.5 3.5 3.5m6 6 3.5 3.5M18.5 5.5 15 9m-6 6-3.5 3.5"/>',

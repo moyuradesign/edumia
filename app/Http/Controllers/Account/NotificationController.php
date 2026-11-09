@@ -51,6 +51,18 @@ final class NotificationController extends Controller
             ->with('success', 'Notification marked as read.');
     }
 
+    public function unread(Request $request, string $notification): RedirectResponse
+    {
+        // The relation, not a global lookup, enforces notification ownership.
+        $notice = $request->user()->notifications()->whereKey($notification)->firstOrFail();
+        if ($notice->read_at !== null) {
+            $notice->update(['read_at' => null]);
+        }
+
+        return to_route('account.notifications.index', $this->inboxFilters($request))
+            ->with('success', 'Notification marked as unread.');
+    }
+
     public function readAll(Request $request): RedirectResponse
     {
         $request->user()->unreadNotifications()->update(['read_at' => now()]);
