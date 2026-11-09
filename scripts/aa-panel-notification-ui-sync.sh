@@ -49,7 +49,7 @@ guard_runtime() {
     fwrite(STDERR,"BLOCKED: Outbound mail/test gate must remain disabled".PHP_EOL);exit(1);
   }
   echo "EDUMIA_RUNTIME_GUARDS=PASS".PHP_EOL;
- '))
+ ')
 }
 refresh_cache() {
  (cd "$APP" &&
