@@ -210,6 +210,31 @@ done
   ! -L "$APP/public/build/assets" && ! -L "$APP/public/build/manifest.json" ]] || {
  echo 'BLOCKED: Existing Vite build invalid.' >&2;exit 1;
 }
+# Use only the tested admin CSS entry. Preserve existing frontend CSS and
+# all JavaScript manifest entries to avoid changing unrelated live modules.
+"$PHP" -r '
+ $current=json_decode(file_get_contents($argv[1]),true,512,JSON_THROW_ON_ERROR);
+ $tested=json_decode(file_get_contents($argv[2]),true,512,JSON_THROW_ON_ERROR);
+ $root=$argv[3];
+ $keys=["resources/css/frontend/app.css","resources/css/admin/app.css",
+        "resources/js/frontend/app.js","resources/js/admin/app.js"];
+ foreach($keys as $key){
+  $file=$current[$key]["file"]??null;
+  if(!is_string($file) || !preg_match("~^assets/[A-Za-z0-9._/-]+$~D",$file)
+    || !is_file("$root/$file") || is_link("$root/$file")){
+   fwrite(STDERR,"BLOCKED: Existing manifest asset missing: ".$key.PHP_EOL);exit(1);
+  }
+ }
+ $css=$tested["resources/css/admin/app.css"]["file"]??null;
+ if(!is_string($css) || !preg_match("~^assets/[A-Za-z0-9._-]+\.css$~D",$css)){
+  fwrite(STDERR,"BLOCKED: Tested admin stylesheet missing".PHP_EOL);exit(1);
+ }
+ $current["resources/css/admin/app.css"]=$tested["resources/css/admin/app.css"];
+ file_put_contents($argv[4],json_encode($current,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR)."\n");
+ file_put_contents($argv[5],"public/build/".$css."\n");
+ echo "VITE_MANIFEST_SCOPE=ADMIN_STYLESHEET_ONLY".PHP_EOL;
+' "$APP/public/build/manifest.json" "$STAGE/snapshot/public/build/manifest.json" \
+  "$APP/public/build" "$STAGE/merged-manifest.json" "$STAGE/assets.txt"
 echo '========== READ-ONLY PRODUCTION DRIFT =========='
 : > "$STAGE/originals.txt"
 : > "$STAGE/created.txt"
@@ -250,7 +275,6 @@ for item in $FILES; do
  count=$((count+1))
 done
 echo public/build/manifest.json >> "$STAGE/originals.txt"
-(cd "$STAGE/snapshot" && find public/build/assets -type f -print | LC_ALL=C sort) > "$STAGE/assets.txt"
 [[ -s "$STAGE/assets.txt" ]] || { echo 'BLOCKED: No compiled assets.' >&2;exit 1; }
 : > "$STAGE/new-assets.txt"
 while IFS= read -r item; do
@@ -307,7 +331,7 @@ for item in $FILES; do
 done
 STEP='switching compiled manifest'
 tmp="$(mktemp "$APP/public/build/.edumia-manifest.XXXXXXXX")"
-cp "$STAGE/snapshot/public/build/manifest.json" "$tmp"
+cp "$STAGE/merged-manifest.json" "$tmp"
 chmod 0644 "$tmp"
 chown --reference="$APP/public/build/manifest.json" "$tmp"
 mv -f "$tmp" "$APP/public/build/manifest.json"
@@ -317,7 +341,7 @@ STEP='verifying notification route guards'
 verify_routes
 STEP='verifying installed content'
 for item in $FILES;do cmp -s "$APP/$item" "$STAGE/source/$item";done
-cmp -s "$APP/public/build/manifest.json" "$STAGE/snapshot/public/build/manifest.json"
+cmp -s "$APP/public/build/manifest.json" "$STAGE/merged-manifest.json"
 while IFS= read -r item;do cmp -s "$APP/$item" "$STAGE/snapshot/$item";done < "$STAGE/assets.txt"
 guard_runtime
 STEP='recording deployed file hashes'

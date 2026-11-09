@@ -9,3 +9,5 @@ From a clean, up-to-date /root/edumia-github checkout run:
 It refuses unknown production source drift, symlinked inputs, nonmatching QA source and asset collisions. It preserves the existing Laravel installation, .env, MySQL, customer media, vendor and payment configuration. No SMTP activation or migrations occur. Older hashed assets are kept for rollback; only the Vite manifest and approved source are swapped.
 
 The successful apply prints ROLLBACK_BACKUP. To undo a completed release with no intervening modifications, run bash scripts/aa-panel-notification-ui-sync.sh --rollback EXACT_ROLLBACK_BACKUP. Browser acceptance must still cover logged-in student/instructor/admin notification roles, mark/read, event filters, delivery history, light/dark and physical mobile. This engineering QA snapshot is not a customer-distribution release.
+
+Only the Vite manifest entry for resources/css/admin/app.css is updated; the existing frontend CSS and both JavaScript entries remain pinned to their previous live assets. The tested admin stylesheet is the only newly activated compiled asset.
