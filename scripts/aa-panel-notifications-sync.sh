@@ -161,7 +161,26 @@ for item in $FILES; do
   if [[ -f "$STAGE/previous/$item" ]]; then
    previous="$(git -C "$SOURCE" hash-object "$STAGE/previous/$item")"
    if [[ "$live" != "$previous" && "$live" != "$target" ]]; then echo "DRIFT: $item: $live";drift=1;fi
-  elif [[ "$live" != "$target" ]]; then echo "DRIFT: New path differs: $item: $live";drift=1;fi
+  elif [[ "$live" != "$target" ]]; then
+   expected_prior=''
+   case "$item" in
+    app/Services/Notifications/NotificationService.php)
+     expected_prior='9383b6ef7c25e63bb77d7ec7ce16d305d20830aa' ;;
+    app/Http/Controllers/Admin/System/MailDeliveryController.php)
+     expected_prior='73b889cd2330738639bfd8933f2becede8c95772' ;;
+    resources/views/admin/system/mail-delivery.blade.php)
+     expected_prior='b7af83ca1bf7a0e34a61ef5ff159d8619729f9ef' ;;
+    config/notifications.php)
+     expected_prior='01e88cd4820dae23a5903aab2121b5376aaf967c' ;;
+   esac
+
+   if [[ -n "$expected_prior" && "$live" == "$expected_prior" ]]; then
+    echo "KNOWN PRIOR GITHUB VERSION: $item"
+   else
+    echo "DRIFT: New path differs: $item: $live"
+    drift=1
+   fi
+  fi
   if [[ "$live" == "$target" ]]; then echo "MATCH: $item";else echo "UPDATE: $item";changes=$((changes+1));fi
  elif [[ -f "$STAGE/previous/$item" ]]; then
   echo "DRIFT: Baseline file missing: $item";drift=1
