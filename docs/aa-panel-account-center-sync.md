@@ -7,3 +7,7 @@ Use `scripts/aa-panel-account-center-sync.sh` for a targeted, backup-protected r
 **aaPanel:** From a clean, up-to-date checkout at /root/edumia-github, run `bash scripts/aa-panel-account-center-sync.sh --check`; proceed to `--apply` only when both workflows pass and the preflight reports CHECK PASSED. A protected backup path is printed; `--rollback EXACT_BACKUP_PATH` refuses unknown changes and restores the prior source and manifest.
 
 This installer does not migrate or edit MySQL, .env, payments, SMTP gates, worker services, uploads or vendor dependencies. It refuses unknown source drift rather than silently overwriting active customizations. After deployment, use logged-in administrator, instructor and student accounts to verify the bell, private preview, read/unread status, navigation, recent account activity and responsive light/dark styling on mobile and desktop. Physical device QA remains separate.
+
+## Historical profile source reconciliation (November 9, 2026)
+
+The read-only aaPanel preflight reported `app/Http/Controllers/Auth/ProfileController.php` with Git SHA `c1d40c832b16a359c5f0e8da87a4abdde1b764c3`. It matches the **exact file blob** from Edumia commit `5f901b67cc62a0e398a734146788976943c2bf2d` (the earlier account-preferences release). The script verifies that exact source through local pinned Git history before allowing the update; it does not accept unknown modifications. If another file differs unexpectedly, the preflight prints each unknown file and its Git hash before stopping. Production remains unchanged during `--check`.

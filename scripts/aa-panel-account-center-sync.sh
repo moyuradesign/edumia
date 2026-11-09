@@ -238,6 +238,7 @@ echo '========== READ-ONLY PRODUCTION DRIFT =========='
 : > "$STAGE/originals.txt"
 : > "$STAGE/created.txt"
 count=0
+unapproved=0
 for item in $FILES; do
  target="$(git -C "$SOURCE" hash-object "$STAGE/source/$item")"
  if [[ -e "$APP/$item" || -L "$APP/$item" ]]; then
@@ -250,9 +251,21 @@ for item in $FILES; do
   allowed=0
   old="$(git -C "$SOURCE" rev-parse "$PRIOR:$item" 2>/dev/null || true)"
   [[ "$old" == "$live" ]] && allowed=1
-  (( allowed == 1 )) || {
-   echo "BLOCKED: Unknown production source drift: $item ($live)" >&2;exit 1;
-  }
+  # This live controller exactly matches the original account-preferences
+  # implementation in Edumia Git history, not arbitrary local modifications.
+  if [[ "$item" == app/Http/Controllers/Auth/ProfileController.php &&
+        "$live" == c1d40c832b16a359c5f0e8da87a4abdde1b764c3 ]]; then
+   known="$(git -C "$SOURCE" rev-parse "5f901b67cc62a0e398a734146788976943c2bf2d:$item" 2>/dev/null || true)"
+   if [[ "$known" == "$live" ]]; then
+    echo "VERIFIED_PRIOR_GITHUB_PROFILE_CONTROLLER=YES"
+    allowed=1
+   fi
+  fi
+  if (( allowed == 0 )); then
+   echo "BLOCKED: Unknown production source drift: $item ($live)" >&2
+   unapproved=$((unapproved + 1))
+   continue
+  fi
   echo "APPROVED_UPDATE: $item"
  else
   case " $ADDED " in *" $item "*) ;; *)
@@ -263,6 +276,11 @@ for item in $FILES; do
  fi
  count=$((count+1))
 done
+if (( unapproved > 0 )); then
+ echo "BLOCKED: $unapproved production source file(s) require reconciliation." >&2
+ echo "PRODUCTION_UNCHANGED=YES" >&2
+ exit 1
+fi
 echo public/build/manifest.json >> "$STAGE/originals.txt"
 [[ -s "$STAGE/assets.txt" ]] || { echo 'BLOCKED: No compiled assets.' >&2;exit 1; }
 : > "$STAGE/new-assets.txt"
