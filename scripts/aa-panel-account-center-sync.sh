@@ -261,6 +261,17 @@ for item in $FILES; do
     allowed=1
    fi
   fi
+  # The live account-preferences Blade view also matches the original
+  # Edumia account-preferences release byte-for-byte. Verify its historical
+  # Git blob before accepting this exact production version.
+  if [[ "$item" == resources/views/auth/preferences.blade.php &&
+        "$live" == c17eebee44a77279f79806c96e65a9c9ec346ebb ]]; then
+   known="$(git -C "$SOURCE" rev-parse "5f901b67cc62a0e398a734146788976943c2bf2d:$item" 2>/dev/null || true)"
+   if [[ "$known" == "$live" ]]; then
+    echo "VERIFIED_PRIOR_GITHUB_ACCOUNT_PREFERENCES=YES"
+    allowed=1
+   fi
+  fi
   if (( allowed == 0 )); then
    echo "BLOCKED: Unknown production source drift: $item ($live)" >&2
    unapproved=$((unapproved + 1))

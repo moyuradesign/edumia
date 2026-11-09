@@ -11,3 +11,7 @@ This installer does not migrate or edit MySQL, .env, payments, SMTP gates, worke
 ## Historical profile source reconciliation (November 9, 2026)
 
 The read-only aaPanel preflight reported `app/Http/Controllers/Auth/ProfileController.php` with Git SHA `c1d40c832b16a359c5f0e8da87a4abdde1b764c3`. It matches the **exact file blob** from Edumia commit `5f901b67cc62a0e398a734146788976943c2bf2d` (the earlier account-preferences release). The script verifies that exact source through local pinned Git history before allowing the update; it does not accept unknown modifications. If another file differs unexpectedly, the preflight prints each unknown file and its Git hash before stopping. Production remains unchanged during `--check`.
+
+## Historical account preferences view reconciliation (November 9, 2026)
+
+The read-only aaPanel audit reported `resources/views/auth/preferences.blade.php` with blob `c17eebee44a77279f79806c96e65a9c9ec346ebb`. GitHub confirms the same exact file at historical Edumia commit `5f901b67cc62a0e398a734146788976943c2bf2d`. The installer now accepts only these verified historical bytes; any other difference still blocks deployment and is reported to the operator. The original controller and view were from the same older account-preferences milestone. No environment, database, or live account source files are changed by this correction.
