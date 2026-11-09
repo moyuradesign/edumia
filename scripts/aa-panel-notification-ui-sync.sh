@@ -88,8 +88,7 @@ check_backup() {
     -s "$BACKUP/originals.tar.gz" && -f "$BACKUP/originals.txt" &&
     -f "$BACKUP/created.txt" && -f "$BACKUP/asset-files.txt" &&
     -f "$BACKUP/asset-sha256.txt" ]] || return 1
- [[ "$(sha256sum "$BACKUP/originals.tar.gz" | cut -d' ' -f1)" ==
-    "$(cat "$BACKUP/originals.sha256")" ]] || return 1
+ [[ "$(sha256sum "$BACKUP/originals.tar.gz" | cut -d' ' -f1)" == "$(cat "$BACKUP/originals.sha256")" ]] || return 1
  diff -u <(tar -tzf "$BACKUP/originals.tar.gz" | LC_ALL=C sort) \
     <(LC_ALL=C sort "$BACKUP/originals.txt") >/dev/null || return 1
  while IFS= read -r item; do
