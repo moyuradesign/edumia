@@ -46,6 +46,7 @@ jobs:
           bash -n scripts/aa-panel-governance-sync.sh
           bash -n scripts/aa-panel-notifications-sync.sh
           bash -n scripts/aa-panel-notification-ui-sync.sh
+          bash -n scripts/aa-panel-account-center-sync.sh
 
       - name: Validate Composer manifest
         run: composer validate --no-check-publish
