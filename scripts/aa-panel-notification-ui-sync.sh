@@ -261,6 +261,23 @@ for item in $FILES; do
    resources/views/admin/system/mail-delivery.blade.php:b7af83ca1bf7a0e34a61ef5ff159d8619729f9ef|\
    config/notifications.php:01e88cd4820dae23a5903aab2121b5376aaf967c) allowed=1;;
   esac
+  # The 2026-11-09 read-only server audit established that the live admin
+  # CSS equals the prior GitHub stylesheet with lines 1510-1543 omitted.
+  # Reproduce that exact file from pinned Git history; no other drift passes.
+  if [[ "$item" == resources/css/admin/app.css &&
+        "$live" == 1e40eab636ba84bfecf050b480957e743b7b6cb4 ]]; then
+   original="$(git -C "$SOURCE" rev-parse "$PRIOR:$item")"
+   [[ "$original" == c5b432b5f66cefb8a88ecc0112de0895ed096ee2 ]] || {
+    echo 'BLOCKED: Unexpected reference stylesheet.' >&2;exit 1;
+   }
+   recreated="$(git -C "$SOURCE" show "$PRIOR:$item" |
+     sed '1510,1543d' | git -C "$SOURCE" hash-object --stdin)"
+   [[ "$recreated" == "$live" ]] || {
+    echo 'BLOCKED: Production CSS omission could not be reproduced.' >&2;exit 1;
+   }
+   echo 'VERIFIED_PRIOR_CSS_OMISSION=34_LINES'
+   allowed=1
+  fi
   (( allowed == 1 )) || {
    echo "BLOCKED: Unknown production source drift: $item ($live)" >&2;exit 1;
   }
