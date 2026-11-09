@@ -315,4 +315,75 @@ final class OperationalNotificationTest extends TestCase
         Mail::assertSent(OperationalMail::class, 1);
     }
 
+
+    public function test_inbox_status_and_event_filters_are_private_and_preserved_after_read(): void
+    {
+        $owner = $this->member('student', 'filters-owner@edumia.test');
+        $other = $this->member('student', 'filters-other@edumia.test');
+
+        app(NotificationService::class)->deliver($owner, 'support_reply',
+            'Filtered support reply', 'Sign in to review.', '/support/tickets/21');
+        app(NotificationService::class)->deliver($owner, 'account_security',
+            'Filtered security alert', 'Sign in to review.', '/account/password');
+        app(NotificationService::class)->deliver($other, 'support_reply',
+            'Another account secret', 'Do not show this.', '/support/tickets/22');
+
+        $url = '/account/notifications?status=unread&event=support_reply';
+        $this->actingAs($owner)->get($url)->assertOk()
+            ->assertSee('Filtered support reply')
+            ->assertDontSee('Filtered security alert')
+            ->assertDontSee('Another account secret')
+            ->assertSee('Activity type')
+            ->assertSee('of 1 matching updates');
+
+        $notice = $owner->notifications()->where('data->event', 'support_reply')->firstOrFail();
+        $this->patch('/account/notifications/'.$notice->id.'/read?status=unread&event=support_reply')
+            ->assertRedirect(route('account.notifications.index', [
+                'status' => 'unread', 'event' => 'support_reply',
+            ]));
+
+        $this->get($url)->assertOk()->assertDontSee('Filtered support reply')
+            ->assertSee('You are all caught up');
+        $this->get('/account/notifications?status=read&event=support_reply')
+            ->assertOk()->assertSee('Filtered support reply')
+            ->assertDontSee('Filtered security alert');
+        $this->get('/account/notifications?status=invalid&event=invalid')
+            ->assertOk()->assertSee('Filtered support reply')
+            ->assertSee('Filtered security alert');
+
+        $this->patch('/account/notifications/read-all?status=unread&event=all')
+            ->assertRedirect(route('account.notifications.index', [
+                'status' => 'unread', 'event' => 'all',
+            ]));
+        $this->assertSame(0, $owner->fresh()->unreadNotifications()->count());
+        $this->assertSame(1, $other->fresh()->unreadNotifications()->count());
+    }
+
+    public function test_admin_delivery_history_filters_remain_admin_only(): void
+    {
+        $admin = $this->member('admin', 'delivery-filter-admin@edumia.test');
+        $student = $this->member('student', 'delivery-filter-learner@edumia.test');
+
+        \App\Models\AuditEvent::create([
+            'actor_id' => $admin->id, 'subject_type' => User::class,
+            'subject_id' => $student->id,
+            'action' => 'notifications.mail_accepted',
+            'new_values' => ['transport' => 'smtp'],
+        ]);
+        \App\Models\AuditEvent::create([
+            'actor_id' => $admin->id, 'subject_type' => User::class,
+            'subject_id' => $student->id,
+            'action' => 'notifications.mail_failed',
+            'new_values' => ['error_category' => 'RuntimeException'],
+        ]);
+
+        $this->actingAs($student)->get('/admin/notifications/delivery?outcome=failed')
+            ->assertForbidden();
+        $this->actingAs($admin)->get('/admin/notifications/delivery?outcome=accepted')
+            ->assertOk()->assertSee('mail accepted')->assertDontSee('mail failed')
+            ->assertSee('of 1 delivery records');
+        $this->get('/admin/notifications/delivery?outcome=failed')
+            ->assertOk()->assertSee('mail failed')->assertDontSee('mail accepted');
+    }
+
 }

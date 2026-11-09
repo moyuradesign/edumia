@@ -22,6 +22,18 @@ final class MailDeliveryController extends Controller
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
+        $rawOutcome = $request->query('outcome', 'all');
+        $outcome = is_string($rawOutcome) && in_array($rawOutcome, ['all', 'accepted', 'failed'], true)
+            ? $rawOutcome : 'all';
+        $activity = AuditEvent::query()->with('actor')
+            ->whereIn('action', ['notifications.mail_accepted', 'notifications.mail_failed',
+                'notifications.smtp_test_accepted', 'notifications.smtp_test_failed']);
+        if ($outcome === 'accepted') {
+            $activity->whereIn('action', ['notifications.mail_accepted', 'notifications.smtp_test_accepted']);
+        } elseif ($outcome === 'failed') {
+            $activity->whereIn('action', ['notifications.mail_failed', 'notifications.smtp_test_failed']);
+        }
+
         return view('admin.system.mail-delivery', [
             'provider' => config('mail.default'),
             'transportReady' => $notices->mailReady(),
@@ -36,10 +48,8 @@ final class MailDeliveryController extends Controller
                 ->where('action', 'notifications.mail_accepted')
                 ->latest('id')->first()?->created_at,
             'workerVerified' => (bool) config('notifications.queue_worker_verified', false),
-            'recentActivity' => AuditEvent::query()->with('actor')
-                ->whereIn('action', ['notifications.mail_accepted', 'notifications.mail_failed',
-                    'notifications.smtp_test_accepted', 'notifications.smtp_test_failed'])
-                ->latest('id')->paginate(20),
+            'outcome' => $outcome,
+            'recentActivity' => $activity->latest('id')->paginate(20)->withQueryString(),
         ]);
     }
 
