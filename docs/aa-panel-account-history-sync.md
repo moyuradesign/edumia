@@ -1,0 +1,9 @@
+# Edumia private activity and notification search — guarded aaPanel synchronization
+
+Source commit: `1efddbc05d8c05d041d69b85af30bce230ca3dd4`. The milestone adds a private account-activity page (`/account/activity`) with safe event labels, status filters, ten records per page and a Go To control, plus keyword search in the notification inbox. Access is restricted by Laravel's existing `auth` and `active` middleware, and both actor and subject must belong to the signed-in user. No audit metadata or before/after values are displayed. The user's existing roles, layouts and payment/email policies stay unchanged.
+
+Use `scripts/aa-panel-account-history-sync.sh` to deploy this feature only after both source QA workflows and installer QA pass. The script compares the live copies of eight changed files against exact revision `36dd125cb0beab887a7a434e5ab6f2a716b738b7`, which the previous aaPanel installation verified. Only two new PHP/Blade source files may be added. The new activity view directory is created by the installer if absent; rollback removes it only if empty.
+
+The source and new admin CSS build are fetched from the original pinned CI archive. Only the admin CSS Vite manifest entry is replaced, preserving frontend styles and all JavaScript assets. A private rollback archive is written under `/root/edumia-account-history-backups`. No MySQL, .env, uploads, payment configuration, mail delivery, vendor files or unrelated source files are modified. `--check` is read-only, `--apply` performs a guarded installation, and `--rollback EXACT_BACKUP` checks current deployed file fingerprints first.
+
+Acceptance: log in as admin, instructor, student; verify pagination and Go To, empty filters, private account activity values, search by notification title/message, read/unread actions and mobile/light/dark interfaces. Do not deploy if source drift is reported; reconcile the unexpected file instead.

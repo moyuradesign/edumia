@@ -13,6 +13,7 @@ on:
       - 'scripts/aa-panel-notifications-sync.sh'
       - 'scripts/aa-panel-notification-ui-sync.sh'
       - 'scripts/aa-panel-account-center-sync.sh'
+      - 'scripts/aa-panel-account-history-sync.sh'
       - 'docs/aa-panel-notifications-sync.md'
       - 'config/notifications.php'
       - 'config/queue.php'
