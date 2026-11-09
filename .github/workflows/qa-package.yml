@@ -11,6 +11,7 @@ on:
       - 'scripts/aa-panel-media-sync.sh'
       - 'scripts/aa-panel-governance-sync.sh'
       - 'scripts/aa-panel-notifications-sync.sh'
+      - 'scripts/aa-panel-notification-ui-sync.sh'
       - 'docs/aa-panel-notifications-sync.md'
       - 'config/notifications.php'
       - 'config/queue.php'
